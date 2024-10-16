@@ -7,9 +7,7 @@
 ![GitHub issues](https://img.shields.io/github/issues/smyrgeorge/log4k)
 [![Kotlin](https://img.shields.io/badge/kotlin-2.0.21-blue.svg?logo=kotlin)](http://kotlinlang.org)
 
-A small actor system written in kotlin using Coroutines.
-
-The primary objective is to create a minimal actor system capable of functioning in cluster mode.
+The missing logger for Kotlin Multiplatform.
 
 > [!IMPORTANT]  
 > The project is in a very early stage; thus, breaking changes should be expected.
