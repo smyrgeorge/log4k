@@ -10,13 +10,13 @@ import kotlin.reflect.KClass
 @Suppress("MemberVisibilityCanBePrivate", "unused")
 class LoggerRegistry {
     private val mutex = Mutex()
-
-    private val loggers = mutableMapOf<String, Logger>()
     private val muted = mutableSetOf<String>()
+    private val loggers = mutableMapOf<String, Logger>()
 
     fun get(clazz: KClass<*>): Logger? = get(clazz.toName())
     fun get(name: String): Logger? = mutex.witLock { loggers[name] }
     fun register(logger: Logger): Unit = mutex.witLock {
+        fun isMuted(name: String): Boolean = name in muted
         val muted = isMuted(logger.name)
         if (muted) logger.mute()
         loggers[logger.name] = logger
