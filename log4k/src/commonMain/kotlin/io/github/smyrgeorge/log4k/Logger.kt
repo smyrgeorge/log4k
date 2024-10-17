@@ -1,6 +1,5 @@
 package io.github.smyrgeorge.log4k
 
-import io.github.smyrgeorge.log4k.impl.RootLogger
 import kotlinx.datetime.Clock
 import kotlin.reflect.KClass
 

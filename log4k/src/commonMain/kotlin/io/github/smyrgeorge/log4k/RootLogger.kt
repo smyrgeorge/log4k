@@ -1,9 +1,7 @@
-package io.github.smyrgeorge.log4k.impl
+package io.github.smyrgeorge.log4k
 
-import io.github.smyrgeorge.log4k.Appender
-import io.github.smyrgeorge.log4k.Level
-import io.github.smyrgeorge.log4k.LoggerFactory
-import io.github.smyrgeorge.log4k.LoggingEvent
+import io.github.smyrgeorge.log4k.impl.SimpleLoggerFactory
+import io.github.smyrgeorge.log4k.impl.appenders.ConsoleAppender
 import io.github.smyrgeorge.log4k.registry.AppenderRegistry
 import io.github.smyrgeorge.log4k.registry.LoggerRegistry
 import kotlinx.coroutines.CoroutineScope

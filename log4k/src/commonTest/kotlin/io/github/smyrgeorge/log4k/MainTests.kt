@@ -1,14 +1,18 @@
 package io.github.smyrgeorge.log4k
 
-import io.github.smyrgeorge.log4k.impl.RootLogger
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
+import io.github.smyrgeorge.log4k.appenders.BatchAppender
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import kotlin.test.Test
 
 class MainTests {
+
+    class MyBatchAppender(size: Int) : BatchAppender(size) {
+        override suspend fun append(event: List<LoggingEvent>) {
+            // E.g. send batch over http.
+            println(event.joinToString { it.message })
+        }
+    }
 
     private val log: Logger = Logger.of(this::class)
 
@@ -29,9 +33,16 @@ class MainTests {
         }
 
         runBlocking {
-            withContext(Dispatchers.IO) {
-                delay(2000)
+            delay(2000)
+            val appender = MyBatchAppender(5)
+            RootLogger.appenders.register(appender)
+
+            repeat(10) {
+                log.info("$it")
+                delay(500)
             }
+
+            delay(2000)
         }
     }
 }
