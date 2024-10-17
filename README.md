@@ -61,7 +61,7 @@ log.info("this is a test")
 // Support for mute/unmute each logger programmatically.
 RootLogger.loggers.mute("io.github.smyrgeorge.log4k.MainTests")
 log.info("this is a test with 1 arg: {}", "hello")
-RootLogger.loggers.unmute(this::class)
+RootLogger.loggers.unmute(this::class) // Will set the logging level that had before was muted.
 log.info("this is a test with 1 arg: {}", "hello")
 
 try {
