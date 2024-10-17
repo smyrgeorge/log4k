@@ -9,9 +9,71 @@
 
 The missing logger for Kotlin Multiplatform.
 
+This project aims to develop a logger designed for Kotlin Multiplatform
+that operates asynchronously and is event-driven at its core.
+Built from the ground up, log4k leverages Kotlin’s coroutines
+and channels to deliver efficient and scalable logging.
+
 > [!IMPORTANT]  
 > The project is in a very early stage; thus, breaking changes should be expected.
 
 📖 [Documentation](https://smyrgeorge.github.io/log4k/)
 
 🏠 [Homepage](https://smyrgeorge.github.io/) (under construction)
+
+## Architecture
+
+At the core of the logging system is the `RootLogger`, which maintains a `Channel<LoggingEvent>`.
+All logging events are enqueued into this channel, and the `RootLogger` is responsible for distributing
+these events to the registered appenders (refer to `RootLogger` for more details).
+
+Each appender may also have its own `Channel`, which is especially useful
+for cases requiring batching—such as sending batched log or trace events over the network or
+appending them to a file.
+
+## Examples
+
+```kotlin
+// Create a Logger.
+private val log: Logger = Logger.of(this::class)
+
+log.debug("ignore")
+log.info("this is a test")
+
+// Support for mute/unmute each logger programmatically.
+RootLogger.loggers.mute("io.github.smyrgeorge.log4k.MainTests")
+log.info("this is a test with 1 arg: {}", "hello")
+RootLogger.loggers.unmute(this::class)
+log.info("this is a test with 1 arg: {}", "hello")
+
+try {
+    error("An error occurred!")
+} catch (e: Exception) {
+    log.error(e.message)
+    log.error(e.message, e)
+}
+
+// Create custom appenders.
+// See [BatchAppender] for more information.
+class MyBatchAppender(size: Int) : BatchAppender(size) {
+    override suspend fun append(event: List<LoggingEvent>) {
+        // E.g. send batch over http.
+        // In this case every [append] method will be called every 5 elements.
+        println(event.joinToString { it.message })
+    }
+}
+
+runBlocking {
+    delay(2000)
+    val appender = MyBatchAppender(5)
+    // Register the appender.
+    RootLogger.appenders.register(appender)
+
+    repeat(10) {
+        log.info("$it")
+        delay(500)
+    }
+
+    delay(2000)
+}
+```
