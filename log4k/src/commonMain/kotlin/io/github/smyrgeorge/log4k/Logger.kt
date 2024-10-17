@@ -55,8 +55,9 @@ abstract class Logger {
     fun debug(msg: String, vararg args: Any?): Unit = log(Level.DEBUG, msg, args)
     fun info(msg: String, vararg args: Any?): Unit = log(Level.INFO, msg, args)
     fun warn(msg: String, vararg args: Any?): Unit = log(Level.WARN, msg, args)
-    fun error(msg: String, vararg args: Any?): Unit = log(Level.ERROR, msg, args)
-    fun error(msg: String, throwable: Throwable, vararg args: Any?): Unit = log(Level.ERROR, msg, throwable, args)
+    fun error(msg: String?, vararg args: Any?): Unit = log(Level.ERROR, msg ?: "", args)
+    fun error(msg: String?, throwable: Throwable, vararg args: Any?): Unit =
+        log(Level.ERROR, msg ?: "", throwable, args)
 
     companion object {
         fun of(name: String): Logger = RootLogger.factory.getLogger(name)

@@ -9,6 +9,7 @@ class ConsoleAppender : Appender {
     override val name: String = this::class.toName()
     override fun append(event: LoggingEvent) {
         print(event.format())
+        event.throwable?.printStackTrace()
     }
 
     private fun LoggingEvent.format(): String {

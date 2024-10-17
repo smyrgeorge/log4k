@@ -2,8 +2,7 @@ package io.github.smyrgeorge.log4k
 
 import kotlinx.datetime.Instant
 
-@Suppress("ArrayInDataClass")
-data class LoggingEvent(
+class LoggingEvent(
     var id: Long = 0,
     val level: Level,
     val logger: String,
