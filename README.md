@@ -69,6 +69,9 @@ runBlocking {
     // Register the appender.
     RootLogger.appenders.register(appender)
 
+    // Will print:
+    // 0, 1, 2, 3, 4
+    // 5, 6, 7, 8, 9
     repeat(10) {
         log.info("$it")
         delay(500)
