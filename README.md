@@ -31,6 +31,23 @@ Each appender may also have its own `Channel`, which is especially useful
 for cases requiring batching—such as sending batched log or trace events over the network or
 appending them to a file.
 
+## API
+
+```kotlin
+log.info("this is test log")
+log.info("this is test with 1 arg: {}", "hello")
+log.error(e.message, e)
+```
+
+We also support a more kotlin style API:
+
+```kotlin
+log.debug { "ignore" }
+log.debug { "ignore + ${5}" } // Will be evaluated only if DEBUG logs are enabled.
+log.error { e.message }
+log.error(e) { e.message } // e: Throwable
+```
+
 ## Examples
 
 ```kotlin
@@ -38,6 +55,7 @@ appending them to a file.
 private val log: Logger = Logger.of(this::class)
 
 log.debug("ignore")
+log.debug { "ignore + ${5}" } // Will be evaluated only if DEBUG logs are enabled.
 log.info("this is a test")
 
 // Support for mute/unmute each logger programmatically.

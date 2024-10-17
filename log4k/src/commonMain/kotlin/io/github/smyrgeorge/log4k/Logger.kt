@@ -50,13 +50,18 @@ abstract class Logger {
         levelBeforeMute = level
     }
 
+    fun trace(f: () -> String): Unit = if (Level.TRACE.shouldLog()) trace(f()) else Unit
     fun trace(msg: String, vararg args: Any?): Unit = log(Level.TRACE, msg, args)
+    fun debug(f: () -> String): Unit = if (Level.DEBUG.shouldLog()) debug(f()) else Unit
     fun debug(msg: String, vararg args: Any?): Unit = log(Level.DEBUG, msg, args)
+    fun info(f: () -> String): Unit = if (Level.INFO.shouldLog()) info(f()) else Unit
     fun info(msg: String, vararg args: Any?): Unit = log(Level.INFO, msg, args)
+    fun warn(f: () -> String): Unit = if (Level.WARN.shouldLog()) warn(f()) else Unit
     fun warn(msg: String, vararg args: Any?): Unit = log(Level.WARN, msg, args)
+    fun error(f: () -> String?): Unit = if (Level.ERROR.shouldLog()) error(f()) else Unit
     fun error(msg: String?, vararg args: Any?): Unit = log(Level.ERROR, msg ?: "", args)
-    fun error(msg: String?, throwable: Throwable, vararg args: Any?): Unit =
-        log(Level.ERROR, msg ?: "", throwable, args)
+    fun error(t: Throwable, f: () -> String?): Unit = if (Level.ERROR.shouldLog()) error(f(), t) else Unit
+    fun error(msg: String?, t: Throwable, vararg args: Any?): Unit = log(Level.ERROR, msg ?: "", t, args)
 
     companion object {
         fun of(name: String): Logger = RootLogger.factory.getLogger(name)

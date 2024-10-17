@@ -19,6 +19,7 @@ class MainTests {
     @Test
     fun test() {
         log.debug("ignore")
+        log.debug { "ignore + ${5}" } // Will be evaluated only if DEBUG logs are enabled.
         log.info("this is a test")
         RootLogger.loggers.mute("io.github.smyrgeorge.log4k.MainTests")
         log.info("this is a test with 1 arg: {}", "hello")
@@ -29,7 +30,9 @@ class MainTests {
             error("An error occurred!")
         } catch (e: Exception) {
             log.error(e.message)
+            log.error { e.message }
             log.error(e.message, e)
+            log.error(e) { e.message }
         }
 
         runBlocking {
