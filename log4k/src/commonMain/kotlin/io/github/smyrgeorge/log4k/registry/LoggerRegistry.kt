@@ -17,6 +17,8 @@ class LoggerRegistry {
     fun get(clazz: KClass<*>): Logger? = get(clazz.toName())
     fun get(name: String): Logger? = mutex.witLock { loggers[name] }
     fun register(logger: Logger): Unit = mutex.witLock {
+        val muted = isMuted(logger.name)
+        if (muted) logger.mute()
         loggers[logger.name] = logger
     }
 

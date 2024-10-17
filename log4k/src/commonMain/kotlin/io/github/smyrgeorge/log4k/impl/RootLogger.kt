@@ -22,7 +22,7 @@ object RootLogger {
         Channel(capacity = Channel.UNLIMITED)
 
     val level: Level = Level.INFO
-    val factory = LoggerFactory()
+    val factory = SimpleLoggerFactory()
     val loggers = LoggerRegistry()
     val appenders = AppenderRegistry()
 

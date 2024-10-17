@@ -14,7 +14,6 @@ class MainTests {
 
     @Test
     fun test() {
-
         log.debug("ignore")
         log.info("this is a test")
         RootLogger.loggers.mute("io.github.smyrgeorge.log4k.MainTests")
