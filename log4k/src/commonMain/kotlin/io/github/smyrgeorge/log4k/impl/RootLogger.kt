@@ -13,8 +13,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -43,12 +41,11 @@ object RootLogger {
     fun log(event: LoggingEvent) = runBlocking { events.send(event) }
     fun register(appender: Appender) = appenders.register(appender)
 
+    private var idx: Long = 0
+    private fun nextIdx(): Long = ++idx
+
     private object LoggerScope : CoroutineScope {
         override val coroutineContext: CoroutineContext
             get() = EmptyCoroutineContext
     }
-
-    private var idx: Long = 0
-    private val idxMutex = Mutex()
-    private suspend fun nextIdx(): Long = idxMutex.withLock { ++idx }
 }
