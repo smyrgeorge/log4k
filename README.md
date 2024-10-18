@@ -21,15 +21,33 @@ and channels to deliver efficient and scalable logging.
 
 🏠 [Homepage](https://smyrgeorge.github.io/) (under construction)
 
+## TODO
+
+- [ ] Introduce tracing API (event/span)
+- [ ] `CoroutineContexAwareLogger`: `Logger` that will collect more info from the coroutine context. (in progress)
+- [ ] Ability to chain appenders (in progress)
+- [ ] Json console logger
+- [ ] `LogbackAppender`: `Appender` that will publish the logging events to the logback.
+
 ## Architecture
 
-At the core of the logging system is the `RootLogger`, which maintains a `Channel<LoggingEvent>`.
-All logging events are enqueued into this channel, and the `RootLogger` is responsible for distributing
-these events to the registered appenders (refer to `RootLogger` for more details).
+<!--suppress HtmlDeprecatedAttribute -->
+<p align="center">
+  <!--suppress CheckImageSize -->
+<img src="img/arch.png" alt="Architecture" width="158" height="338">
+</p>
 
-Each appender may also have its own `Channel`, which is especially useful
-for cases requiring batching—such as sending batched log or trace events over the network or
-appending them to a file.
+At the core of the logging system is the `RootLogger`, which manages a `Channel<LoggingEvent>`. All logging events are
+enqueued in this channel, and the `RootLogger` is responsible for distributing them to the registered appenders (refer
+to `RootLogger` for more details).
+
+Each `Appender` may also maintain its own `Channel`, which is particularly beneficial in scenarios that require
+batching—such as sending batched log or trace events over the network or appending them to a file. For instance, the
+`FlowAppender` leverages `kotlinx.coroutines.flow.Flow` to process incoming events efficiently.
+
+On the other hand, some appenders can be simpler and do not require a `Channel` for event processing. For example, the
+`ConsoleAppender` directly prints each incoming event to the console without queuing, offering a straightforward logging
+solution.
 
 ## API
 
