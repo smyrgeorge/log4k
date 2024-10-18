@@ -2,6 +2,7 @@ package io.github.smyrgeorge.log4k
 
 import io.github.smyrgeorge.log4k.impl.SimpleLoggerFactory
 import io.github.smyrgeorge.log4k.impl.appenders.ConsoleAppender
+import io.github.smyrgeorge.log4k.impl.extensions.forEachParallel
 import io.github.smyrgeorge.log4k.registry.AppenderRegistry
 import io.github.smyrgeorge.log4k.registry.LoggerRegistry
 import kotlinx.coroutines.CoroutineScope
@@ -31,7 +32,7 @@ object RootLogger {
         LoggerScope.launch(Dispatchers.IO) {
             events.consumeEach { event ->
                 event.id = nextIdx()
-                appenders.all().forEach { it.append(event) }
+                appenders.all().forEachParallel { it.append(event) }
             }
         }
     }
