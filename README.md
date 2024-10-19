@@ -76,9 +76,9 @@ log.debug { "ignore + ${5}" } // Will be evaluated only if DEBUG logs are enable
 log.info("this is a test")
 
 // Support for mute/unmute each logger programmatically.
-RootLogger.loggers.mute("io.github.smyrgeorge.log4k.MainTests")
+RootLogger.Logging.logges.mute("io.github.smyrgeorge.log4k.MainTests")
 log.info("this is a test with 1 arg: {}", "hello")
-RootLogger.loggers.unmute(this::class) // Will set the logging level that had before was muted.
+log.unmute() // Will set the logging level that had before was muted.
 log.info("this is a test with 1 arg: {}", "hello")
 
 try {
@@ -90,7 +90,7 @@ try {
 
 // Create custom appenders.
 // See [BatchAppender] for more information.
-class MyBatchAppender(size: Int) : BatchAppender(size) {
+class MyBatchAppender(size: Int) : BatchAppender<LoggingEvent>(size) {
     override suspend fun append(event: List<LoggingEvent>) {
         // E.g. send batch over http.
         // In this case every [append] method will be called every 5 elements.
