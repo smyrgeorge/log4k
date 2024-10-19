@@ -1,6 +1,6 @@
 package io.github.smyrgeorge.log4k
 
-interface Appender {
+interface Appender<T> {
     val name: String
-    fun append(event: LoggingEvent)
+    fun append(event: T)
 }

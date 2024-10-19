@@ -5,7 +5,7 @@ import io.github.smyrgeorge.log4k.LoggingEvent
 import io.github.smyrgeorge.log4k.impl.extensions.format
 import io.github.smyrgeorge.log4k.impl.extensions.toName
 
-class ConsoleAppender : Appender {
+class SimpleConsoleLoggingAppender : Appender<LoggingEvent> {
     override val name: String = this::class.toName()
     override fun append(event: LoggingEvent) {
         print(event.format())

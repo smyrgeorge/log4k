@@ -5,11 +5,5 @@ import io.github.smyrgeorge.log4k.LoggerFactory
 import io.github.smyrgeorge.log4k.RootLogger
 
 class SimpleLoggerFactory : LoggerFactory {
-    override fun getLogger(name: String): Logger {
-        val existing = RootLogger.loggers.get(name)
-        if (existing != null) return existing
-        return SimpleLogger(name, RootLogger.level).also {
-            RootLogger.loggers.register(it)
-        }
-    }
+    override fun create(name: String): Logger = SimpleLogger(name, RootLogger.level)
 }

@@ -1,4 +1,4 @@
-package io.github.smyrgeorge.log4k.registry
+package io.github.smyrgeorge.log4k.impl.registry
 
 import io.github.smyrgeorge.log4k.Level
 import io.github.smyrgeorge.log4k.Logger

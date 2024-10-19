@@ -1,37 +1,24 @@
 package io.github.smyrgeorge.log4k
 
-import kotlinx.datetime.Clock
 import kotlin.reflect.KClass
 
-@Suppress("unused", "MemberVisibilityCanBePrivate", "ConvertSecondaryConstructorToPrimary")
-abstract class Logger {
-    val name: String
+@Suppress("unused", "MemberVisibilityCanBePrivate")
+abstract class Logger(
+    val name: String,
     private var level: Level
-    private var levelBeforeMute: Level
-
-    constructor(name: String, level: Level) {
-        this.name = name
-        this.level = level
-        this.levelBeforeMute = level
-    }
+) {
+    private var levelBeforeMute: Level = level
 
     private fun log(level: Level, msg: String, args: Array<out Any?>) =
         log(level, msg, null, args)
 
     private fun log(level: Level, msg: String, throwable: Throwable?, args: Array<out Any?>) {
         if (!level.shouldLog()) return
-        val event = LoggingEvent(
-            level = level,
-            message = msg,
-            logger = name,
-            arguments = args,
-            timestamp = Clock.System.now(),
-            thread = null,
-            throwable = throwable
-        )
-
+        val event = toLoggingEvent(level, msg, throwable, args)
         RootLogger.log(event)
     }
+
+    abstract fun toLoggingEvent(level: Level, msg: String, throwable: Throwable?, args: Array<out Any?>): LoggingEvent
 
     private fun Level.shouldLog(): Boolean =
         ordinal >= level.ordinal
@@ -50,6 +37,30 @@ abstract class Logger {
         levelBeforeMute = level
     }
 
+    fun span(name: String, parent: String? = null): TracingEvent.Span =
+        TracingEvent.Span(RootLogger.Tracing.id(), name, level, parent, this)
+
+    inline fun <T> span(name: String, parent: String? = null, f: (TracingEvent.Span) -> T): T {
+        val span = span(name, parent)
+        return try {
+            f(span)
+        } finally {
+            span.end()
+        }
+    }
+
+    fun span(id: String, name: String, parent: String? = null): TracingEvent.Span =
+        TracingEvent.Span(id, name, level, parent, this)
+
+    inline fun <T> span(id: String, name: String, parent: String? = null, f: (TracingEvent.Span) -> T): T {
+        val span = span(id, name, parent)
+        return try {
+            f(span)
+        } finally {
+            span.end()
+        }
+    }
+
     fun trace(f: () -> String): Unit = if (Level.TRACE.shouldLog()) trace(f()) else Unit
     fun trace(msg: String, vararg args: Any?): Unit = log(Level.TRACE, msg, args)
     fun debug(f: () -> String): Unit = if (Level.DEBUG.shouldLog()) debug(f()) else Unit
@@ -64,7 +75,7 @@ abstract class Logger {
     fun error(msg: String?, t: Throwable, vararg args: Any?): Unit = log(Level.ERROR, msg ?: "", t, args)
 
     companion object {
-        fun of(name: String): Logger = RootLogger.factory.getLogger(name)
-        fun of(clazz: KClass<*>): Logger = RootLogger.factory.getLogger(clazz)
+        fun of(name: String): Logger = RootLogger.Logging.factory.get(name)
+        fun of(clazz: KClass<*>): Logger = RootLogger.Logging.factory.get(clazz)
     }
 }

@@ -1,13 +1,14 @@
 package io.github.smyrgeorge.log4k
 
 import io.github.smyrgeorge.log4k.appenders.BatchAppender
+import io.github.smyrgeorge.log4k.impl.appenders.SimpleConsoleTracingAppender
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 
 class MainTests {
 
-    class MyBatchAppender(size: Int) : BatchAppender(size) {
+    class MyBatchAppender(size: Int) : BatchAppender<LoggingEvent>(size) {
         override suspend fun append(event: List<LoggingEvent>) {
             // E.g. send batch over http.
             println(event.joinToString { it.message })
@@ -21,9 +22,9 @@ class MainTests {
         log.debug("ignore")
         log.debug { "ignore + ${5}" } // Will be evaluated only if DEBUG logs are enabled.
         log.info("this is a test")
-        RootLogger.loggers.mute("io.github.smyrgeorge.log4k.MainTests")
+        RootLogger.Logging.loggers.mute("io.github.smyrgeorge.log4k.MainTests")
         log.info("this is a test with 1 arg: {}", "hello")
-        RootLogger.loggers.unmute(this::class)
+        log.unmute()
         log.info("this is a test with 1 arg: {}", "hello")
 
         try {
@@ -36,13 +37,20 @@ class MainTests {
         }
 
         runBlocking {
-            delay(2000)
             val appender = MyBatchAppender(5)
-            RootLogger.appenders.register(appender)
+            RootLogger.Logging.appenders.register(appender)
 
             repeat(10) {
                 log.info("$it")
                 delay(500)
+            }
+
+            delay(1000)
+
+            RootLogger.Tracing.register(SimpleConsoleTracingAppender())
+            log.span("test") {
+                it.event("this is a test event")
+                it.event("this is a test event")
             }
 
             delay(2000)

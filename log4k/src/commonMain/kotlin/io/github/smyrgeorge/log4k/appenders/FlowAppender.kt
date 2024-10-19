@@ -2,7 +2,6 @@ package io.github.smyrgeorge.log4k.appenders
 
 import io.github.smyrgeorge.log4k.Appender
 import io.github.smyrgeorge.log4k.Logger
-import io.github.smyrgeorge.log4k.LoggingEvent
 import io.github.smyrgeorge.log4k.impl.extensions.toName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -19,9 +18,9 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
 @Suppress("unused")
-abstract class FlowAppender<T> : Appender {
+abstract class FlowAppender<T, E> : Appender<E> {
     private val log = Logger.of(this::class)
-    private val logs: Channel<LoggingEvent> = Channel(capacity = Channel.UNLIMITED)
+    private val logs: Channel<E> = Channel(capacity = Channel.UNLIMITED)
 
     @Suppress("UNCHECKED_CAST")
     private var flow: Flow<T> = logs.receiveAsFlow().flowOn(Dispatchers.IO) as Flow<T>
@@ -29,17 +28,17 @@ abstract class FlowAppender<T> : Appender {
     init {
         FlowAppenderScope().launch(Dispatchers.IO) {
             @Suppress("UNCHECKED_CAST")
-            flow = setup(this@FlowAppender.flow as Flow<LoggingEvent>)
+            flow = setup(this@FlowAppender.flow as Flow<E>)
             flow.onEach { event -> runCatching { append(event) } }.launchIn(this)
         }
     }
 
     final override val name: String = this::class.toName()
-    final override fun append(event: LoggingEvent) {
+    final override fun append(event: E) {
         runBlocking { logs.send(event) }
     }
 
-    abstract fun setup(flow: Flow<LoggingEvent>): Flow<T>
+    abstract fun setup(flow: Flow<E>): Flow<T>
     abstract suspend fun append(event: T)
 
     private class FlowAppenderScope : CoroutineScope {
