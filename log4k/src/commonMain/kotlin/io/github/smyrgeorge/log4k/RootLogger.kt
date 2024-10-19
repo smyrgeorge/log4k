@@ -28,25 +28,6 @@ object RootLogger {
     private val traces: Channel<TracingEvent> =
         Channel(capacity = Channel.UNLIMITED)
 
-    object Logging {
-        private var idx: Long = 0
-        fun id(): Long = ++idx
-        val factory = SimpleLoggerFactory()
-        val loggers = LoggerRegistry()
-        val appenders = AppenderRegistry<LoggingEvent>()
-        fun register(appender: Appender<LoggingEvent>) = appenders.register(appender)
-    }
-
-    object Tracing {
-        private var idx: Long = 0
-        var prefix: String = "span"
-        fun id(): String = runBlocking { "$prefix-${Clock.System.now().epochSeconds}-${idx()}" }
-        private val mutex = Mutex()
-        private suspend fun idx(): Long = mutex.withLock { ++idx }
-        val appenders = AppenderRegistry<TracingEvent>()
-        fun register(appender: Appender<TracingEvent>) = appenders.register(appender)
-    }
-
     init {
         Logging.register(SimpleConsoleLoggingAppender())
 
@@ -68,6 +49,25 @@ object RootLogger {
 
     fun log(event: LoggingEvent) = runBlocking { logs.send(event) }
     fun trace(event: TracingEvent) = runBlocking { traces.send(event) }
+
+    object Logging {
+        private var idx: Long = 0
+        fun id(): Long = ++idx
+        val factory = SimpleLoggerFactory()
+        val loggers = LoggerRegistry()
+        val appenders = AppenderRegistry<LoggingEvent>()
+        fun register(appender: Appender<LoggingEvent>) = appenders.register(appender)
+    }
+
+    object Tracing {
+        private var idx: Long = 0
+        var prefix: String = "span"
+        fun id(): String = runBlocking { "$prefix-${Clock.System.now().epochSeconds}-${idx()}" }
+        private val mutex = Mutex()
+        private suspend fun idx(): Long = mutex.withLock { ++idx }
+        val appenders = AppenderRegistry<TracingEvent>()
+        fun register(appender: Appender<TracingEvent>) = appenders.register(appender)
+    }
 
     private object LoggerScope : CoroutineScope {
         override val coroutineContext: CoroutineContext

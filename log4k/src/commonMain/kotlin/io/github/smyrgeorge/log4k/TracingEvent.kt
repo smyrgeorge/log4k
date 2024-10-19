@@ -36,9 +36,9 @@ interface TracingEvent {
             RootLogger.trace(event)
         }
 
-        fun event(msg: String, vararg args: Any?): Unit = withLock {
+        fun event(msg: String, vararg args: Any?) {
             // If already ended, return.
-            if (closed) return@withLock
+            if (closed) return
             val event = Event(
                 id = "$id-${idx()}",
                 spanId = id,
