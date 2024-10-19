@@ -9,7 +9,7 @@ import org.gradle.kotlin.dsl.configure
 class PublishConventions : Plugin<Project> {
 
     private val descriptions: Map<String, String> = mapOf(
-        "log4k" to "The missing logger for Kotlin Multiplatform.",
+        "log4k" to "A Comprehensive Logging and Tracing Solution for Kotlin Multiplatform.",
     )
 
     override fun apply(project: Project) {

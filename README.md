@@ -7,12 +7,11 @@
 ![GitHub issues](https://img.shields.io/github/issues/smyrgeorge/log4k)
 [![Kotlin](https://img.shields.io/badge/kotlin-2.0.21-blue.svg?logo=kotlin)](http://kotlinlang.org)
 
-The missing logger for Kotlin Multiplatform.
+A Comprehensive Logging and Tracing Solution for Kotlin Multiplatform.
 
-This project aims to develop a logger designed for Kotlin Multiplatform
-that operates asynchronously and is event-driven at its core.
-Built from the ground up, log4k leverages Kotlin’s coroutines
-and channels to deliver efficient and scalable logging.
+This project provides a robust, event-driven logging and tracing platform specifically designed for Kotlin
+Multiplatform (also compatible with the Java ecosystem). Built with coroutines and channels at its core, it offers
+asynchronous, scalable logging across multiple platforms.
 
 > [!IMPORTANT]  
 > The project is in a very early stage; thus, breaking changes should be expected.
@@ -23,9 +22,9 @@ and channels to deliver efficient and scalable logging.
 
 ## TODO
 
-- [ ] Introduce tracing API (event/span)
-- [ ] `CoroutineContexAwareLogger`: `Logger` that will collect more info from the coroutine context. (in progress)
-- [ ] Ability to chain appenders (in progress)
+- [ ] Introduce tracing API (in progress)
+- [ ] `CoroutineContexAwareLogger`: `Logger` that will collect more info from the coroutine context.
+- [ ] Ability to chain appenders
 - [ ] Json console logger
 - [ ] `LogbackAppender`: `Appender` that will publish the logging events to the logback.
 
