@@ -21,7 +21,7 @@ interface TracingEvent {
         val parent: Span? = null,
         val tracer: Tracer,
     ) {
-        private fun shouldLog(): Boolean =
+        private fun shouldLog(level: Level): Boolean =
             level.ordinal >= tracer.getLevel().ordinal
 
         private val mutex = Mutex()
@@ -32,7 +32,7 @@ interface TracingEvent {
 
         fun start(): Span = withLock {
             started = true
-            if (!shouldLog()) return@withLock this
+            if (!shouldLog(tracer.getLevel())) return@withLock this
             val event = Start(
                 id = id,
                 name = name,
@@ -44,18 +44,24 @@ interface TracingEvent {
             this
         }
 
-        fun event(name: String, f: (MutableMap<String, Any?>) -> Unit) {
+        fun event(name: String, f: (MutableMap<String, Any?>) -> Unit): Unit =
+            event(name, tracer.getLevel(), f)
+
+        fun event(name: String, level: Level, f: (MutableMap<String, Any?>) -> Unit) {
             val attributes = mutableMapOf<String, Any?>()
             f(attributes)
-            event(name, attributes)
+            event(name, level, attributes)
         }
 
-        fun event(name: String, attributes: Map<String, Any?> = emptyMap()): Unit = withLock {
+        fun event(name: String, attributes: Map<String, Any?> = emptyMap()): Unit =
+            event(name, tracer.getLevel(), attributes)
+
+        fun event(name: String, level: Level, attributes: Map<String, Any?> = emptyMap()): Unit = withLock {
             // If not started, return
             if (!started) return@withLock
             // If already ended, return.
             if (closed) return@withLock
-            if (!shouldLog()) return@withLock
+            if (!shouldLog(level)) return@withLock
             val event = Event(
                 id = "$id-${idx()}",
                 name = name,
@@ -74,7 +80,7 @@ interface TracingEvent {
             // If already ended, return.
             if (closed) return@withLock
             closed = true
-            if (!shouldLog()) return@withLock
+            if (!shouldLog(tracer.getLevel())) return@withLock
             val event = End(
                 id = id,
                 level = level,
