@@ -49,13 +49,18 @@ class MainTests {
             delay(1000)
 
             RootLogger.Tracing.register(SimpleConsoleTracingAppender())
+            // Starts immediately the span.
             trace.span("test") {
+                // Send events that are related to the current span.
                 it.event("this is a test event")
+                // Automatically closes at the end of te scope.
             }
 
-            val span = trace.span("test")
+            // Create the span and then start it.
+            val span: TracingEvent.Span = trace.span("test").start()
             span.event("this is a test event")
             span.tracer
+            // Close the span manually.
             span.end()
 
             delay(2000)

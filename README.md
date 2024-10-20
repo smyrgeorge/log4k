@@ -22,7 +22,6 @@ asynchronous, scalable logging across multiple platforms.
 
 ## TODO
 
-- [ ] Introduce tracing API (in progress)
 - [ ] `CoroutineContexAwareLogger`: `Logger` that will collect more info from the coroutine context.
 - [ ] Ability to chain appenders
 - [ ] Json console logger
@@ -48,9 +47,14 @@ On the other hand, some appenders can be simpler and do not require a `Channel` 
 `ConsoleAppender` directly prints each incoming event to the console without queuing, offering a straightforward logging
 solution.
 
-## API
+The tracing module, works with exactly the same architecture.
+
+## Logging API
 
 ```kotlin
+// Create a Logger.
+private val log: Logger = Logger.of(this::class)
+
 log.info("this is test log")
 log.info("this is test with 1 arg: {}", "hello")
 log.error(e.message, e)
@@ -65,17 +69,48 @@ log.error { e.message }
 log.error(e) { e.message } // e: Throwable
 ```
 
+## Tracing API
+
+```kotlin
+private val trace: Tracer = Tracer.of(this::class)
+// We need to manually register an appender.
+// The [SimpleConsoleTracingAppender] will print the traces in the console
+// (is just an example, should not be used as a real example).
+RootLogger.Tracing.register(SimpleConsoleTracingAppender())
+
+// Create the span and then start it.
+val span: TracingEvent.Span = trace.span("test").start()
+span.event("this is a test event")
+span.tracer
+// Close the span manually.
+span.end()
+```
+
+Similarly to the logging API, we also support a more kotlin-ish style API:
+
+```kotlin
+// Starts immediately the span.
+trace.span("test") {
+    // Send events that are related to the current span.
+    it.event("this is a test event")
+    // Automatically closes at the end of te scope.
+}
+```
+
 ## Examples
 
 ```kotlin
 // Create a Logger.
 private val log: Logger = Logger.of(this::class)
+private val trace: Tracer = Tracer.of(this::class)
+RootLogger.Tracing.register(SimpleConsoleTracingAppender())
 
 log.debug("ignore")
 log.debug { "ignore + ${5}" } // Will be evaluated only if DEBUG logs are enabled.
 log.info("this is a test")
 
 // Support for mute/unmute each logger programmatically.
+// The [RootLogger] maintains a list with all registered loggers.
 RootLogger.Logging.logges.mute("io.github.smyrgeorge.log4k.MainTests")
 log.info("this is a test with 1 arg: {}", "hello")
 log.unmute() // Will set the logging level that had before was muted.
@@ -85,7 +120,7 @@ try {
     error("An error occurred!")
 } catch (e: Exception) {
     log.error(e.message)
-    log.error(e.message, e)
+    log.error(e) { e.message }
 }
 
 // Create custom appenders.
@@ -102,7 +137,7 @@ runBlocking {
     delay(2000)
     val appender = MyBatchAppender(5)
     // Register the appender.
-    RootLogger.appenders.register(appender)
+    RootLogger.Logging.appenders.register(appender)
 
     // Will print:
     // 0, 1, 2, 3, 4
@@ -113,5 +148,19 @@ runBlocking {
     }
 
     delay(2000)
+
+    // Starts immediately the span.
+    trace.span("test") {
+        // Send events that are related to the current span.
+        it.event("this is a test event")
+        // Automatically closes at the end of te scope.
+    }
+
+    // Create the span and then start it.
+    val span: TracingEvent.Span = trace.span("test").start()
+    span.event("this is a test event")
+    span.tracer
+    // Close the span manually.
+    span.end()
 }
 ```

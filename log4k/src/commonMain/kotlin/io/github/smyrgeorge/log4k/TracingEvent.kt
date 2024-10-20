@@ -23,14 +23,12 @@ interface TracingEvent {
     ) {
         private val mutex = Mutex()
         private var idx: Int = 0
+        private var started: Boolean = false
         private var closed: Boolean = false
         private fun idx(): Int = ++idx
 
-        init {
-            start()
-        }
-
-        private fun start() {
+        fun start(): Span = withLock {
+            started = true
             val event = Start(
                 id = id,
                 name = name,
@@ -39,9 +37,12 @@ interface TracingEvent {
                 parent = parent?.id,
             )
             RootLogger.trace(event)
+            this
         }
 
         fun event(msg: String, vararg args: Any?) {
+            // If not started, return
+            if (!started) return
             // If already ended, return.
             if (closed) return
             val event = Event(
@@ -57,10 +58,11 @@ interface TracingEvent {
         }
 
         fun end(): Unit = withLock {
+            // If not started, return
+            if (!started) return@withLock
             // If already ended, return.
             if (closed) return@withLock
             closed = true
-
             val event = End(
                 id = id,
                 level = level,
@@ -69,7 +71,7 @@ interface TracingEvent {
             RootLogger.trace(event)
         }
 
-        private fun withLock(f: () -> Unit) = runBlocking { mutex.withLock { f() } }
+        private fun <T> withLock(f: () -> T): T = runBlocking { mutex.withLock { f() } }
 
         class Start(
             override var id: String,

@@ -30,17 +30,11 @@ abstract class Tracer(
     fun span(name: String, parent: TracingEvent.Span?): TracingEvent.Span =
         TracingEvent.Span(RootLogger.Tracing.id(), name, level, parent, this)
 
-    fun span(name: String, parent: String?): TracingEvent.Span {
-        @Suppress("NAME_SHADOWING")
-        val parent = parent?.let { spanOf(it, name) }
-        return span(name, parent)
-    }
-
     fun span(name: String): TracingEvent.Span =
         span(name, null as? TracingEvent.Span?)
 
     inline fun <T> span(name: String, parent: TracingEvent.Span? = null, f: (TracingEvent.Span) -> T): T {
-        val span = span(name, parent)
+        val span = span(name, parent).start()
         return try {
             f(span)
         } finally {
@@ -48,29 +42,20 @@ abstract class Tracer(
         }
     }
 
-    fun span(id: String, name: String, parent: TracingEvent.Span? = null): TracingEvent.Span =
+    fun span(id: String, name: String, parent: TracingEvent.Span?): TracingEvent.Span =
         TracingEvent.Span(id, name, level, parent, this)
-
-    fun span(id: String, name: String, parent: String? = null): TracingEvent.Span {
-        @Suppress("NAME_SHADOWING")
-        val parent = parent?.let { spanOf(it, name) }
-        return span(id, name, parent)
-    }
 
     fun span(id: String, name: String): TracingEvent.Span =
         span(id, name, null as? TracingEvent.Span?)
 
     inline fun <T> span(id: String, name: String, parent: TracingEvent.Span? = null, f: (TracingEvent.Span) -> T): T {
-        val span = span(id, name, parent)
+        val span = span(id, name, parent).start()
         return try {
             f(span)
         } finally {
             span.end()
         }
     }
-
-    private fun spanOf(spanId: String, name: String): TracingEvent.Span =
-        TracingEvent.Span(spanId, name, level, null, this)
 
     companion object {
         fun of(name: String): Tracer = RootLogger.Tracing.factory.get(name)
