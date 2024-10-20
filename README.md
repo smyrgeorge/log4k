@@ -94,8 +94,11 @@ span.end()
 Similarly to the logging API, we also support a more kotlin style API:
 
 ```kotlin
+// Create the parent span.
+// NOTICE: we do not start it, since it's already started.
+val parent: TracingEvent.Span = trace.span("parent")
 // Starts immediately the span.
-trace.span("test") {
+trace.span("test", parent) {
     // Send events that are related to the current span.
     it.event("this is a test event")
     // Automatically closes at the end of te scope.
