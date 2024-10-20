@@ -55,7 +55,12 @@ class MainTests {
             // Starts immediately the span.
             trace.span("test", parent) {
                 // Send events that are related to the current span.
-                it.event("this is a test event")
+                it.event(name = "event-1")
+                // Include attributes in the event.
+                it.event(name = "event-2", attributes = mapOf("key" to "value"))
+                it.event(name = "event-2") { attrs ->
+                    attrs["key"] = "value"
+                }
                 // Automatically closes at the end of te scope.
             }
 

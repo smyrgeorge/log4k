@@ -1,7 +1,6 @@
 group = "io.github.smyrgeorge"
-version = "0.3.0"
+version = "0.4.0"
 
-// Common plugin versions here.
 plugins {
     alias(libs.plugins.dokka)
     alias(libs.plugins.kotlin.multiplatform) apply false

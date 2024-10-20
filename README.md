@@ -80,7 +80,7 @@ RootLogger.Tracing.register(SimpleConsoleTracingAppender())
 
 // Create the span and then start it.
 val span: TracingEvent.Span = trace.span("test").start()
-span.event("this is a test event")
+span.event(name = "test-event")
 span.tracer
 // Close the span manually.
 span.end()
@@ -100,7 +100,12 @@ val parent: TracingEvent.Span = trace.span("parent")
 // Starts immediately the span.
 trace.span("test", parent) {
     // Send events that are related to the current span.
-    it.event("this is a test event")
+    it.event(name = "event-1")
+    // Include attributes in the event.
+    it.event(name = "event-2", attributes = mapOf("key" to "value"))
+    it.event(name = "event-2") { attrs: MutableMap<String, Any?> ->
+        attrs["key"] = "value"
+    }
     // Automatically closes at the end of te scope.
 }
 ```
@@ -156,7 +161,12 @@ repeat(10) {
 // Starts immediately the span.
 trace.span("test") {
     // Send events that are related to the current span.
-    it.event("this is a test event")
+    it.event(name = "event-1")
+    // Include attributes in the event.
+    it.event(name = "event-2", attributes = mapOf("key" to "value"))
+    it.event(name = "event-2") { attrs: MutableMap<String, Any?> ->
+        attrs["key"] = "value"
+    }
     // Automatically closes at the end of te scope.
 }
 
