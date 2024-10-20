@@ -7,4 +7,4 @@ io.github.smyrgeorge.log4k.appenders
 io.github.smyrgeorge.log4k.impl
 io.github.smyrgeorge.log4k.impl.appenders
 io.github.smyrgeorge.log4k.impl.extensions
-io.github.smyrgeorge.log4k.registry
+io.github.smyrgeorge.log4k.impl.registry
