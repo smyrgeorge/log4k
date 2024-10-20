@@ -16,6 +16,7 @@ class MainTests {
     }
 
     private val log: Logger = Logger.of(this::class)
+    private val trace: Tracer = Tracer.of(this::class)
 
     @Test
     fun test() {
@@ -48,10 +49,14 @@ class MainTests {
             delay(1000)
 
             RootLogger.Tracing.register(SimpleConsoleTracingAppender())
-            log.span("test") {
-                it.event("this is a test event")
+            trace.span("test") {
                 it.event("this is a test event")
             }
+
+            val span = trace.span("test")
+            span.event("this is a test event")
+            span.tracer
+            span.end()
 
             delay(2000)
         }

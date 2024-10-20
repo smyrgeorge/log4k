@@ -1,21 +1,20 @@
 package io.github.smyrgeorge.log4k.impl.registry
 
 import io.github.smyrgeorge.log4k.Level
-import io.github.smyrgeorge.log4k.Logger
 import io.github.smyrgeorge.log4k.impl.extensions.toName
 import io.github.smyrgeorge.log4k.impl.extensions.witLock
 import kotlinx.coroutines.sync.Mutex
 import kotlin.reflect.KClass
 
 @Suppress("MemberVisibilityCanBePrivate", "unused")
-class LoggerRegistry {
+class LoggerRegistry<T> where T : LoggerRegistry.Collector {
     private val mutex = Mutex()
     private val muted = mutableSetOf<String>()
-    private val loggers = mutableMapOf<String, Logger>()
+    private val loggers = mutableMapOf<String, T>()
 
-    fun get(clazz: KClass<*>): Logger? = get(clazz.toName())
-    fun get(name: String): Logger? = mutex.witLock { loggers[name] }
-    fun register(logger: Logger): Unit = mutex.witLock {
+    fun get(clazz: KClass<*>): T? = get(clazz.toName())
+    fun get(name: String): T? = mutex.witLock { loggers[name] }
+    fun register(logger: T): Unit = mutex.witLock {
         fun isMuted(name: String): Boolean = name in muted
         val muted = isMuted(logger.name)
         if (muted) logger.mute()
@@ -42,5 +41,12 @@ class LoggerRegistry {
     fun isMuted(clazz: KClass<*>): Boolean = isMuted(clazz.toName())
     fun isMuted(name: String): Boolean = mutex.witLock {
         name in muted
+    }
+
+    interface Collector {
+        val name: String
+        fun mute()
+        fun unmute()
+        fun setLevel(level: Level)
     }
 }

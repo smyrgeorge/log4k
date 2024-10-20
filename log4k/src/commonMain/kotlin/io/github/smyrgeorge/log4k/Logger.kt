@@ -1,12 +1,13 @@
 package io.github.smyrgeorge.log4k
 
+import io.github.smyrgeorge.log4k.impl.registry.LoggerRegistry
 import kotlin.reflect.KClass
 
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 abstract class Logger(
-    val name: String,
+    override val name: String,
     private var level: Level
-) {
+) : LoggerRegistry.Collector {
     private var levelBeforeMute: Level = level
 
     private fun log(level: Level, msg: String, args: Array<out Any?>) =
@@ -23,42 +24,18 @@ abstract class Logger(
     private fun Level.shouldLog(): Boolean =
         ordinal >= level.ordinal
 
-    fun setLevel(level: Level) {
+    override fun setLevel(level: Level) {
         this.level = level
     }
 
-    fun mute() {
+    override fun mute() {
         levelBeforeMute = level
         level = Level.OFF
     }
 
-    fun unmute() {
+    override fun unmute() {
         level = levelBeforeMute
         levelBeforeMute = level
-    }
-
-    fun span(name: String, parent: String? = null): TracingEvent.Span =
-        TracingEvent.Span(RootLogger.Tracing.id(), name, level, parent, this)
-
-    inline fun <T> span(name: String, parent: String? = null, f: (TracingEvent.Span) -> T): T {
-        val span = span(name, parent)
-        return try {
-            f(span)
-        } finally {
-            span.end()
-        }
-    }
-
-    fun span(id: String, name: String, parent: String? = null): TracingEvent.Span =
-        TracingEvent.Span(id, name, level, parent, this)
-
-    inline fun <T> span(id: String, name: String, parent: String? = null, f: (TracingEvent.Span) -> T): T {
-        val span = span(id, name, parent)
-        return try {
-            f(span)
-        } finally {
-            span.end()
-        }
     }
 
     fun trace(f: () -> String): Unit = if (Level.TRACE.shouldLog()) trace(f()) else Unit

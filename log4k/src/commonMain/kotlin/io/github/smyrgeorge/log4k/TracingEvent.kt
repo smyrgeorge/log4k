@@ -6,6 +6,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 
+@Suppress("MemberVisibilityCanBePrivate", "unused")
 interface TracingEvent {
     val id: String
     val level: Level
@@ -17,8 +18,8 @@ interface TracingEvent {
         val id: String,
         val name: String,
         val level: Level,
-        parent: String? = null,
-        val logger: Logger,
+        val parent: Span? = null,
+        val tracer: Tracer,
     ) {
         private val mutex = Mutex()
         private var idx: Int = 0
@@ -26,12 +27,16 @@ interface TracingEvent {
         private fun idx(): Int = ++idx
 
         init {
+            start()
+        }
+
+        private fun start() {
             val event = Start(
                 id = id,
                 name = name,
                 level = level,
-                tracer = logger.name,
-                parent = parent,
+                tracer = tracer.name,
+                parent = parent?.id,
             )
             RootLogger.trace(event)
         }
@@ -43,7 +48,7 @@ interface TracingEvent {
                 id = "$id-${idx()}",
                 spanId = id,
                 level = level,
-                tracer = logger.name,
+                tracer = tracer.name,
                 message = msg,
                 arguments = args,
                 timestamp = Clock.System.now()
@@ -59,12 +64,22 @@ interface TracingEvent {
             val event = End(
                 id = id,
                 level = level,
-                tracer = logger.name,
+                tracer = tracer.name,
             )
             RootLogger.trace(event)
         }
 
         private fun withLock(f: () -> Unit) = runBlocking { mutex.withLock { f() } }
+
+        class Start(
+            override var id: String,
+            val name: String,
+            override val level: Level,
+            override val tracer: String,
+            val parent: String?,
+            override val timestamp: Instant = Clock.System.now(),
+            override val thread: String? = null,
+        ) : TracingEvent
 
         class Event(
             override val id: String,
@@ -75,16 +90,6 @@ interface TracingEvent {
             val arguments: Array<out Any?>,
             override val timestamp: Instant = Clock.System.now(),
             override val thread: String? = null
-        ) : TracingEvent
-
-        class Start(
-            override var id: String,
-            val name: String,
-            override val level: Level,
-            override val tracer: String,
-            val parent: String?,
-            override val timestamp: Instant = Clock.System.now(),
-            override val thread: String? = null,
         ) : TracingEvent
 
         class End(

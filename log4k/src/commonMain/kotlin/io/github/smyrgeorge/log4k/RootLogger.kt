@@ -1,6 +1,7 @@
 package io.github.smyrgeorge.log4k
 
 import io.github.smyrgeorge.log4k.impl.SimpleLoggerFactory
+import io.github.smyrgeorge.log4k.impl.SimpleTracerFactory
 import io.github.smyrgeorge.log4k.impl.appenders.SimpleConsoleLoggingAppender
 import io.github.smyrgeorge.log4k.impl.extensions.forEachParallel
 import io.github.smyrgeorge.log4k.impl.registry.AppenderRegistry
@@ -54,7 +55,7 @@ object RootLogger {
         private var idx: Long = 0
         fun id(): Long = ++idx
         val factory = SimpleLoggerFactory()
-        val loggers = LoggerRegistry()
+        val loggers = LoggerRegistry<Logger>()
         val appenders = AppenderRegistry<LoggingEvent>()
         fun register(appender: Appender<LoggingEvent>) = appenders.register(appender)
     }
@@ -65,6 +66,8 @@ object RootLogger {
         fun id(): String = runBlocking { "$prefix-${Clock.System.now().epochSeconds}-${idx()}" }
         private val mutex = Mutex()
         private suspend fun idx(): Long = mutex.withLock { ++idx }
+        val factory = SimpleTracerFactory()
+        val tracers = LoggerRegistry<Tracer>()
         val appenders = AppenderRegistry<TracingEvent>()
         fun register(appender: Appender<TracingEvent>) = appenders.register(appender)
     }
