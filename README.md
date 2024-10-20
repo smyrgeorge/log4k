@@ -133,34 +133,29 @@ class MyBatchAppender(size: Int) : BatchAppender<LoggingEvent>(size) {
     }
 }
 
-runBlocking {
-    delay(2000)
-    val appender = MyBatchAppender(5)
-    // Register the appender.
-    RootLogger.Logging.appenders.register(appender)
+val appender = MyBatchAppender(5)
+// Register the appender.
+RootLogger.Logging.appenders.register(appender)
 
-    // Will print:
-    // 0, 1, 2, 3, 4
-    // 5, 6, 7, 8, 9
-    repeat(10) {
-        log.info("$it")
-        delay(500)
-    }
-
-    delay(2000)
-
-    // Starts immediately the span.
-    trace.span("test") {
-        // Send events that are related to the current span.
-        it.event("this is a test event")
-        // Automatically closes at the end of te scope.
-    }
-
-    // Create the span and then start it.
-    val span: TracingEvent.Span = trace.span("test").start()
-    span.event("this is a test event")
-    span.tracer
-    // Close the span manually.
-    span.end()
+// Will print:
+// 0, 1, 2, 3, 4
+// 5, 6, 7, 8, 9
+repeat(10) {
+    log.info("$it")
+    delay(500)
 }
+
+// Starts immediately the span.
+trace.span("test") {
+    // Send events that are related to the current span.
+    it.event("this is a test event")
+    // Automatically closes at the end of te scope.
+}
+
+// Create the span and then start it.
+val span: TracingEvent.Span = trace.span("test").start()
+span.event("this is a test event")
+span.tracer
+// Close the span manually.
+span.end()
 ```
