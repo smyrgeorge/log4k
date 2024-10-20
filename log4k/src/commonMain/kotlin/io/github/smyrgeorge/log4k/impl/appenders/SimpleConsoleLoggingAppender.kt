@@ -15,6 +15,7 @@ class SimpleConsoleLoggingAppender : Appender<LoggingEvent> {
     private fun LoggingEvent.format(): String {
         var formatted = PATTERN
         formatted = formatted.replace("%idx", id.toString())
+        formatted = formatted.replace(" [%span] ", span?.id?.let { " [$it] " } ?: " ")
         formatted = formatted.replace("%d{HH:mm:ss.SSS}", timestamp.toString())
         formatted = formatted.replace("%-5level", level.name.padEnd(5))
         formatted = formatted.replace("%logger{36}", logger.take(36))
@@ -24,6 +25,6 @@ class SimpleConsoleLoggingAppender : Appender<LoggingEvent> {
     }
 
     companion object {
-        private const val PATTERN = "%idx %d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n"
+        private const val PATTERN = "%idx [%span] %d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n"
     }
 }

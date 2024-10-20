@@ -1,4 +1,4 @@
-package io.github.smyrgeorge.log4k.appenders
+package io.github.smyrgeorge.log4k.impl.appenders
 
 import io.github.smyrgeorge.log4k.Appender
 import io.github.smyrgeorge.log4k.Logger

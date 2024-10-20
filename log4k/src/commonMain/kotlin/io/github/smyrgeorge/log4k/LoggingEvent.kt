@@ -5,6 +5,7 @@ import kotlinx.datetime.Instant
 interface LoggingEvent {
     var id: Long
     val level: Level
+    val span: TracingEvent.Span?
     val timestamp: Instant
     val logger: String
     val message: String

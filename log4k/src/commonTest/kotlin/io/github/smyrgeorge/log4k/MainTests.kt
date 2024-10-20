@@ -1,6 +1,6 @@
 package io.github.smyrgeorge.log4k
 
-import io.github.smyrgeorge.log4k.appenders.BatchAppender
+import io.github.smyrgeorge.log4k.impl.appenders.BatchAppender
 import io.github.smyrgeorge.log4k.impl.appenders.SimpleConsoleTracingAppender
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -54,10 +54,12 @@ class MainTests {
             val parent: TracingEvent.Span = trace.span("parent")
             // Starts immediately the span.
             trace.span("test", parent) {
+                log.info(it, "this is a test with span")
                 // Send events that are related to the current span.
                 it.event(name = "event-1", level = Level.DEBUG)
+                it.debug(name = "event-1") // Same as event(name = "event-1", level = Level.DEBUG)
                 // Include attributes in the event.
-                it.event(name = "event-2", attributes = mapOf("key" to "value"))
+                it.event(name = "event-2", attrs = mapOf("key" to "value"))
                 it.event(name = "event-2") { attrs ->
                     attrs["key"] = "value"
                 }

@@ -1,4 +1,4 @@
-package io.github.smyrgeorge.log4k.appenders
+package io.github.smyrgeorge.log4k.impl.appenders
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow

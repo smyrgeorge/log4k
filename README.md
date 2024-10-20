@@ -101,6 +101,7 @@ val parent: TracingEvent.Span = trace.span("parent")
 trace.span("test", parent) {
     // Send events that are related to the current span.
     it.event(name = "event-1", level = Level.DEBUG)
+    it.debug(name = "event-1") // Same as event(name = "event-1", level = Level.DEBUG)
     // Include attributes in the event.
     it.event(name = "event-2", attributes = mapOf("key" to "value"))
     it.event(name = "event-2") { attrs: MutableMap<String, Any?> ->

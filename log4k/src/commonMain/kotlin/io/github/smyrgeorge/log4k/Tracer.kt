@@ -6,15 +6,9 @@ import kotlin.reflect.KClass
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 abstract class Tracer(
     override val name: String,
-    private var level: Level
+    override var level: Level
 ) : LoggerRegistry.Collector {
-    private var levelBeforeMute: Level = level
-
-    override fun getLevel(): Level = level
-
-    override fun setLevel(level: Level) {
-        this.level = level
-    }
+    private lateinit var levelBeforeMute: Level
 
     override fun mute() {
         levelBeforeMute = level
@@ -36,6 +30,9 @@ abstract class Tracer(
         val span = span(name, parent).start()
         return try {
             f(span)
+        } catch (e: Throwable) {
+            span.end(e)
+            throw e
         } finally {
             span.end()
         }
@@ -51,6 +48,9 @@ abstract class Tracer(
         val span = span(id, name, parent).start()
         return try {
             f(span)
+        } catch (e: Throwable) {
+            span.end(e)
+            throw e
         } finally {
             span.end()
         }

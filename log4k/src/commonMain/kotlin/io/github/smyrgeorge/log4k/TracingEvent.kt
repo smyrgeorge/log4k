@@ -14,6 +14,7 @@ interface TracingEvent {
     val tracer: String
     val thread: String?
 
+    @Suppress("unused")
     class Span(
         val id: String,
         val name: String,
@@ -22,7 +23,7 @@ interface TracingEvent {
         val tracer: Tracer,
     ) {
         private fun shouldLog(level: Level): Boolean =
-            level.ordinal >= tracer.getLevel().ordinal
+            level.ordinal >= tracer.level.ordinal
 
         private val mutex = Mutex()
         private var idx: Int = 0
@@ -32,7 +33,7 @@ interface TracingEvent {
 
         fun start(): Span = withLock {
             started = true
-            if (!shouldLog(tracer.getLevel())) return@withLock this
+            if (!shouldLog(tracer.level)) return@withLock this
             val event = Start(
                 id = id,
                 name = name,
@@ -44,19 +45,29 @@ interface TracingEvent {
             this
         }
 
-        fun event(name: String, f: (MutableMap<String, Any?>) -> Unit): Unit =
-            event(name, tracer.getLevel(), f)
+        fun trace(name: String, f: (MutableMap<String, Any?>) -> Unit) = event(name, Level.TRACE, f)
+        fun debug(name: String, f: (MutableMap<String, Any?>) -> Unit) = event(name, Level.DEBUG, f)
+        fun info(name: String, f: (MutableMap<String, Any?>) -> Unit) = event(name, Level.INFO, f)
+        fun warn(name: String, f: (MutableMap<String, Any?>) -> Unit) = event(name, Level.WARN, f)
+        fun error(name: String, f: (MutableMap<String, Any?>) -> Unit) = event(name, Level.ERROR, f)
+
+        fun trace(name: String, attrs: Map<String, Any?> = emptyMap()) = event(name, Level.TRACE, attrs)
+        fun debug(name: String, attrs: Map<String, Any?> = emptyMap()) = event(name, Level.DEBUG, attrs)
+        fun info(name: String, attrs: Map<String, Any?> = emptyMap()) = event(name, Level.INFO, attrs)
+        fun warn(name: String, attrs: Map<String, Any?> = emptyMap()) = event(name, Level.WARN, attrs)
+        fun error(name: String, attrs: Map<String, Any?> = emptyMap()) = event(name, Level.ERROR, attrs)
+
+        fun event(name: String, f: (MutableMap<String, Any?>) -> Unit) = event(name, tracer.level, f)
+        fun event(name: String, attrs: Map<String, Any?> = emptyMap()) = event(name, tracer.level, attrs)
 
         fun event(name: String, level: Level, f: (MutableMap<String, Any?>) -> Unit) {
-            val attributes = mutableMapOf<String, Any?>()
-            f(attributes)
-            event(name, level, attributes)
+            mutableMapOf<String, Any?>().also {
+                f(it)
+                event(name, level, it)
+            }
         }
 
-        fun event(name: String, attributes: Map<String, Any?> = emptyMap()): Unit =
-            event(name, tracer.getLevel(), attributes)
-
-        fun event(name: String, level: Level, attributes: Map<String, Any?> = emptyMap()): Unit = withLock {
+        fun event(name: String, level: Level, attrs: Map<String, Any?> = emptyMap()): Unit = withLock {
             // If not started, return
             if (!started) return@withLock
             // If already ended, return.
@@ -66,7 +77,7 @@ interface TracingEvent {
                 id = "$id-${idx()}",
                 name = name,
                 spanId = id,
-                attributes = attributes,
+                attributes = attrs,
                 level = level,
                 tracer = tracer.name,
                 timestamp = Clock.System.now()
@@ -80,7 +91,7 @@ interface TracingEvent {
             // If already ended, return.
             if (closed) return@withLock
             closed = true
-            if (!shouldLog(tracer.getLevel())) return@withLock
+            if (!shouldLog(tracer.level)) return@withLock
             val event = End(
                 id = id,
                 level = level,

@@ -23,7 +23,7 @@ class LoggerRegistry<T> where T : LoggerRegistry.Collector {
 
     fun setLevel(clazz: KClass<*>, level: Level): Unit = setLevel(clazz.toName(), level)
     fun setLevel(name: String, level: Level): Unit = mutex.witLock {
-        loggers[name]?.setLevel(level)
+        loggers[name]?.level = level
     }
 
     fun mute(clazz: KClass<*>): Unit = mute(clazz.toName())
@@ -45,9 +45,8 @@ class LoggerRegistry<T> where T : LoggerRegistry.Collector {
 
     interface Collector {
         val name: String
+        var level: Level
         fun mute()
         fun unmute()
-        fun getLevel(): Level
-        fun setLevel(level: Level)
     }
 }
