@@ -47,6 +47,7 @@ class LoggerRegistry<T> where T : LoggerRegistry.Collector {
         val name: String
         fun mute()
         fun unmute()
+        fun getLevel(): Level
         fun setLevel(level: Level)
     }
 }

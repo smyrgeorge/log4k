@@ -10,8 +10,7 @@ abstract class Tracer(
 ) : LoggerRegistry.Collector {
     private var levelBeforeMute: Level = level
 
-    private fun Level.shouldLog(): Boolean =
-        ordinal >= level.ordinal
+    override fun getLevel(): Level = level
 
     override fun setLevel(level: Level) {
         this.level = level

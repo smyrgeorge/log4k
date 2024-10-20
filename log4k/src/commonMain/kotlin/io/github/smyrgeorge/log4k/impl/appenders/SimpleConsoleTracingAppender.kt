@@ -9,6 +9,6 @@ import io.github.smyrgeorge.log4k.impl.extensions.toName
 class SimpleConsoleTracingAppender : Appender<TracingEvent> {
     override val name: String = this::class.toName()
     override fun append(event: TracingEvent) {
-        println("[${event.id}]:: ${event.timestamp}")
+        println(event.toString())
     }
 }
