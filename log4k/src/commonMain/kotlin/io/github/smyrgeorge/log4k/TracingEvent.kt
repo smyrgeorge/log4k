@@ -40,11 +40,11 @@ interface TracingEvent {
             this
         }
 
-        fun event(msg: String, vararg args: Any?) {
+        fun event(msg: String, vararg args: Any?): Unit = withLock {
             // If not started, return
-            if (!started) return
+            if (!started) return@withLock
             // If already ended, return.
-            if (closed) return
+            if (closed) return@withLock
             val event = Event(
                 id = "$id-${idx()}",
                 spanId = id,

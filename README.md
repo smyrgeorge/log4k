@@ -86,7 +86,7 @@ span.tracer
 span.end()
 ```
 
-Similarly to the logging API, we also support a more kotlin-ish style API:
+Similarly to the logging API, we also support a more kotlin style API:
 
 ```kotlin
 // Starts immediately the span.
