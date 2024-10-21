@@ -13,6 +13,6 @@ class SimpleLoggingEvent(
     override val logger: String,
     override val message: String,
     override val arguments: Array<out Any?>,
-    override val thread: String?,
+    override val thread: String,
     override val throwable: Throwable?,
 ) : LoggingEvent

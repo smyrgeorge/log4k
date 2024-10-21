@@ -1,13 +1,21 @@
-package io.github.smyrgeorge.log4k
-
+import io.github.smyrgeorge.log4k.Level
+import io.github.smyrgeorge.log4k.Logger
+import io.github.smyrgeorge.log4k.LoggingEvent
+import io.github.smyrgeorge.log4k.RootLogger
+import io.github.smyrgeorge.log4k.Tracer
+import io.github.smyrgeorge.log4k.TracingEvent
 import io.github.smyrgeorge.log4k.impl.appenders.BatchAppender
 import io.github.smyrgeorge.log4k.impl.appenders.SimpleConsoleTracingAppender
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import kotlin.test.Test
+import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
-class MainTests {
-
+class Main {
     class MyBatchAppender(size: Int) : BatchAppender<LoggingEvent>(size) {
         override suspend fun append(event: List<LoggingEvent>) {
             // E.g. send batch over http.
@@ -18,12 +26,11 @@ class MainTests {
     private val log: Logger = Logger.of(this::class)
     private val trace: Tracer = Tracer.of(this::class)
 
-    @Test
-    fun test() {
+    fun run() {
         log.debug("ignore")
         log.debug { "ignore + ${5}" } // Will be evaluated only if DEBUG logs are enabled.
         log.info("this is a test")
-        RootLogger.Logging.loggers.mute("io.github.smyrgeorge.log4k.MainTests")
+        RootLogger.Logging.loggers.mute(Main::class)
         log.info("this is a test with 1 arg: {}", "hello")
         log.unmute()
         log.info("this is a test with 1 arg: {}", "hello")
@@ -35,6 +42,25 @@ class MainTests {
         }
 
         runBlocking {
+            delay(5000)
+
+            suspend fun <A> Iterable<A>.forEachParallel(
+                context: CoroutineContext = Dispatchers.IO,
+                f: suspend (A) -> Unit
+            ): Unit = withContext(context) { map { async { f(it) } }.awaitAll() }
+
+            val appender = MyBatchAppender(5)
+            RootLogger.Logging.appenders.register(appender)
+
+            (0..10).forEachParallel {
+                repeat(10) {
+                    log.info("$it")
+                    delay(500)
+                }
+            }
+
+            delay(2000)
+
             RootLogger.Tracing.register(SimpleConsoleTracingAppender())
             // Create the parent span.
             // NOTICE: we do not start it, since it's already started.
@@ -65,3 +91,5 @@ class MainTests {
         }
     }
 }
+
+fun main(): Unit = Main().run()

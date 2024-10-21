@@ -4,6 +4,7 @@ import io.github.smyrgeorge.log4k.Level
 import io.github.smyrgeorge.log4k.Logger
 import io.github.smyrgeorge.log4k.LoggingEvent
 import io.github.smyrgeorge.log4k.TracingEvent.Span
+import io.github.smyrgeorge.log4k.impl.extensions.thread
 import kotlinx.datetime.Clock
 
 class SimpleLogger(name: String, level: Level) : Logger(name, level) {
@@ -21,7 +22,7 @@ class SimpleLogger(name: String, level: Level) : Logger(name, level) {
             logger = name,
             message = msg,
             arguments = args,
-            thread = null,
+            thread = thread(),
             throwable = throwable
         )
     }

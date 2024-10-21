@@ -1,5 +1,5 @@
 plugins {
-    id("io.github.smyrgeorge.log4k.multiplatform")
+    id("io.github.smyrgeorge.log4k.multiplatform.examples")
 }
 
 kotlin {

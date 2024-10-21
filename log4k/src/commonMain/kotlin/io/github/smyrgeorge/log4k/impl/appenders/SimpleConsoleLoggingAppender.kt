@@ -15,13 +15,15 @@ class SimpleConsoleLoggingAppender : Appender<LoggingEvent> {
     private fun LoggingEvent.format(): String = buildString {
         append(id)
         append(' ')
-        append(span?.context?.spanId?.let { " [$it] " } ?: " ")
+        append(span?.context?.spanId?.let { "[$it] " } ?: " ")
         append(timestamp)
-        append(' ')
+        append(" [")
+        append(thread)
+        append("] - ")
         append(level.name.padEnd(5))
         append(' ')
         append(logger.take(36))
-        append(' ')
+        append(" - ")
         append(message.format(arguments))
         appendLine()
     }

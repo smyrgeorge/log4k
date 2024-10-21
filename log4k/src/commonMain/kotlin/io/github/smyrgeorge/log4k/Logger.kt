@@ -6,10 +6,10 @@ import kotlin.reflect.KClass
 
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 abstract class Logger(
-    override val name: String,
-    override var level: Level
+    final override val name: String,
+    final override var level: Level
 ) : LoggerRegistry.Collector {
-    private lateinit var levelBeforeMute: Level
+    private var levelBeforeMute: Level = level
 
     private fun log(level: Level, span: Span?, msg: String, args: Array<out Any?>) = log(level, span, msg, null, args)
     private fun log(level: Level, span: Span?, msg: String, throwable: Throwable?, args: Array<out Any?>) {

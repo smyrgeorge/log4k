@@ -76,5 +76,5 @@ object Utils {
 
                 else -> it.split(",").map { t -> t.trim() }
             }
-        } ?: listOf(defaultTarget) // Default for local development.
+        } ?: (listOf(defaultTarget) + "jvm") // Default for local development.
 }

@@ -10,6 +10,6 @@ interface LoggingEvent {
     val logger: String
     val message: String
     val arguments: Array<out Any?>
-    val thread: String?
+    val thread: String
     val throwable: Throwable?
 }
