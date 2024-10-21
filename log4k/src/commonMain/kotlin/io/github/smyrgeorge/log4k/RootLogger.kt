@@ -3,7 +3,6 @@ package io.github.smyrgeorge.log4k
 import io.github.smyrgeorge.log4k.impl.SimpleLoggerFactory
 import io.github.smyrgeorge.log4k.impl.SimpleTracerFactory
 import io.github.smyrgeorge.log4k.impl.appenders.SimpleConsoleLoggingAppender
-import io.github.smyrgeorge.log4k.impl.extensions.forEachParallel
 import io.github.smyrgeorge.log4k.impl.registry.AppenderRegistry
 import io.github.smyrgeorge.log4k.impl.registry.LoggerRegistry
 import kotlinx.coroutines.CoroutineScope
@@ -36,14 +35,14 @@ object RootLogger {
         LoggerScope.launch(Dispatchers.IO) {
             logs.consumeEach { event ->
                 event.id = Logging.id()
-                Logging.appenders.all().forEachParallel { it.append(event) }
+                Logging.appenders.all().forEach { it.append(event) }
             }
         }
 
         // Start consuming the Tracing queue.
         TracerScope.launch(Dispatchers.IO) {
             traces.consumeEach { event ->
-                Tracing.appenders.all().forEachParallel { it.append(event) }
+                Tracing.appenders.all().forEach { it.append(event) }
             }
         }
     }

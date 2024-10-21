@@ -29,7 +29,7 @@ abstract class FlowAppender<T, E> : Appender<E> {
         FlowAppenderScope().launch(Dispatchers.IO) {
             @Suppress("UNCHECKED_CAST")
             flow = setup(this@FlowAppender.flow as Flow<E>)
-            flow.onEach { event -> runCatching { append(event) } }.launchIn(this)
+            flow.onEach { event: T -> runCatching { append(event) } }.launchIn(this)
         }
     }
 

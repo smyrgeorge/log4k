@@ -4,4 +4,4 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
-fun <T> Mutex.witLock(f: () -> T): T = runBlocking { withLock { f() } }
+fun <T> Mutex.withLockBlocking(f: () -> T): T = runBlocking { this@withLockBlocking.withLock { f() } }

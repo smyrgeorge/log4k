@@ -23,6 +23,6 @@ class SimpleConsoleLoggingAppender : Appender<LoggingEvent> {
         append(logger.take(36))
         append(' ')
         append(message.format(arguments))
-        append('\n')
+        appendLine()
     }
 }
