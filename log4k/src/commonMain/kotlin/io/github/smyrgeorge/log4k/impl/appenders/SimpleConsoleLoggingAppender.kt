@@ -12,19 +12,17 @@ class SimpleConsoleLoggingAppender : Appender<LoggingEvent> {
         event.throwable?.printStackTrace()
     }
 
-    private fun LoggingEvent.format(): String {
-        var formatted = PATTERN
-        formatted = formatted.replace("%idx", id.toString())
-        formatted = formatted.replace(" [%span] ", span?.id?.let { " [$it] " } ?: " ")
-        formatted = formatted.replace("%d{HH:mm:ss.SSS}", timestamp.toString())
-        formatted = formatted.replace("%-5level", level.name.padEnd(5))
-        formatted = formatted.replace("%logger{36}", logger.take(36))
-        formatted = formatted.replace("%msg", message.format(arguments))
-        formatted = formatted.replace("%n", "\n")
-        return formatted
-    }
-
-    companion object {
-        private const val PATTERN = "%idx [%span] %d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n"
+    private fun LoggingEvent.format(): String = buildString {
+        append(id)
+        append(' ')
+        append(span?.id?.let { " [$it] " } ?: " ")
+        append(timestamp)
+        append(' ')
+        append(level.name.padEnd(5))
+        append(' ')
+        append(logger.take(36))
+        append(' ')
+        append(message.format(arguments))
+        append('\n')
     }
 }

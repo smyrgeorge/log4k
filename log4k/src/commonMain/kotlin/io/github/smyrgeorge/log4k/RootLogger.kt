@@ -13,11 +13,11 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import kotlinx.datetime.Clock
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
+import kotlin.math.absoluteValue
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 @Suppress("MemberVisibilityCanBePrivate")
 object RootLogger {
@@ -61,11 +61,9 @@ object RootLogger {
     }
 
     object Tracing {
-        private var idx: Long = 0
+        @OptIn(ExperimentalUuidApi::class)
+        fun id(): String = "$prefix-${Uuid.random().hashCode().absoluteValue}"
         var prefix: String = "span"
-        fun id(): String = runBlocking { "$prefix-${Clock.System.now().epochSeconds}-${idx()}" }
-        private val mutex = Mutex()
-        private suspend fun idx(): Long = mutex.withLock { ++idx }
         val factory = SimpleTracerFactory()
         val tracers = LoggerRegistry<Tracer>()
         val appenders = AppenderRegistry<TracingEvent>()

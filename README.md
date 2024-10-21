@@ -22,6 +22,7 @@ asynchronous, scalable logging across multiple platforms.
 
 ## TODO
 
+- [ ] Support for OpenTelemetry's Metrics 
 - [ ] `CoroutineContexAwareLogger`: `Logger` that will collect more info from the coroutine context.
 - [ ] Ability to chain appenders
 - [ ] Json console logger
@@ -84,6 +85,9 @@ log.error(e) { e.message } // e: Throwable
 
 ## Tracing API
 
+The tracing API is fully compatible with the `OpenTelemetry` standard, enabling seamless distributed tracing, metric
+collection, and context propagation across services.
+
 ```kotlin
 private val trace: Tracer = Tracer.of(this::class)
 // We need to manually register an appender.
@@ -97,11 +101,6 @@ span.event(name = "test-event")
 span.tracer
 // Close the span manually.
 span.end()
-
-// Will produce the following tracing events:
-// Start(id=span-1729420618-1, name=test, level=INFO, tracer=io.github.smyrgeorge.log4k.MainTests, parent=null, timestamp=2024-10-20T10:36:58.214095Z, thread=null)
-// Event(id=span-1729420618-1-1, spanId=span-1729420618-1, level=INFO, tracer=io.github.smyrgeorge.log4k.MainTests, message=this is a test event, arguments=[], timestamp=2024-10-20T10:36:58.214126Z, thread=null)
-// End(id=span-1729420618-1, level=INFO, tracer=io.github.smyrgeorge.log4k.MainTests, timestamp=2024-10-20T10:36:58.214139Z, thread=null)
 ```
 
 Similarly to the logging API, we also support a more kotlin style API:

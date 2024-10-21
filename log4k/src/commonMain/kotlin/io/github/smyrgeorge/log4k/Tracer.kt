@@ -21,7 +21,7 @@ abstract class Tracer(
     }
 
     fun span(name: String, parent: TracingEvent.Span?): TracingEvent.Span =
-        TracingEvent.Span(RootLogger.Tracing.id(), name, level, parent, this)
+        TracingEvent.Span(RootLogger.Tracing.id(), level, this, name, parent)
 
     fun span(name: String): TracingEvent.Span =
         span(name, null as? TracingEvent.Span?)
@@ -39,7 +39,7 @@ abstract class Tracer(
     }
 
     fun span(id: String, name: String, parent: TracingEvent.Span?): TracingEvent.Span =
-        TracingEvent.Span(id, name, level, parent, this)
+        TracingEvent.Span(id, level, this, name, parent)
 
     fun span(id: String, name: String): TracingEvent.Span =
         span(id, name, null as? TracingEvent.Span?)
