@@ -27,6 +27,19 @@ asynchronous, scalable logging across multiple platforms.
 - [ ] Json console logger
 - [ ] `LogbackAppender`: `Appender` that will publish the logging events to the logback.
 
+## Usage
+
+```kotlin
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // https://central.sonatype.com/artifact/io.github.smyrgeorge/log4k
+    implementation("io.github.smyrgeorge:log4k:x.y.z")
+}
+```
+
 ## Architecture
 
 <!--suppress HtmlDeprecatedAttribute -->
