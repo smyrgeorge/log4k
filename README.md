@@ -13,6 +13,8 @@ This project provides a robust, event-driven logging and tracing platform specif
 Multiplatform (also compatible with the Java ecosystem). Built with coroutines and channels at its core, it offers
 asynchronous, scalable logging across multiple platforms.
 
+This project also tries to be fully compatible with `OpenTelemetry` standard.
+
 > [!IMPORTANT]  
 > The project is in a very early stage; thus, breaking changes should be expected.
 
@@ -108,7 +110,7 @@ Similarly to the logging API, we also support a more kotlin style API:
 ```kotlin
 // Create the parent span.
 // NOTICE: we do not start it, since it's already started.
-val parent: TracingEvent.Span = trace.span("parent")
+val parent: TracingEvent.Span = trace.span(id = "PARENT_SPAN_ID", traceId = "TRACE_ID", name = "parent")
 // Starts immediately the span.
 trace.span("test", parent) {
     // Send events that are related to the current span.

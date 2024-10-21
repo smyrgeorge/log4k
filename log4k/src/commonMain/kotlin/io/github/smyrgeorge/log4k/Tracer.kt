@@ -20,32 +20,18 @@ abstract class Tracer(
         levelBeforeMute = level
     }
 
-    fun span(name: String, parent: TracingEvent.Span?): TracingEvent.Span =
-        TracingEvent.Span(RootLogger.Tracing.id(), level, this, name, parent)
+    fun span(id: String, traceId: String, name: String): TracingEvent.Span =
+        TracingEvent.Span(id = id, level = level, tracer = this, name = name, parent = null, traceId = traceId)
 
-    fun span(name: String): TracingEvent.Span =
-        span(name, null as? TracingEvent.Span?)
+    fun span(name: String, parent: TracingEvent.Span? = null): TracingEvent.Span =
+        TracingEvent.Span(id = RootLogger.Tracing.id(), level = level, tracer = this, name = name, parent = parent)
 
-    inline fun <T> span(name: String, parent: TracingEvent.Span? = null, f: (TracingEvent.Span) -> T): T {
+    inline fun <T> span(
+        name: String,
+        parent: TracingEvent.Span? = null,
+        f: (TracingEvent.Span) -> T
+    ): T {
         val span = span(name, parent).start()
-        return try {
-            f(span)
-        } catch (e: Throwable) {
-            span.end(e)
-            throw e
-        } finally {
-            span.end()
-        }
-    }
-
-    fun span(id: String, name: String, parent: TracingEvent.Span?): TracingEvent.Span =
-        TracingEvent.Span(id, level, this, name, parent)
-
-    fun span(id: String, name: String): TracingEvent.Span =
-        span(id, name, null as? TracingEvent.Span?)
-
-    inline fun <T> span(id: String, name: String, parent: TracingEvent.Span? = null, f: (TracingEvent.Span) -> T): T {
-        val span = span(id, name, parent).start()
         return try {
             f(span)
         } catch (e: Throwable) {

@@ -20,6 +20,7 @@ interface TracingEvent {
         override val tracer: Tracer,
         val name: String,
         val parent: Span? = null,
+        val traceId: String = parent?.traceId ?: id,
     ) : TracingEvent {
         var status: Status = Status.UNSET
         var start: Instant? = null
@@ -95,17 +96,21 @@ interface TracingEvent {
 
         private fun <T> withLock(f: () -> T): T = runBlocking { mutex.withLock { f() } }
         override fun toString(): String {
-            return "Span(id='$id', level=$level, tracer=$tracer, name='$name', parent=$parent, status=$status, start=$start, end=$end, error=$error, events=$events)"
+            return "Span(id='$id', traceId='$traceId', name='$name', parent=$parent, status=$status, start=$start, end=$end, error=${error?.message}, events=$events)"
         }
     }
 
     // https://opentelemetry.io/docs/specs/otel/trace/api/#add-events
-    data class Event(
+    class Event(
         override val id: String,
         override val level: Level,
         override val tracer: Tracer,
         val name: String,
         val attributes: Map<String, Any?>,
         val timestamp: Instant,
-    ) : TracingEvent
+    ) : TracingEvent {
+        override fun toString(): String {
+            return "Event(id='$id', tracer=$tracer, name='$name', attributes=$attributes, timestamp=$timestamp)"
+        }
+    }
 }

@@ -51,7 +51,7 @@ class MainTests {
             RootLogger.Tracing.register(SimpleConsoleTracingAppender())
             // Create the parent span.
             // NOTICE: we do not start it, since it's already started.
-            val parent: TracingEvent.Span = trace.span("parent")
+            val parent: TracingEvent.Span = trace.span(id = "ID_EXAMPLE", traceId = "TRACE_ID_EXAMPLE", name = "parent")
             // Starts immediately the span.
             trace.span("test", parent) {
                 log.info(it, "this is a test with span")
