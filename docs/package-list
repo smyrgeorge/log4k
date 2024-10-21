@@ -3,7 +3,6 @@ $dokka.linkExtension:html
 
 module:log4k
 io.github.smyrgeorge.log4k
-io.github.smyrgeorge.log4k.appenders
 io.github.smyrgeorge.log4k.impl
 io.github.smyrgeorge.log4k.impl.appenders
 io.github.smyrgeorge.log4k.impl.extensions
