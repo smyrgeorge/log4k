@@ -15,7 +15,7 @@ class SimpleConsoleLoggingAppender : Appender<LoggingEvent> {
     private fun LoggingEvent.format(): String = buildString {
         append(id)
         append(' ')
-        append(span?.id?.let { " [$it] " } ?: " ")
+        append(span?.context?.spanId?.let { " [$it] " } ?: " ")
         append(timestamp)
         append(' ')
         append(level.name.padEnd(5))

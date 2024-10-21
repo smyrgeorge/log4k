@@ -21,10 +21,10 @@ abstract class Tracer(
     }
 
     fun span(id: String, traceId: String, name: String): TracingEvent.Span =
-        TracingEvent.Span(id = id, level = level, tracer = this, name = name, traceId = traceId)
+        TracingEvent.Span.of(id = id, level = level, tracer = this, name = name, traceId = traceId, isRemote = true)
 
     fun span(name: String, parent: TracingEvent.Span? = null): TracingEvent.Span =
-        TracingEvent.Span(id = RootLogger.Tracing.id(), level = level, tracer = this, name = name, parent = parent)
+        TracingEvent.Span.of(id = RootLogger.Tracing.id(), level = level, tracer = this, name = name, parent = parent)
 
     inline fun <T> span(
         name: String,
@@ -33,12 +33,11 @@ abstract class Tracer(
     ): T {
         val span = span(name, parent).start()
         return try {
-            f(span)
+            f(span).also { span.end() }
         } catch (e: Throwable) {
+            span.exception(e, true)
             span.end(e)
             throw e
-        } finally {
-            span.end()
         }
     }
 

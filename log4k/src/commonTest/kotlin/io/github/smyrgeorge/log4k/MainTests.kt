@@ -46,15 +46,15 @@ class MainTests {
                 delay(500)
             }
 
-            delay(1000)
-
             RootLogger.Tracing.register(SimpleConsoleTracingAppender())
             // Create the parent span.
             // NOTICE: we do not start it, since it's already started.
             val parent: TracingEvent.Span = trace.span(id = "ID_EXAMPLE", traceId = "TRACE_ID_EXAMPLE", name = "parent")
             // Starts immediately the span.
             trace.span("test", parent) {
-                log.info(it, "this is a test with span")
+                log.info(it, "this is a test with span") // The log will contain the span id.
+                // Set span attributes.
+                it.attributes["key"] = "value"
                 // Send events that are related to the current span.
                 it.event(name = "event-1", level = Level.DEBUG)
                 it.debug(name = "event-1") // Same as event(name = "event-1", level = Level.DEBUG)
@@ -69,7 +69,6 @@ class MainTests {
             // Create the span and then start it.
             val span: TracingEvent.Span = trace.span("test").start()
             span.event("this is a test event")
-            span.tracer
             // Close the span manually.
             span.end()
 
