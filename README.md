@@ -155,7 +155,7 @@ try {
 // Create custom appenders.
 // See [BatchAppender] for more information.
 class MyBatchAppender(size: Int) : BatchAppender<LoggingEvent>(size) {
-    override suspend fun append(event: List<LoggingEvent>) {
+    override suspend fun handle(event: List<LoggingEvent>) {
         // E.g. send batch over http.
         // In this case every [append] method will be called every 5 elements.
         println(event.joinToString { it.message })
