@@ -3,11 +3,11 @@ package io.github.smyrgeorge.log4k
 import io.github.smyrgeorge.log4k.impl.SimpleLoggerFactory
 import io.github.smyrgeorge.log4k.impl.SimpleTracerFactory
 import io.github.smyrgeorge.log4k.impl.appenders.SimpleConsoleLoggingAppender
+import io.github.smyrgeorge.log4k.impl.extensions.dispatcher
 import io.github.smyrgeorge.log4k.impl.registry.AppenderRegistry
 import io.github.smyrgeorge.log4k.impl.registry.LoggerRegistry
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
@@ -20,18 +20,15 @@ import kotlin.uuid.Uuid
 @Suppress("MemberVisibilityCanBePrivate")
 object RootLogger {
     val level: Level = Level.INFO
-
-    private val logs: Channel<LoggingEvent> =
-        Channel(capacity = Channel.UNLIMITED)
-
-    private val traces: Channel<TracingEvent> =
-        Channel(capacity = Channel.UNLIMITED)
+    private val dispatcher: CoroutineDispatcher = dispatcher()
+    private val logs: Channel<LoggingEvent> = Channel(capacity = Channel.UNLIMITED)
+    private val traces: Channel<TracingEvent> = Channel(capacity = Channel.UNLIMITED)
 
     init {
         Logging.register(SimpleConsoleLoggingAppender())
 
         // Start consuming the Logging queue.
-        LoggerScope.launch(Dispatchers.IO) {
+        LoggerScope.launch(dispatcher) {
             logs.consumeEach { event ->
                 event.id = Logging.id()
                 Logging.appenders.all().forEach { it.append(event) }
@@ -39,7 +36,7 @@ object RootLogger {
         }
 
         // Start consuming the Tracing queue.
-        TracerScope.launch(Dispatchers.IO) {
+        TracerScope.launch(dispatcher) {
             traces.consumeEach { event ->
                 Tracing.appenders.all().forEach { it.append(event) }
             }

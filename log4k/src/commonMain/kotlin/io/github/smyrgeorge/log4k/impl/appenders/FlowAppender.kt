@@ -1,11 +1,10 @@
 package io.github.smyrgeorge.log4k.impl.appenders
 
 import io.github.smyrgeorge.log4k.Appender
+import io.github.smyrgeorge.log4k.impl.extensions.dispatcher
 import io.github.smyrgeorge.log4k.impl.extensions.toName
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
@@ -19,7 +18,7 @@ import kotlin.coroutines.EmptyCoroutineContext
 @Suppress("unused")
 abstract class FlowAppender<T, E> : Appender<E> {
     private val scope = FlowAppenderScope()
-    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
+    private val dispatcher: CoroutineDispatcher = dispatcher()
     private val logs: Channel<E> = Channel(capacity = Channel.UNLIMITED)
 
     @Suppress("UNCHECKED_CAST")

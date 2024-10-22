@@ -1,5 +1,6 @@
 package io.github.smyrgeorge.log4k.impl.extensions
 
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 
-expect fun dispatcher(): CoroutineDispatcher
+actual fun dispatcher(): CoroutineDispatcher = Dispatchers.IO
