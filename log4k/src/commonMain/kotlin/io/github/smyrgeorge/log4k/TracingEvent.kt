@@ -1,6 +1,7 @@
 package io.github.smyrgeorge.log4k
 
 import io.github.smyrgeorge.log4k.impl.OpenTelemetry
+import io.github.smyrgeorge.log4k.impl.extensions.toName
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 
@@ -12,8 +13,8 @@ interface TracingEvent {
         val level: Level,
         val context: Context,
         val parent: Span?,
-        var start: Instant?,
-        var end: Instant?,
+        var startAt: Instant?,
+        var endAt: Instant?,
         val attributes: MutableMap<String, Any?>,
         val events: MutableList<Event>,
         var status: Status,
@@ -31,7 +32,7 @@ interface TracingEvent {
         fun start(): Span {
             if (!shouldStart()) return this
             if (started) return this
-            start = Clock.System.now()
+            startAt = Clock.System.now()
             started = true
             return this
         }
@@ -61,7 +62,7 @@ interface TracingEvent {
                 name = OpenTelemetry.EXCEPTION,
                 timestamp = Clock.System.now(),
                 attributes = attrs + mapOf(
-                    OpenTelemetry.EXCEPTION_TYPE to error::class.qualifiedName,
+                    OpenTelemetry.EXCEPTION_TYPE to error::class.toName(),
                     OpenTelemetry.EXCEPTION_ESCAPED to escaped,
                     OpenTelemetry.EXCEPTION_MESSAGE to error.message,
                     OpenTelemetry.EXCEPTION_STACKTRACE to error.stackTraceToString(),
@@ -79,7 +80,7 @@ interface TracingEvent {
         fun end(error: Throwable? = null) {
             if (!shouldStart()) return
             if (closed || !started) return
-            end = Clock.System.now()
+            endAt = Clock.System.now()
             closed = true
             status = Status(
                 code = error?.let { Status.Code.ERROR } ?: Status.Code.OK,
@@ -151,8 +152,8 @@ interface TracingEvent {
                 level = level,
                 context = Context(traceId, id, isRemote, Context.Tracer(tracer.name, tracer.level)),
                 parent = parent,
-                start = null,
-                end = null,
+                startAt = null,
+                endAt = null,
                 attributes = mutableMapOf(),
                 events = mutableListOf(),
                 status = Status(),

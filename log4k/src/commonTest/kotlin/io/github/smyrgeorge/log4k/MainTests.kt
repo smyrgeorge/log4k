@@ -9,7 +9,7 @@ import kotlin.test.Test
 class MainTests {
 
     class MyBatchAppender(size: Int) : BatchAppender<LoggingEvent>(size) {
-        override suspend fun append(event: List<LoggingEvent>) {
+        override suspend fun handle(event: List<LoggingEvent>) {
             // E.g. send batch over http.
             println(event.joinToString { it.message })
         }

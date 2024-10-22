@@ -7,7 +7,7 @@ import io.github.smyrgeorge.log4k.impl.extensions.toName
 
 class SimpleConsoleLoggingAppender : Appender<LoggingEvent> {
     override val name: String = this::class.toName()
-    override fun append(event: LoggingEvent) {
+    override suspend fun append(event: LoggingEvent) {
         print(event.format())
         event.throwable?.printStackTrace()
     }

@@ -11,7 +11,6 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.math.absoluteValue
@@ -47,8 +46,8 @@ object RootLogger {
         }
     }
 
-    fun log(event: LoggingEvent) = runBlocking { logs.send(event) }
-    fun trace(event: TracingEvent) = runBlocking { traces.send(event) }
+    fun log(event: LoggingEvent): Unit = send(LoggerScope) { logs.send(event) }
+    fun trace(event: TracingEvent): Unit = send(TracerScope) { traces.send(event) }
 
     object Logging {
         private var idx: Long = 0
@@ -67,6 +66,10 @@ object RootLogger {
         val tracers = LoggerRegistry<Tracer>()
         val appenders = AppenderRegistry<TracingEvent>()
         fun register(appender: Appender<TracingEvent>) = appenders.register(appender)
+    }
+
+    private inline fun send(scope: CoroutineScope, crossinline f: suspend () -> Unit) {
+        scope.launch { f() }
     }
 
     private object LoggerScope : CoroutineScope {
