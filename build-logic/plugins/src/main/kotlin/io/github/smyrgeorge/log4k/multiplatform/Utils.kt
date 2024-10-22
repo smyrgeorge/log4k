@@ -3,6 +3,7 @@ package io.github.smyrgeorge.log4k.multiplatform
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 object Utils {
     private val os = DefaultNativePlatform.getCurrentOperatingSystem()
@@ -71,7 +72,10 @@ object Utils {
                     "linuxArm64",
                     "linuxX64",
                     "mingwX64",
-                    "jvm"
+                    "jvm",
+//                    "js",
+//                    "wasmJs",
+//                    "wasmWasi"
                 )
 
                 else -> it.split(",").map { t -> t.trim() }

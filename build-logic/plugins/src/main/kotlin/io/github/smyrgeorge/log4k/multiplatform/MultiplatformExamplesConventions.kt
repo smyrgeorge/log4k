@@ -3,6 +3,7 @@ package io.github.smyrgeorge.log4k.multiplatform
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 class MultiplatformExamplesConventions : Plugin<Project> {
@@ -20,6 +21,26 @@ class MultiplatformExamplesConventions : Plugin<Project> {
                 Pair("linuxX64") { linuxX64 { binaries { executable() } } },
                 Pair("mingwX64") { mingwX64 { binaries { executable() } } },
                 Pair("jvm") { jvm { withJava() } },
+                Pair("js") {
+                    js {
+                        browser()
+                        nodejs()
+                    }
+                },
+                @OptIn(ExperimentalWasmDsl::class)
+                Pair("wasmJs") {
+                    wasmJs {
+                        browser()
+                        nodejs()
+                        d8()
+                    }
+                },
+                @OptIn(ExperimentalWasmDsl::class)
+                Pair("wasmWasi") {
+                    wasmWasi {
+                        nodejs()
+                    }
+                },
             )
 
             targets.forEach {
