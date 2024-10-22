@@ -32,7 +32,6 @@ class MultiplatformConventions : Plugin<Project> {
                     wasmJs {
                         browser()
                         nodejs()
-                        d8()
                     }
                 },
                 @OptIn(ExperimentalWasmDsl::class)

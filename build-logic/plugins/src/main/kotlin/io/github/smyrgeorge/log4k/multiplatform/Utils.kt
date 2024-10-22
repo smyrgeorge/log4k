@@ -73,11 +73,11 @@ object Utils {
                     "mingwX64",
                     "jvm",
                     "js",
-//                    "wasmJs",
-//                    "wasmWasi"
+                    "wasmJs",
+//                    "wasmWasi",
                 )
 
                 else -> it.split(",").map { t -> t.trim() }
             }
-        } ?: listOf(defaultTarget, "jvm", "js") // Default for local development.
+        } ?: listOf(defaultTarget, "jvm", "js", "wasmJs") // Default for local development.
 }
