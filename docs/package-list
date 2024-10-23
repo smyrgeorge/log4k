@@ -5,5 +5,6 @@ module:log4k
 io.github.smyrgeorge.log4k
 io.github.smyrgeorge.log4k.impl
 io.github.smyrgeorge.log4k.impl.appenders
+io.github.smyrgeorge.log4k.impl.appenders.simple
 io.github.smyrgeorge.log4k.impl.extensions
 io.github.smyrgeorge.log4k.impl.registry
