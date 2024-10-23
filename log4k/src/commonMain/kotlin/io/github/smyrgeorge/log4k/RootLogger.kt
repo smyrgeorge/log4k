@@ -2,7 +2,7 @@ package io.github.smyrgeorge.log4k
 
 import io.github.smyrgeorge.log4k.impl.SimpleLoggerFactory
 import io.github.smyrgeorge.log4k.impl.SimpleTracerFactory
-import io.github.smyrgeorge.log4k.impl.appenders.SimpleConsoleLoggingAppender
+import io.github.smyrgeorge.log4k.impl.appenders.simple.SimpleConsoleLoggingAppender
 import io.github.smyrgeorge.log4k.impl.extensions.dispatcher
 import io.github.smyrgeorge.log4k.impl.registry.AppenderRegistry
 import io.github.smyrgeorge.log4k.impl.registry.LoggerRegistry

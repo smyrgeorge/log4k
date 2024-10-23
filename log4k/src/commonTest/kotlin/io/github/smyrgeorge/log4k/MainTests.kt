@@ -1,6 +1,6 @@
 package io.github.smyrgeorge.log4k
 
-import io.github.smyrgeorge.log4k.impl.appenders.SimpleConsoleTracingAppender
+import io.github.smyrgeorge.log4k.impl.appenders.simple.SimpleConsoleTracingAppender
 import kotlin.test.Test
 
 class MainTests {

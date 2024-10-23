@@ -24,7 +24,7 @@ This project also tries to be fully compatible with `OpenTelemetry` standard.
 
 ## TODO
 
-- [ ] Support for OpenTelemetry's Metrics 
+- [ ] Support for OpenTelemetry's Metrics
 - [ ] `CoroutineContexAwareLogger`: `Logger` that will collect more info from the coroutine context.
 - [ ] Ability to chain appenders
 - [ ] Json console logger
@@ -66,6 +66,13 @@ solution.
 The tracing module, works with exactly the same architecture.
 
 ## Logging API
+
+By default, the `SimpleConsoleLoggingAppender` is automatically registered.
+You can change the behaviour by executing, early in your program, the following:
+
+```kotlin
+RootLogger.Logging.appenders.unregister(SimpleConsoleLoggingAppender::class)
+```
 
 ```kotlin
 // Create a Logger.

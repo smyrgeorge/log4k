@@ -1,4 +1,4 @@
-package io.github.smyrgeorge.log4k.impl.appenders
+package io.github.smyrgeorge.log4k.impl.appenders.simple
 
 import io.github.smyrgeorge.log4k.Appender
 import io.github.smyrgeorge.log4k.TracingEvent

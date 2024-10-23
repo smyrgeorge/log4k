@@ -5,7 +5,9 @@ import io.github.smyrgeorge.log4k.RootLogger
 import io.github.smyrgeorge.log4k.Tracer
 import io.github.smyrgeorge.log4k.TracingEvent
 import io.github.smyrgeorge.log4k.impl.appenders.BatchAppender
-import io.github.smyrgeorge.log4k.impl.appenders.SimpleConsoleTracingAppender
+import io.github.smyrgeorge.log4k.impl.appenders.FlowBufferedAppender
+import io.github.smyrgeorge.log4k.impl.appenders.simple.SimpleConsoleLoggingAppender.Companion.print
+import io.github.smyrgeorge.log4k.impl.appenders.simple.SimpleConsoleTracingAppender
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.async
@@ -23,10 +25,16 @@ class Main {
         }
     }
 
+    class SimpleBufferedConsoleAppender(
+        capacity: Int
+    ) : FlowBufferedAppender<LoggingEvent>(capacity) {
+        override suspend fun handle(event: LoggingEvent) = event.print()
+    }
+
     private val log: Logger = Logger.of(this::class)
     private val trace: Tracer = Tracer.of(this::class)
 
-    fun run() {
+    fun run(): Unit = runBlocking {
         log.debug("ignore")
         log.debug { "ignore + ${5}" } // Will be evaluated only if DEBUG logs are enabled.
         log.info("this is a test")
@@ -41,54 +49,60 @@ class Main {
             log.error(e) { e.message }
         }
 
-        runBlocking {
-            delay(5000)
 
-            suspend fun <A> Iterable<A>.forEachParallel(
-                context: CoroutineContext = Dispatchers.IO,
-                f: suspend (A) -> Unit
-            ): Unit = withContext(context) { map { async { f(it) } }.awaitAll() }
+        delay(5000)
 
-            val appender = MyBatchAppender(5)
-            RootLogger.Logging.appenders.register(appender)
+        suspend fun <A> Iterable<A>.forEachParallel(
+            context: CoroutineContext = Dispatchers.IO,
+            f: suspend (A) -> Unit
+        ): Unit = withContext(context) { map { async { f(it) } }.awaitAll() }
 
-            (0..10).forEachParallel {
-                repeat(10) {
-                    log.info("$it")
-                    delay(500)
-                }
+        val appender = MyBatchAppender(5)
+        RootLogger.Logging.appenders.register(appender)
+
+        (0..10).forEachParallel {
+            repeat(10) {
+                log.info("$it")
+                delay(500)
             }
-
-            delay(2000)
-
-            RootLogger.Tracing.register(SimpleConsoleTracingAppender())
-            // Create the parent span.
-            // NOTICE: we do not start it, since it's already started.
-            val parent: TracingEvent.Span = trace.span(id = "ID_EXAMPLE", traceId = "TRACE_ID_EXAMPLE", name = "parent")
-            // Starts immediately the span.
-            trace.span("test", parent) {
-                log.info(it, "this is a test with span") // The log will contain the span id.
-                // Set span attributes.
-                it.attributes["key"] = "value"
-                // Send events that are related to the current span.
-                it.event(name = "event-1", level = Level.DEBUG)
-                it.debug(name = "event-1") // Same as event(name = "event-1", level = Level.DEBUG)
-                // Include attributes in the event.
-                it.event(name = "event-2", attrs = mapOf("key" to "value"))
-                it.event(name = "event-2") { attrs ->
-                    attrs["key"] = "value"
-                }
-                // Automatically closes at the end of te scope.
-            }
-
-            // Create the span and then start it.
-            val span: TracingEvent.Span = trace.span("test").start()
-            span.event("this is a test event")
-            // Close the span manually.
-            span.end()
-
-            delay(2000)
         }
+
+        delay(2000)
+
+        RootLogger.Tracing.register(SimpleConsoleTracingAppender())
+        // Create the parent span.
+        // NOTICE: we do not start it, since it's already started.
+        val parent: TracingEvent.Span = trace.span(id = "ID_EXAMPLE", traceId = "TRACE_ID_EXAMPLE", name = "parent")
+        // Starts immediately the span.
+        trace.span("test", parent) {
+            log.info(it, "this is a test with span") // The log will contain the span id.
+            // Set span attributes.
+            it.attributes["key"] = "value"
+            // Send events that are related to the current span.
+            it.event(name = "event-1", level = Level.DEBUG)
+            it.debug(name = "event-1") // Same as event(name = "event-1", level = Level.DEBUG)
+            // Include attributes in the event.
+            it.event(name = "event-2", attrs = mapOf("key" to "value"))
+            it.event(name = "event-2") { attrs ->
+                attrs["key"] = "value"
+            }
+            // Automatically closes at the end of te scope.
+        }
+
+        // Create the span and then start it.
+        val span: TracingEvent.Span = trace.span("test").start()
+        span.event("this is a test event")
+        // Close the span manually.
+        span.end()
+
+        delay(2000)
+
+        RootLogger.Logging.appenders.unregisterAll()
+        RootLogger.Logging.appenders.register(SimpleBufferedConsoleAppender(5))
+        repeat(1000) {
+            log.info("$it")
+        }
+        delay(2000)
     }
 }
 
