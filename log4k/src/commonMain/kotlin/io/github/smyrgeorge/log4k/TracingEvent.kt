@@ -90,11 +90,11 @@ interface TracingEvent {
             RootLogger.trace(this)
         }
 
-        fun trace(name: String, f: (MutableMap<String, Any?>) -> Unit) = event(name, Level.TRACE, f)
-        fun debug(name: String, f: (MutableMap<String, Any?>) -> Unit) = event(name, Level.DEBUG, f)
-        fun info(name: String, f: (MutableMap<String, Any?>) -> Unit) = event(name, Level.INFO, f)
-        fun warn(name: String, f: (MutableMap<String, Any?>) -> Unit) = event(name, Level.WARN, f)
-        fun error(name: String, f: (MutableMap<String, Any?>) -> Unit) = event(name, Level.ERROR, f)
+        inline fun trace(name: String, f: (MutableMap<String, Any?>) -> Unit) = event(name, Level.TRACE, f)
+        inline fun debug(name: String, f: (MutableMap<String, Any?>) -> Unit) = event(name, Level.DEBUG, f)
+        inline fun info(name: String, f: (MutableMap<String, Any?>) -> Unit) = event(name, Level.INFO, f)
+        inline fun warn(name: String, f: (MutableMap<String, Any?>) -> Unit) = event(name, Level.WARN, f)
+        inline fun error(name: String, f: (MutableMap<String, Any?>) -> Unit) = event(name, Level.ERROR, f)
 
         fun trace(name: String, attrs: Map<String, Any?> = emptyMap()) = event(name, Level.TRACE, attrs)
         fun debug(name: String, attrs: Map<String, Any?> = emptyMap()) = event(name, Level.DEBUG, attrs)
@@ -105,7 +105,7 @@ interface TracingEvent {
         fun event(name: String, f: (MutableMap<String, Any?>) -> Unit) = event(name, level, f)
         fun event(name: String, attrs: Map<String, Any?> = emptyMap()) = event(name, level, attrs)
 
-        fun event(name: String, level: Level, f: (MutableMap<String, Any?>) -> Unit) {
+        inline fun event(name: String, level: Level, f: (MutableMap<String, Any?>) -> Unit) {
             mutableMapOf<String, Any?>().also {
                 f(it)
                 event(name, level, it)

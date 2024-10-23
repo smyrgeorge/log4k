@@ -26,7 +26,7 @@ abstract class Logger(
         args: Array<out Any?>
     ): LoggingEvent
 
-    private fun Level.shouldLog(): Boolean =
+    fun Level.shouldLog(): Boolean =
         ordinal >= level.ordinal
 
     override fun mute() {
@@ -39,19 +39,19 @@ abstract class Logger(
         levelBeforeMute = level
     }
 
-    fun trace(f: () -> String): Unit = if (Level.TRACE.shouldLog()) trace(f()) else Unit
-    fun debug(f: () -> String): Unit = if (Level.DEBUG.shouldLog()) debug(f()) else Unit
-    fun info(f: () -> String): Unit = if (Level.INFO.shouldLog()) info(f()) else Unit
-    fun warn(f: () -> String): Unit = if (Level.WARN.shouldLog()) warn(f()) else Unit
-    fun error(f: () -> String?): Unit = if (Level.ERROR.shouldLog()) error(f()) else Unit
-    fun error(t: Throwable, f: () -> String?): Unit = if (Level.ERROR.shouldLog()) error(f(), t) else Unit
+    inline fun trace(f: () -> String): Unit = if (Level.TRACE.shouldLog()) trace(f()) else Unit
+    inline fun debug(f: () -> String): Unit = if (Level.DEBUG.shouldLog()) debug(f()) else Unit
+    inline fun info(f: () -> String): Unit = if (Level.INFO.shouldLog()) info(f()) else Unit
+    inline fun warn(f: () -> String): Unit = if (Level.WARN.shouldLog()) warn(f()) else Unit
+    inline fun error(f: () -> String?): Unit = if (Level.ERROR.shouldLog()) error(f()) else Unit
+    inline fun error(t: Throwable, f: () -> String?): Unit = if (Level.ERROR.shouldLog()) error(f(), t) else Unit
 
-    fun trace(span: Span, f: () -> String): Unit = if (Level.TRACE.shouldLog()) trace(span, f()) else Unit
-    fun debug(span: Span, f: () -> String): Unit = if (Level.DEBUG.shouldLog()) debug(span, f()) else Unit
-    fun info(span: Span, f: () -> String): Unit = if (Level.INFO.shouldLog()) info(span, f()) else Unit
-    fun warn(span: Span, f: () -> String): Unit = if (Level.WARN.shouldLog()) warn(span, f()) else Unit
-    fun error(span: Span, f: () -> String?): Unit = if (Level.ERROR.shouldLog()) error(span, f()) else Unit
-    fun error(span: Span, t: Throwable, f: () -> String?): Unit =
+    inline fun trace(span: Span, f: () -> String): Unit = if (Level.TRACE.shouldLog()) trace(span, f()) else Unit
+    inline fun debug(span: Span, f: () -> String): Unit = if (Level.DEBUG.shouldLog()) debug(span, f()) else Unit
+    inline fun info(span: Span, f: () -> String): Unit = if (Level.INFO.shouldLog()) info(span, f()) else Unit
+    inline fun warn(span: Span, f: () -> String): Unit = if (Level.WARN.shouldLog()) warn(span, f()) else Unit
+    inline fun error(span: Span, f: () -> String?): Unit = if (Level.ERROR.shouldLog()) error(span, f()) else Unit
+    inline fun error(span: Span, t: Throwable, f: () -> String?): Unit =
         if (Level.ERROR.shouldLog()) error(span, f(), t) else Unit
 
     fun trace(msg: String, vararg args: Any?): Unit = log(Level.TRACE, null, msg, args)
