@@ -16,9 +16,11 @@ class SimpleConsoleLoggingAppender : Appender<LoggingEvent> {
         }
 
         private fun LoggingEvent.format(): String = buildString {
-            append(id)
-            append(' ')
-            append(span?.context?.spanId?.let { "[$it] " } ?: " ")
+            if (id > 0) {
+                append(id)
+                append(' ')
+            }
+            append(span?.context?.spanId?.let { "[$it] " } ?: "")
             append(timestamp)
             append(" [")
             append(thread)

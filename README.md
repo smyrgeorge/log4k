@@ -65,6 +65,21 @@ solution.
 
 The tracing module, works with exactly the same architecture.
 
+### Prevent log/trace flooding.
+
+_Log rate spikes are common and often go unnoticed. They could be an indication that something went terribly wrong or
+that a high-traffic system was unintentionally configured with verbose logging._
+
+At times, it's crucial to reduce the volume of logs and traces to prevent unnecessary costs. In our solution, we can
+leverage Kotlin's Flow to manage log streams efficiently by dropping excess log messages when needed. For example, the
+`FlowFloodProtectedAppender` is designed specifically for this scenario. It not only limits the flood of log messages
+but also reports the number of dropped messages, giving you visibility into how much data is being filtered out.
+
+To tackle similar issues, we can apply dynamic rate-limiting based on system load or log severity, prioritizing critical
+logs while dropping less important ones during high-traffic periods. Batching or buffering logs can also help optimize
+processing, ensuring important logs are preserved without overwhelming the system. This reduces costs and maintains log
+integrity.
+
 ## Logging API
 
 By default, the `SimpleConsoleLoggingAppender` is automatically registered.

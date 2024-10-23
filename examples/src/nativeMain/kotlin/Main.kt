@@ -5,7 +5,7 @@ import io.github.smyrgeorge.log4k.RootLogger
 import io.github.smyrgeorge.log4k.Tracer
 import io.github.smyrgeorge.log4k.TracingEvent
 import io.github.smyrgeorge.log4k.impl.appenders.BatchAppender
-import io.github.smyrgeorge.log4k.impl.appenders.FlowBufferedAppender
+import io.github.smyrgeorge.log4k.impl.appenders.FlowFloodProtectedAppender
 import io.github.smyrgeorge.log4k.impl.appenders.simple.SimpleConsoleLoggingAppender.Companion.print
 import io.github.smyrgeorge.log4k.impl.appenders.simple.SimpleConsoleTracingAppender
 import kotlinx.coroutines.Dispatchers
@@ -16,6 +16,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
+import kotlin.time.measureTime
 
 class Main {
     class MyBatchAppender(size: Int) : BatchAppender<LoggingEvent>(size) {
@@ -25,9 +26,10 @@ class Main {
         }
     }
 
-    class SimpleBufferedConsoleAppender(
-        capacity: Int
-    ) : FlowBufferedAppender<LoggingEvent>(capacity) {
+    class SimpleFloodProtectedAppender(
+        requestPerSecond: Int,
+        burstDurationMillis: Int
+    ) : FlowFloodProtectedAppender<LoggingEvent>(requestPerSecond, burstDurationMillis) {
         override suspend fun handle(event: LoggingEvent) = event.print()
     }
 
@@ -98,11 +100,15 @@ class Main {
         delay(2000)
 
         RootLogger.Logging.appenders.unregisterAll()
-        RootLogger.Logging.appenders.register(SimpleBufferedConsoleAppender(5))
-        repeat(1000) {
-            log.info("$it")
+        RootLogger.Logging.appenders.register(SimpleFloodProtectedAppender(50, 100))
+
+        val time = measureTime {
+            repeat(1_000_000) {
+                log.info("$it")
+            }
         }
         delay(2000)
+        println("Finished in $time")
     }
 }
 

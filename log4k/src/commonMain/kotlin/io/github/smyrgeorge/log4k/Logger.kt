@@ -11,8 +11,13 @@ abstract class Logger(
 ) : LoggerRegistry.Collector {
     private var levelBeforeMute: Level = level
 
-    private fun log(level: Level, span: Span?, msg: String, args: Array<out Any?>) = log(level, span, msg, null, args)
-    private fun log(level: Level, span: Span?, msg: String, throwable: Throwable?, args: Array<out Any?>) {
+    private fun log(
+        level: Level,
+        span: Span?,
+        msg: String,
+        throwable: Throwable?,
+        args: Array<out Any?>
+    ) {
         if (!level.shouldLog()) return
         val event = toLoggingEvent(level, span, msg, throwable, args)
         RootLogger.log(event)
@@ -70,26 +75,26 @@ abstract class Logger(
     inline fun error(span: Span, t: Throwable, f: () -> String?): Unit =
         if (Level.ERROR.shouldLog()) error(span, f(), t) else Unit
 
-    fun trace(msg: String, vararg args: Any?): Unit = log(Level.TRACE, null, msg, args)
+    fun trace(msg: String, vararg args: Any?): Unit = log(Level.TRACE, null, msg, null, args)
     fun trace(msg: String, t: Throwable, vararg args: Any?): Unit = log(Level.TRACE, null, msg, t, args)
-    fun debug(msg: String, vararg args: Any?): Unit = log(Level.DEBUG, null, msg, args)
+    fun debug(msg: String, vararg args: Any?): Unit = log(Level.DEBUG, null, msg, null, args)
     fun debug(msg: String, t: Throwable, vararg args: Any?): Unit = log(Level.DEBUG, null, msg, t, args)
-    fun info(msg: String, vararg args: Any?): Unit = log(Level.INFO, null, msg, args)
+    fun info(msg: String, vararg args: Any?): Unit = log(Level.INFO, null, msg, null, args)
     fun info(msg: String, t: Throwable, vararg args: Any?): Unit = log(Level.INFO, null, msg, t, args)
-    fun warn(msg: String, vararg args: Any?): Unit = log(Level.WARN, null, msg, args)
+    fun warn(msg: String, vararg args: Any?): Unit = log(Level.WARN, null, msg, null, args)
     fun warn(msg: String, t: Throwable, vararg args: Any?): Unit = log(Level.WARN, null, msg, t, args)
-    fun error(msg: String?, vararg args: Any?): Unit = log(Level.ERROR, null, msg ?: "", args)
+    fun error(msg: String?, vararg args: Any?): Unit = log(Level.ERROR, null, msg ?: "", null, args)
     fun error(msg: String?, t: Throwable, vararg args: Any?): Unit = log(Level.ERROR, null, msg ?: "", t, args)
 
-    fun trace(span: Span, msg: String, vararg args: Any?): Unit = log(Level.TRACE, span, msg, args)
+    fun trace(span: Span, msg: String, vararg args: Any?): Unit = log(Level.TRACE, span, msg, null, args)
     fun trace(span: Span, msg: String, t: Throwable, vararg args: Any?): Unit = log(Level.TRACE, span, msg, t, args)
-    fun debug(span: Span, msg: String, vararg args: Any?): Unit = log(Level.DEBUG, span, msg, args)
+    fun debug(span: Span, msg: String, vararg args: Any?): Unit = log(Level.DEBUG, span, msg, null, args)
     fun debug(span: Span, msg: String, t: Throwable, vararg args: Any?): Unit = log(Level.DEBUG, span, msg, t, args)
-    fun info(span: Span, msg: String, vararg args: Any?): Unit = log(Level.INFO, span, msg, args)
+    fun info(span: Span, msg: String, vararg args: Any?): Unit = log(Level.INFO, span, msg, null, args)
     fun info(span: Span, msg: String, t: Throwable, vararg args: Any?): Unit = log(Level.INFO, span, msg, t, args)
-    fun warn(span: Span, msg: String, vararg args: Any?): Unit = log(Level.WARN, span, msg, args)
+    fun warn(span: Span, msg: String, vararg args: Any?): Unit = log(Level.WARN, span, msg, null, args)
     fun warn(span: Span, msg: String, t: Throwable, vararg args: Any?): Unit = log(Level.WARN, span, msg, t, args)
-    fun error(span: Span, msg: String?, vararg args: Any?): Unit = log(Level.ERROR, span, msg ?: "", args)
+    fun error(span: Span, msg: String?, vararg args: Any?): Unit = log(Level.ERROR, span, msg ?: "", null, args)
     fun error(span: Span, msg: String?, t: Throwable, vararg args: Any?): Unit =
         log(Level.ERROR, span, msg ?: "", t, args)
 
