@@ -4,10 +4,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.transform
 import kotlinx.datetime.Clock
 
-fun <T> Flow<T>.preventFloodingWithBurst(
+inline fun <T> Flow<T>.preventFloodingWithBurst(
     requestsPerSecond: Int,
     burstDurationMillis: Int,
-    onDropMessages: (dropped: Int, totalDropped: Long) -> Unit =
+    burstResetPeriodMillis: Int,
+    crossinline onDropMessages: (dropped: Int, totalDropped: Long) -> Unit =
         { dropped, totalDropped -> println("Dropped $dropped log messages due to flooding (total: $totalDropped).") }
 ): Flow<T> {
     require(requestsPerSecond > 0) { "Requests per second must be greater than 0." }
@@ -17,18 +18,23 @@ fun <T> Flow<T>.preventFloodingWithBurst(
     var lastEmissionTime = 0L
     var dropCounter = 0
     var totalDropped = 0L
-    val startTime = Clock.System.now().toEpochMilliseconds()
+    var startBurstTime: Long = 0
 
-    return this.transform { value ->
+    return transform { value ->
         val currentTime = Clock.System.now().toEpochMilliseconds()
-
-        // Allow all messages during the burst period.
-        if (currentTime - startTime < burstDurationMillis) {
+        if (currentTime - lastEmissionTime >= windowMillis) {
+            if (currentTime - startBurstTime > burstResetPeriodMillis) startBurstTime = 0
             emit(value)
             lastEmissionTime = currentTime
+            if (dropCounter > 0) {
+                totalDropped += dropCounter
+                onDropMessages(dropCounter, totalDropped)
+                dropCounter = 0
+            }
         } else {
-            // After burst period, start limiting.
-            if (currentTime - lastEmissionTime >= windowMillis) {
+            if (startBurstTime == 0L) startBurstTime = currentTime
+            if (currentTime - startBurstTime <= burstDurationMillis) {
+                // Allow all messages during the burst period.
                 emit(value)
                 lastEmissionTime = currentTime
                 if (dropCounter > 0) {
@@ -37,6 +43,7 @@ fun <T> Flow<T>.preventFloodingWithBurst(
                     dropCounter = 0
                 }
             } else {
+                // After burst period, start limiting.
                 dropCounter++
             }
         }

@@ -104,7 +104,17 @@ class Main {
             SimpleFloodProtectedAppender(requestPerSecond = 50, burstDurationMillis = 100)
         )
 
-        val time = measureTime {
+        delay(2000)
+
+        var time = measureTime {
+            repeat(1_000_000) {
+                log.info("$it")
+            }
+        }
+        delay(2000)
+        println("Finished in $time")
+
+        time = measureTime {
             repeat(1_000_000) {
                 log.info("$it")
             }

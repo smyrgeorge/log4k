@@ -11,10 +11,11 @@ import kotlinx.datetime.Clock
 @Suppress("unused")
 abstract class FlowFloodProtectedAppender<T>(
     private val requestPerSecond: Int,
-    private val burstDurationMillis: Int
+    private val burstDurationMillis: Int,
+    private val burstResetPeriodMillis: Int = 5000,
 ) : FlowAppender<T, T>() {
     override fun setup(flow: Flow<T>): Flow<T> =
-        flow.preventFloodingWithBurst(requestPerSecond, burstDurationMillis) { d, t ->
+        flow.preventFloodingWithBurst(requestPerSecond, burstDurationMillis, burstResetPeriodMillis) { d, t ->
             SimpleLoggingEvent(
                 id = 0,
                 level = Level.WARN,
