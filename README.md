@@ -63,7 +63,7 @@ On the other hand, some appenders can be simpler and do not require a `Channel` 
 `ConsoleAppender` directly prints each incoming event to the console without queuing, offering a straightforward logging
 solution.
 
-The tracing module, works with exactly the same architecture.
+The tracing module shares exactly the same principals.
 
 ### Prevent log/trace flooding.
 
@@ -74,6 +74,34 @@ At times, it's crucial to reduce the volume of logs and traces to prevent unnece
 leverage Kotlin's Flow to manage log streams efficiently by dropping excess log messages when needed. For example, the
 `FlowFloodProtectedAppender` is designed specifically for this scenario. It not only limits the flood of log messages
 but also reports the number of dropped messages, giving you visibility into how much data is being filtered out.
+
+```kotlin
+class SimpleFloodProtectedAppender(
+    requestPerSecond: Int,
+    burstDurationMillis: Int
+) : FlowFloodProtectedAppender<LoggingEvent>(requestPerSecond, burstDurationMillis) {
+    override suspend fun handle(event: LoggingEvent) = event.print()
+}
+
+RootLogger.Logging.appenders.unregisterAll()
+RootLogger.Logging.appenders.register(SimpleFloodProtectedAppender(50, 100))
+
+repeat(1_000_000) {
+    log.info("$it")
+}
+
+// The above will produce the following output:
+// 115 2024-10-24T07:19:34.707789Z [native-1] - INFO  Main - 0
+// 116 2024-10-24T07:19:34.707869Z [native-1] - INFO  Main - 1
+// 117 2024-10-24T07:19:34.707884Z [native-1] - INFO  Main - 2
+// 118 2024-10-24T07:19:34.707899Z [native-1] - INFO  Main - 3
+// # ...
+// # After some ~4k logs starts to drop.
+// 991339 2024-10-24T07:19:38.294933Z [native-1] - INFO  Main - 991224
+// 2024-10-24T07:19:38.295050Z [native-13] - WARN  FlowFloodProtectedAppender - Dropped 6556 log messages due to flooding (total: 987299).
+// 995897 2024-10-24T07:19:38.314454Z [native-1] - INFO  Main - 995782
+// 2024-10-24T07:19:38.315134Z [native-19] - WARN  FlowFloodProtectedAppender - Dropped 4557 log messages due to flooding (total: 991856).
+```
 
 To tackle similar issues, we can apply dynamic rate-limiting based on system load or log severity, prioritizing critical
 logs while dropping less important ones during high-traffic periods. Batching or buffering logs can also help optimize
@@ -149,6 +177,8 @@ trace.span("test", parent) {
 ```
 
 ## Examples
+
+For more detailed examples take also a look at the `examples` module.
 
 ```kotlin
 // Create a Logger.
