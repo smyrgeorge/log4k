@@ -7,6 +7,15 @@
 ![GitHub issues](https://img.shields.io/github/issues/smyrgeorge/log4k)
 [![Kotlin](https://img.shields.io/badge/kotlin-2.0.21-blue.svg?logo=kotlin)](http://kotlinlang.org)
 
+![](https://img.shields.io/static/v1?label=&message=Platforms&color=grey)
+![](https://img.shields.io/static/v1?label=&message=Jvm&color=blue)
+![](https://img.shields.io/static/v1?label=&message=Linux&color=blue)
+![](https://img.shields.io/static/v1?label=&message=macOS&color=blue)
+![](https://img.shields.io/static/v1?label=&message=Windows&color=blue)
+![](https://img.shields.io/static/v1?label=&message=iOS&color=blue)
+![](https://img.shields.io/static/v1?label=&message=Android&color=blue)
+
+
 A Comprehensive Logging and Tracing Solution for Kotlin Multiplatform.
 
 This project provides a robust, event-driven logging and tracing platform specifically designed for Kotlin
