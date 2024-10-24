@@ -100,7 +100,9 @@ class Main {
         delay(2000)
 
         RootLogger.Logging.appenders.unregisterAll()
-        RootLogger.Logging.appenders.register(SimpleFloodProtectedAppender(50, 100))
+        RootLogger.Logging.appenders.register(
+            SimpleFloodProtectedAppender(requestPerSecond = 50, burstDurationMillis = 100)
+        )
 
         val time = measureTime {
             repeat(1_000_000) {

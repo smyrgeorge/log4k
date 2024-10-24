@@ -84,7 +84,9 @@ class SimpleFloodProtectedAppender(
 }
 
 RootLogger.Logging.appenders.unregisterAll()
-RootLogger.Logging.appenders.register(SimpleFloodProtectedAppender(50, 100))
+RootLogger.Logging.appenders.register(
+    SimpleFloodProtectedAppender(requestPerSecond = 50, burstDurationMillis = 100)
+)
 
 repeat(1_000_000) {
     log.info("$it")
