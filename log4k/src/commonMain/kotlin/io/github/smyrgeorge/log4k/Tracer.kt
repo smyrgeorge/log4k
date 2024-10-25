@@ -54,5 +54,7 @@ abstract class Tracer(
     companion object {
         fun of(name: String): Tracer = RootLogger.Tracing.factory.get(name)
         fun of(clazz: KClass<*>): Tracer = RootLogger.Tracing.factory.get(clazz)
+        inline fun <reified T : Tracer> of(name: String): T = of(name) as T
+        inline fun <reified T : Tracer> of(clazz: KClass<*>): T = of(clazz) as T
     }
 }

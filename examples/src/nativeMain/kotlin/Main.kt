@@ -4,6 +4,7 @@ import io.github.smyrgeorge.log4k.LoggingEvent
 import io.github.smyrgeorge.log4k.RootLogger
 import io.github.smyrgeorge.log4k.Tracer
 import io.github.smyrgeorge.log4k.TracingEvent
+import io.github.smyrgeorge.log4k.impl.SimpleLogger
 import io.github.smyrgeorge.log4k.impl.appenders.BatchAppender
 import io.github.smyrgeorge.log4k.impl.appenders.FlowFloodProtectedAppender
 import io.github.smyrgeorge.log4k.impl.appenders.simple.SimpleConsoleLoggingAppender.Companion.print
@@ -33,7 +34,7 @@ class Main {
         override suspend fun handle(event: LoggingEvent) = event.print()
     }
 
-    private val log: Logger = Logger.of(this::class)
+    private val log = Logger.of<SimpleLogger>(this::class)
     private val trace: Tracer = Tracer.of(this::class)
 
     fun run(): Unit = runBlocking {

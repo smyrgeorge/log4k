@@ -33,10 +33,10 @@ This project also tries to be fully compatible with `OpenTelemetry` standard.
 
 ## TODO
 
-- [ ] Support for OpenTelemetry's Metrics
-- [ ] `CoroutineContexAwareLogger`: `Logger` that will collect more info from the coroutine context.
+- [ ] Support for OpenTelemetry's Metrics (in progress)
+- [ ] `CoroutineContexAwareLogger`: `Logger` that will collect more info from the coroutine context (in progress)
+- [ ] Json console logger (in progress)
 - [ ] Ability to chain appenders
-- [ ] Json console logger
 - [ ] `LogbackAppender`: `Appender` that will publish the logging events to the logback.
 
 ## Usage
