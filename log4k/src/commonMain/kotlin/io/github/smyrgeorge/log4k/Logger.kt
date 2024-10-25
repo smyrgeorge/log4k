@@ -101,7 +101,7 @@ abstract class Logger(
     companion object {
         fun of(name: String): Logger = RootLogger.Logging.factory.get(name)
         fun of(clazz: KClass<*>): Logger = RootLogger.Logging.factory.get(clazz)
-        inline fun <reified T : Logger> of(name: String): T = of(name) as T
-        inline fun <reified T : Logger> of(clazz: KClass<*>): T = of(clazz) as T
+        inline fun <reified T : Logger> ofType(name: String): T = of(name) as T
+        inline fun <reified T : Logger> ofType(clazz: KClass<*>): T = of(clazz) as T
     }
 }

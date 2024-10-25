@@ -22,8 +22,8 @@ abstract class Meter(
     companion object {
         fun of(name: String): Meter = RootLogger.Metering.factory.get(name)
         fun of(clazz: KClass<*>): Meter = RootLogger.Metering.factory.get(clazz)
-        inline fun <reified T : Meter> of(name: String): T = of(name) as T
-        inline fun <reified T : Meter> of(clazz: KClass<*>): T = of(clazz) as T
+        inline fun <reified T : Meter> ofType(name: String): T = of(name) as T
+        inline fun <reified T : Meter> ofType(clazz: KClass<*>): T = of(clazz) as T
     }
 
     // https://opentelemetry.io/docs/specs/otel/metrics/api/#meter

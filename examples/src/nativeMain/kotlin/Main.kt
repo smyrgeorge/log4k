@@ -34,7 +34,7 @@ class Main {
         override suspend fun handle(event: LoggingEvent) = event.print()
     }
 
-    private val log = Logger.of<SimpleLogger>(this::class)
+    private val log = Logger.ofType<SimpleLogger>(this::class)
     private val trace: Tracer = Tracer.of(this::class)
 
     fun run(): Unit = runBlocking {
