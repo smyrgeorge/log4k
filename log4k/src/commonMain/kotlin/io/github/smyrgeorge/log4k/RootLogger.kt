@@ -1,6 +1,7 @@
 package io.github.smyrgeorge.log4k
 
 import io.github.smyrgeorge.log4k.impl.SimpleLoggerFactory
+import io.github.smyrgeorge.log4k.impl.SimpleMeterFactory
 import io.github.smyrgeorge.log4k.impl.SimpleTracerFactory
 import io.github.smyrgeorge.log4k.impl.appenders.simple.SimpleConsoleLoggingAppender
 import io.github.smyrgeorge.log4k.impl.extensions.dispatcher
@@ -56,13 +57,18 @@ object RootLogger {
     }
 
     object Tracing {
-        @OptIn(ExperimentalUuidApi::class)
-        fun id(): String = "$prefix-${Uuid.random().hashCode().absoluteValue}"
         var prefix: String = "span"
         val factory = SimpleTracerFactory()
         val tracers = LoggerRegistry<Tracer>()
         val appenders = AppenderRegistry<TracingEvent>()
         fun register(appender: Appender<TracingEvent>) = appenders.register(appender)
+    }
+
+    object Metering {
+        val factory = SimpleMeterFactory()
+        val meters = LoggerRegistry<Meter>()
+        val appenders = AppenderRegistry<MeteringEvent>()
+        fun register(appender: Appender<MeteringEvent>) = appenders.register(appender)
     }
 
     private inline fun send(scope: CoroutineScope, crossinline f: suspend () -> Unit) {
