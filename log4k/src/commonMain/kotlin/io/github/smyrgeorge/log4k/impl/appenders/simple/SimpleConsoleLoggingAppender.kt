@@ -1,8 +1,10 @@
 package io.github.smyrgeorge.log4k.impl.appenders.simple
 
 import io.github.smyrgeorge.log4k.Appender
+import io.github.smyrgeorge.log4k.Level
 import io.github.smyrgeorge.log4k.LoggingEvent
 import io.github.smyrgeorge.log4k.impl.extensions.format
+import io.github.smyrgeorge.log4k.impl.extensions.platformPrintlnError
 import io.github.smyrgeorge.log4k.impl.extensions.toName
 
 class SimpleConsoleLoggingAppender : Appender<LoggingEvent> {
@@ -11,7 +13,9 @@ class SimpleConsoleLoggingAppender : Appender<LoggingEvent> {
 
     companion object {
         fun LoggingEvent.print() {
-            print(format())
+            val message = format()
+            if (level == Level.ERROR) platformPrintlnError(message)
+            else println(message)
             throwable?.printStackTrace()
         }
 
@@ -30,7 +34,6 @@ class SimpleConsoleLoggingAppender : Appender<LoggingEvent> {
             append(logger)
             append(" - ")
             append(message.format(arguments))
-            appendLine()
         }
     }
 }
