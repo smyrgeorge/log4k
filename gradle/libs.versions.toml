@@ -5,6 +5,8 @@ kotlin = "2.0.21"
 kotlinx-datetime = "0.6.1"
 # https://github.com/Kotlin/kotlinx.coroutines
 kotlinx-coroutines = "1.9.0"
+# https://github.com/Kotlin/kotlinx.serialization
+kotlinx-serialisation = "1.7.3"
 # https://github.com/vanniktech/gradle-maven-publish-plugin
 publish = "0.30.0"
 # https://github.com/Kotlin/dokka
@@ -18,10 +20,10 @@ gradle-publish-plugin = { module = "com.vanniktech:gradle-maven-publish-plugin",
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+kotlinx-serialisation-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialisation" }
 assertk = { module = "com.willowtreeapps.assertk:assertk", version.ref = "assertk" }
 
 [plugins]
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
-kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 pubhish = { id = "com.vanniktech.maven.publish", version.ref = "publish" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }

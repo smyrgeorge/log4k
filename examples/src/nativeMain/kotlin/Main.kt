@@ -9,6 +9,7 @@ import io.github.smyrgeorge.log4k.impl.appenders.BatchAppender
 import io.github.smyrgeorge.log4k.impl.appenders.FlowFloodProtectedAppender
 import io.github.smyrgeorge.log4k.impl.appenders.simple.SimpleConsoleLoggingAppender.Companion.print
 import io.github.smyrgeorge.log4k.impl.appenders.simple.SimpleConsoleTracingAppender
+import io.github.smyrgeorge.log4k.impl.appenders.simple.SimpleJsonConsoleLoggingAppender
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.async
@@ -97,6 +98,17 @@ class Main {
         span.event("this is a test event")
         // Close the span manually.
         span.end()
+
+        delay(2000)
+
+        RootLogger.Logging.appenders.unregisterAll()
+        RootLogger.Logging.appenders.register(SimpleJsonConsoleLoggingAppender())
+        log.info { "This is a test json log" }
+        try {
+            error("An error occurred!")
+        } catch (e: Exception) {
+            log.error(e) { e.message }
+        }
 
         delay(2000)
 

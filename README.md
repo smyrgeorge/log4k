@@ -15,7 +15,6 @@
 ![](https://img.shields.io/static/v1?label=&message=iOS&color=blue)
 ![](https://img.shields.io/static/v1?label=&message=Android&color=blue)
 
-
 A Comprehensive Logging and Tracing Solution for Kotlin Multiplatform.
 
 This project provides a robust, event-driven logging and tracing platform specifically designed for Kotlin
@@ -35,7 +34,6 @@ This project also tries to be fully compatible with `OpenTelemetry` standard.
 
 - [ ] Support for OpenTelemetry's Metrics (in progress)
 - [ ] `CoroutineContexAwareLogger`: `Logger` that will collect more info from the coroutine context (in progress)
-- [ ] Json console logger (in progress)
 - [ ] Ability to chain appenders
 - [ ] `LogbackAppender`: `Appender` that will publish the logging events to the logback.
 
@@ -144,6 +142,13 @@ log.debug { "ignore" }
 log.debug { "ignore + ${5}" } // Will be evaluated only if DEBUG logs are enabled.
 log.error { e.message }
 log.error(e) { e.message } // e: Throwable
+```
+
+### Json Appender
+
+```kotlin
+// You can register the `SimpleJsonConsoleLoggingAppender` for json logs in the console.
+RootLogger.Logging.appenders.register(SimpleJsonConsoleLoggingAppender())
 ```
 
 ## Tracing API
