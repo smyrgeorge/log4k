@@ -11,17 +11,17 @@ class SimpleLogger(name: String, level: Level) : Logger(name, level) {
     override fun toLoggingEvent(
         level: Level,
         span: Span?,
-        msg: String,
-        throwable: Throwable?,
-        args: Array<out Any?>
+        message: String,
+        arguments: Array<out Any?>,
+        throwable: Throwable?
     ): LoggingEvent {
         return SimpleLoggingEvent(
             level = level,
             span = span,
             timestamp = Clock.System.now(),
             logger = name,
-            message = msg,
-            arguments = args,
+            message = message,
+            arguments = arguments,
             thread = thread(),
             throwable = throwable
         )
