@@ -41,7 +41,7 @@
 <a class="library-name--link" href="../../../index.html">
                             log4k
                     </a>            </div>
-            <div class="library-version">0.17.0
+            <div class="library-version">0.18.0
             </div>
         </div>
         <div class="filter-section" id="filter-section">
@@ -62,7 +62,7 @@
   <div class="breadcrumbs"><a href="../../index.html">log4k</a><span class="delimiter">/</span><a href="../index.html">io.github.smyrgeorge.log4k</a><span class="delimiter">/</span><span class="current">RootLogger</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Root</span><wbr><span><span>Logger</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="index.html">RootLogger</a></div></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="index.html">RootLogger</a></div><p class="paragraph">The RootLogger object serves as the central logging and tracing utility for the application. It facilitates logging, tracing, and metering by providing an integrated framework for handling these activities.</p><p class="paragraph">Properties:</p><ul><li><p class="paragraph">level: Represents the logging level for the logger. Default is INFO.</p></li></ul><p class="paragraph">Initialization: Upon initialization, the RootLogger registers a default logging appender and starts consuming both the logging and tracing event queues.</p><p class="paragraph">Nested Objects:</p><ul><li><p class="paragraph">Logging: Handles logging related operations including generating unique log IDs, registering log appenders, and accessing loggers.</p></li><li><p class="paragraph">Tracing: Handles tracing related operations such as registering trace appenders and accessing tracers.</p></li><li><p class="paragraph">Metering: Handles metering operations like registering meter appenders.</p></li></ul><p class="paragraph">Functions:</p><ul><li><p class="paragraph">log(event: LoggingEvent): Sends a logging event to the logging channel.</p></li><li><p class="paragraph">trace(event: TracingEvent): Sends a tracing event to the tracing channel.</p></li></ul></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
@@ -79,7 +79,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-logging/index.html">Logging</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-logging/index.html">Logging</a></div><div class="brief "><p class="paragraph">Singleton object responsible for managing logging system.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -94,7 +94,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-metering/index.html">Metering</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-metering/index.html">Metering</a></div><div class="brief "><p class="paragraph">The Metering object is responsible for managing meters, appenders, and their interactions. It provides a factory to create meters, a registry to manage them, and functionality to register appenders that handle metering events.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -109,7 +109,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-tracing/index.html">Tracing</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-tracing/index.html">Tracing</a></div><div class="brief "><p class="paragraph">The <code class="lang-kotlin">Tracing</code> object provides a centralized registry for tracers and appenders, enabling the management of tracing spans across different parts of the application.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -147,7 +147,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="log.html"><span class="token function">log</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">event<span class="token operator">: </span><a href="../-logging-event/index.html">LoggingEvent</a></span></span><span class="token punctuation">)</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="log.html"><span class="token function">log</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">event<span class="token operator">: </span><a href="../-logging-event/index.html">LoggingEvent</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Logs a specified logging event.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -162,7 +162,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="trace.html"><span class="token function">trace</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">event<span class="token operator">: </span><a href="../-tracing-event/index.html">TracingEvent</a></span></span><span class="token punctuation">)</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="trace.html"><span class="token function">trace</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">event<span class="token operator">: </span><a href="../-tracing-event/index.html">TracingEvent</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Sends a tracing event through the tracer scope.</p></div></div></div>
                 </div>
               </div>
             </div>

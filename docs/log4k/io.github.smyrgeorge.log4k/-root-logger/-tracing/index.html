@@ -41,7 +41,7 @@
 <a class="library-name--link" href="../../../../index.html">
                             log4k
                     </a>            </div>
-            <div class="library-version">0.17.0
+            <div class="library-version">0.18.0
             </div>
         </div>
         <div class="filter-section" id="filter-section">
@@ -62,7 +62,7 @@
   <div class="breadcrumbs"><a href="../../../index.html">log4k</a><span class="delimiter">/</span><a href="../../index.html">io.github.smyrgeorge.log4k</a><span class="delimiter">/</span><a href="../index.html">RootLogger</a><span class="delimiter">/</span><span class="current">Tracing</span></div>
   <div class="cover ">
     <h1 class="cover"><span><span>Tracing</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="index.html">Tracing</a></div></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="index.html">Tracing</a></div><p class="paragraph">The <code class="lang-kotlin">Tracing</code> object provides a centralized registry for tracers and appenders, enabling the management of tracing spans across different parts of the application.</p></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
@@ -79,7 +79,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="appenders.html">appenders</a><span class="token operator">: </span><a href="../../../io.github.smyrgeorge.log4k.impl.registry/-appender-registry/index.html">AppenderRegistry</a><span class="token operator">&lt;</span><a href="../../-tracing-event/index.html">TracingEvent</a><span class="token operator">&gt;</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="appenders.html">appenders</a><span class="token operator">: </span><a href="../../../io.github.smyrgeorge.log4k.impl.registry/-appender-registry/index.html">AppenderRegistry</a><span class="token operator">&lt;</span><a href="../../-tracing-event/index.html">TracingEvent</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">A registry that maintains all registered appenders for tracing events.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -94,7 +94,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="factory.html">factory</a><span class="token operator">: </span><a href="../../../io.github.smyrgeorge.log4k.impl/-simple-tracer-factory/index.html">SimpleTracerFactory</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">var </span><a href="factory.html">factory</a><span class="token operator">: </span><a href="../../-tracer-factory/index.html">TracerFactory</a></div><div class="brief "><p class="paragraph">An instance of <code class="lang-kotlin">SimpleTracerFactory</code> used to create new tracers.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -109,7 +109,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">var </span><a href="prefix.html">prefix</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">var </span><a href="prefix.html">prefix</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">The prefix used for span identifiers.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -124,7 +124,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="tracers.html">tracers</a><span class="token operator">: </span><a href="../../../io.github.smyrgeorge.log4k.impl.registry/-logger-registry/index.html">LoggerRegistry</a><span class="token operator">&lt;</span><a href="../../-tracer/index.html">Tracer</a><span class="token operator">&gt;</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="tracers.html">tracers</a><span class="token operator">: </span><a href="../../../io.github.smyrgeorge.log4k.impl.registry/-logger-registry/index.html">LoggerRegistry</a><span class="token operator">&lt;</span><a href="../../-tracer/index.html">Tracer</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">A registry that maintains all registered tracers.</p></div></div></div>
                 </div>
               </div>
             </div>
