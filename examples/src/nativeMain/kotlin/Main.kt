@@ -75,8 +75,9 @@ class Main {
 
         RootLogger.Tracing.register(SimpleConsoleTracingAppender())
         // Create the parent span.
+        // This is useful in cases that the parent span is not created by us (e.g. from a http call).
         // NOTICE: we do not start it, since it's already started.
-        val parent: TracingEvent.Span = trace.span(id = "ID_EXAMPLE", traceId = "TRACE_ID_EXAMPLE", name = "parent")
+        val parent: TracingEvent.Span.Remote = trace.span(id = "ID_EXAMPLE", traceId = "TRACE_ID_EXAMPLE")
         // Starts immediately the span.
         trace.span("test", parent) {
             log.info(it, "this is a test with span") // The log will contain the span id.
@@ -94,7 +95,8 @@ class Main {
         }
 
         // Create the span and then start it.
-        val span: TracingEvent.Span = trace.span("test").start()
+        val span: TracingEvent.Span.Local = trace.span("test").start()
+        delay(100)
         span.event("this is a test event")
         // Close the span manually.
         span.end()

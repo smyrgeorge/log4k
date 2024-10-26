@@ -30,16 +30,31 @@ abstract class Tracer(
         return "${RootLogger.Tracing.prefix}-$id"
     }
 
-    fun span(id: String, traceId: String, name: String): TracingEvent.Span =
-        TracingEvent.Span.of(id = id, level = level, tracer = this, name = name, traceId = traceId, isRemote = true)
+    /**
+     * Creates and returns a new local span with the given name and optional parent span.
+     *
+     * @param name The name of the new span.
+     * @param parent The parent span, if any. Default is `null`.
+     * @return A new instance of `TracingEvent.Span.Local`.
+     */
+    fun span(name: String, parent: TracingEvent.Span? = null): TracingEvent.Span.Local =
+        TracingEvent.Span.Local(id = id(), level = level, tracer = this, name = name, parent = parent)
 
-    fun span(name: String, parent: TracingEvent.Span? = null): TracingEvent.Span =
-        TracingEvent.Span.of(id = id(), level = level, tracer = this, name = name, parent = parent)
+    /**
+     * Creates and returns a new remote span with the given id, trace ID, and an optional name.
+     *
+     * @param id the unique identifier for the span.
+     * @param traceId the unique identifier for the trace.
+     * @param name the name of the span, defaulting to "remote-$id" if not provided.
+     * @return a new instance of `TracingEvent.Span.Remote`.
+     */
+    fun span(id: String, traceId: String, name: String = "remote-$id"): TracingEvent.Span.Remote =
+        TracingEvent.Span.Remote(id = id, level = level, tracer = this, name = name, traceId = traceId)
 
     inline fun <T> span(
         name: String,
         parent: TracingEvent.Span? = null,
-        f: (TracingEvent.Span) -> T
+        f: (TracingEvent.Span.Local) -> T
     ): T {
         val span = span(name, parent).start()
         return try {

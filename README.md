@@ -164,7 +164,7 @@ private val trace: Tracer = Tracer.of(this::class)
 RootLogger.Tracing.register(SimpleConsoleTracingAppender())
 
 // Create the span and then start it.
-val span: TracingEvent.Span = trace.span("test").start()
+val span: TracingEvent.Span.Local = trace.span("test").start()
 span.event(name = "test-event")
 // Close the span manually.
 span.end()
@@ -174,8 +174,9 @@ Similarly to the logging API, we also support a more kotlin style API:
 
 ```kotlin
 // Create the parent span.
+// This is useful in cases that the parent span is not created by us (e.g. from a http call).
 // NOTICE: we do not start it, since it's already started.
-val parent: TracingEvent.Span = trace.span(id = "PARENT_SPAN_ID", traceId = "TRACE_ID", name = "parent")
+val parent: TracingEvent.Span.Remote = trace.span(id = "ID_EXAMPLE", traceId = "TRACE_ID_EXAMPLE")
 // Starts immediately the span.
 trace.span("test", parent) {
     // Set span attributes.
@@ -191,6 +192,11 @@ trace.span("test", parent) {
     // Automatically closes at the end of te scope.
 }
 ```
+
+In the examples above, we see two variations of the `Span` class:
+
+- **Span.Local**: Represents a span created locally within our application.
+- **Span.Remote**: Represents a span created outside our application and propagated to us (e.g., from an HTTP call).
 
 ## Examples
 
