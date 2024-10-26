@@ -44,7 +44,7 @@ class MainTests {
         }
 
         // Create the span and then start it.
-        val span: TracingEvent.Span = trace.span("test").start()
+        val span = trace.span("test").start()
         span.event("this is a test event")
         // Close the span manually.
         span.end()
