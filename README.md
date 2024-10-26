@@ -173,12 +173,9 @@ span.end()
 Similarly to the logging API, we also support a more kotlin style API:
 
 ```kotlin
-// Create the parent span.
-// This is useful in cases that the parent span is not created by us (e.g. from a http call).
-// NOTICE: we do not start it, since it's already started.
-val parent: TracingEvent.Span.Remote = trace.span(id = "ID_EXAMPLE", traceId = "TRACE_ID_EXAMPLE")
 // Starts immediately the span.
-trace.span("test", parent) {
+trace.span("test") {
+    // it is [TracingEvent.Span.Local]
     // Set span attributes.
     it.attributes["key"] = "value"
     // Send events that are related to the current span.
@@ -190,6 +187,19 @@ trace.span("test", parent) {
         attrs["key"] = "value"
     }
     // Automatically closes at the end of te scope.
+}
+```
+
+Additionally, you can instantiate a span that represents the parent span.
+This is useful in cases that the parent span is created outside our application (e.g. received from an HTTP call).
+
+```kotlin
+// Create the parent span.
+// NOTICE: we do not start it, since it's already started.
+val parent: TracingEvent.Span.Remote = trace.span(id = "ID_EXAMPLE", traceId = "TRACE_ID_EXAMPLE")
+// Starts immediately the span.
+trace.span("test", parent) {
+    // Your logic here
 }
 ```
 
