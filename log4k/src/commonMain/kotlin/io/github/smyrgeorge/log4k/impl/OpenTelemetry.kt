@@ -1,5 +1,11 @@
 package io.github.smyrgeorge.log4k.impl
 
+/**
+ * The `OpenTelemetry` object provides a set of constants used for tracing and monitoring
+ * various parts of an application or system. These constants represent standard attributes
+ * that can be used to describe exceptions, HTTP requests and responses, database operations,
+ * and thread states.
+ */
 @Suppress("unused")
 object OpenTelemetry {
     // Exception Attributes

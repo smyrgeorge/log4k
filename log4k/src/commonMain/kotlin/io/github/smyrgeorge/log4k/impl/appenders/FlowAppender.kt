@@ -15,7 +15,16 @@ import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
-@Suppress("unused")
+/**
+ * FlowAppender is an abstract class that provides an implementation of the `Appender` interface using Kotlin Flows.
+ * It processes incoming events asynchronously and allows custom handling by subclassing.
+ *
+ * @param T The type of the transformed events.
+ * @param E The type of the original events to be appended.
+ *
+ * This class utilizes a `Channel` to buffer the incoming events and processes them using a Coroutine Flow.
+ * The event processing logic is defined in the `setup` and `handle` methods which need to be implemented by subclasses.
+ */
 abstract class FlowAppender<T, E> : Appender<E> {
     private val scope = FlowAppenderScope()
     private val dispatcher: CoroutineDispatcher = dispatcher()

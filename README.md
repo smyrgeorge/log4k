@@ -195,8 +195,10 @@ trace.span("test", parent) {
 
 In the examples above, we see two variations of the `Span` class:
 
-- **Span.Local**: Represents a span created locally within our application.
-- **Span.Remote**: Represents a span created outside our application and propagated to us (e.g., from an HTTP call).
+- **Span.Local**: Represents a span created locally within our application, exposing all methods such as `start`, `end`,
+  `event`, `debug`, `info`, and more.
+- **Span.Remote**: Represents a span created outside our application and propagated to us (e.g., from an HTTP call). It
+  does not expose any methods and serves only as a reference to the parent remote span.
 
 ## Examples
 

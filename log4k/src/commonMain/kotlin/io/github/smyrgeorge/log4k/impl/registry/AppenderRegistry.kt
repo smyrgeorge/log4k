@@ -4,6 +4,11 @@ import io.github.smyrgeorge.log4k.Appender
 import io.github.smyrgeorge.log4k.impl.extensions.toName
 import kotlin.reflect.KClass
 
+/**
+ * A registry that manages a collection of appenders.
+ *
+ * @param T The type of event to be appended.
+ */
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 class AppenderRegistry<T> {
     private val appenders = mutableListOf<Appender<T>>()

@@ -1,13 +1,30 @@
 package io.github.smyrgeorge.log4k
 
+import io.github.smyrgeorge.log4k.TracingEvent.Span.Local
+import io.github.smyrgeorge.log4k.TracingEvent.Span.Remote
 import io.github.smyrgeorge.log4k.impl.OpenTelemetry
 import io.github.smyrgeorge.log4k.impl.extensions.toName
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 
-@Suppress("MemberVisibilityCanBePrivate", "unused")
-interface TracingEvent {
-    // https://opentelemetry.io/docs/specs/otel/trace/api/#span
+@Suppress("unused")
+sealed interface TracingEvent {
+    /**
+     * Represents a span in a tracing system, which can either be a [Local] or [Remote] span.
+     *
+     * A span is a unit of work within a trace and may contain child spans, attributes, events, and a status.
+     * https://opentelemetry.io/docs/specs/otel/trace/api/#span
+     *
+     * @property name The name of the span.
+     * @property level The logging level of the span.
+     * @property context The context of the span, providing trace and span identifiers.
+     * @property parent The parent span, if any; can be null.
+     * @property startAt The start timestamp of the span, set when the span starts.
+     * @property endAt The end timestamp of the span, set when the span ends.
+     * @property attributes A map of attributes associated with the span.
+     * @property events A list of events associated with the span.
+     * @property status The status of the span, containing the result of its execution.
+     */
     abstract class Span(
         open val name: String,
         open val level: Level,
@@ -21,7 +38,7 @@ interface TracingEvent {
     ) : TracingEvent {
 
         /**
-         * Constructor for creating a local Span.
+         * Constructor for creating a [Local] Span.
          *
          * This constructor initializes a local Span with the provided identifier, name,
          * level, tracer, parent span, and trace identifier. The start and end timestamps
@@ -48,7 +65,7 @@ interface TracingEvent {
         )
 
         /**
-         * Constructor for creating a remote span instance with the given parameters.
+         * Constructor for creating a [Remote] span instance with the given parameters.
          *
          * @param id The unique identifier of the span.
          * @param traceId The unique identifier of the trace.
@@ -131,6 +148,13 @@ interface TracingEvent {
                 RootLogger.trace(this)
             }
 
+            /**
+             * Records an event with the given name, level, and attributes.
+             *
+             * @param name The name of the event.
+             * @param level The logging level of the event, determining its severity.
+             * @param attrs A map of attributes associated with the event, defaults to an empty map.
+             */
             fun event(name: String, level: Level, attrs: Map<String, Any?> = emptyMap()) {
                 if (!shouldStart()) return
                 if (!shouldLogEvent(level)) return
@@ -165,6 +189,13 @@ interface TracingEvent {
                 events.add(event)
             }
 
+            /**
+             * Records an exception event with the given attributes.
+             *
+             * @param error The throwable error to be recorded.
+             * @param escaped Boolean indicating if the exception was propagated.
+             * @param f Function to populate a mutable map of additional attributes to associate with the exception event.
+             */
             fun exception(error: Throwable, escaped: Boolean, f: (MutableMap<String, Any?>) -> Unit) {
                 val attributes: MutableMap<String, Any?> = mutableMapOf()
                 f(attributes)

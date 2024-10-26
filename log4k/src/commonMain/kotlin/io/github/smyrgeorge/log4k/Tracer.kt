@@ -6,18 +6,32 @@ import kotlin.reflect.KClass
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-@Suppress("unused", "MemberVisibilityCanBePrivate")
+/**
+ * The `Tracer` class provides functionality for creating and managing tracing spans, both local and remote.
+ * This abstract class implements the `LoggerRegistry.Collector` interface.
+ *
+ * @property name The name of the tracer.
+ * @property level The logging level of the tracer.
+ */
+@Suppress("unused")
 abstract class Tracer(
     final override val name: String,
     final override var level: Level
 ) : LoggerRegistry.Collector {
     private var levelBeforeMute: Level = level
 
+    /**
+     * Mutes the tracer by saving the current level and setting it to `Level.OFF`.
+     */
     override fun mute() {
         levelBeforeMute = level
         level = Level.OFF
     }
 
+    /**
+     * Unmutes the tracer by restoring the logging level to the value before it was muted.
+     * It sets the current level to the previously saved `levelBeforeMute`.
+     */
     override fun unmute() {
         level = levelBeforeMute
         levelBeforeMute = level
@@ -51,6 +65,15 @@ abstract class Tracer(
     fun span(id: String, traceId: String, name: String = "remote-$id"): TracingEvent.Span.Remote =
         TracingEvent.Span.Remote(id = id, level = level, tracer = this, name = name, traceId = traceId)
 
+    /**
+     * Executes a function within the scope of a tracing span.
+     *
+     * @param T The type of the result produced by the function.
+     * @param name The name of the span.
+     * @param parent The parent span, if any. Default is `null`.
+     * @param f A function to be executed within the span context.
+     * @return The result produced by the function `f`.
+     */
     inline fun <T> span(
         name: String,
         parent: TracingEvent.Span? = null,
