@@ -14,6 +14,17 @@ jobs:
       - name: Checkout Project
         uses: actions/checkout@v4
 
+      - name: Cache Konan
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.konan/caches
+            ~/.konan/dependencies
+            ~/.konan/kotlin-native-prebuilt-macos-*
+          key: ${{ runner.os }}-konan-${{ hashFiles('**/Dependencies.kt') }}
+          restore-keys: |
+            ${{ runner.os }}-konan-
+
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
