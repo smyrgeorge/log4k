@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: macos-15-arm4
     environment: Maven Central
     steps:
       - name: Checkout Project
