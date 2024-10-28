@@ -43,5 +43,6 @@ class LoggerRegistry<T> where T : LoggerRegistry.Collector {
         var level: Level
         fun mute()
         fun unmute()
+        fun isMuted(): Boolean = level == Level.OFF
     }
 }

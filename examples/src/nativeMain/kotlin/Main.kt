@@ -1,6 +1,7 @@
 import io.github.smyrgeorge.log4k.Level
 import io.github.smyrgeorge.log4k.Logger
 import io.github.smyrgeorge.log4k.LoggingEvent
+import io.github.smyrgeorge.log4k.Meter
 import io.github.smyrgeorge.log4k.RootLogger
 import io.github.smyrgeorge.log4k.Tracer
 import io.github.smyrgeorge.log4k.TracingEvent
@@ -8,8 +9,10 @@ import io.github.smyrgeorge.log4k.impl.SimpleLogger
 import io.github.smyrgeorge.log4k.impl.appenders.BatchAppender
 import io.github.smyrgeorge.log4k.impl.appenders.FlowFloodProtectedAppender
 import io.github.smyrgeorge.log4k.impl.appenders.simple.SimpleConsoleLoggingAppender.Companion.print
+import io.github.smyrgeorge.log4k.impl.appenders.simple.SimpleConsoleMeteringAppender
 import io.github.smyrgeorge.log4k.impl.appenders.simple.SimpleConsoleTracingAppender
 import io.github.smyrgeorge.log4k.impl.appenders.simple.SimpleJsonConsoleLoggingAppender
+import io.github.smyrgeorge.log4k.impl.appenders.simple.SimpleMeteringCollectorAppender
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.async
@@ -37,8 +40,32 @@ class Main {
 
     private val log = Logger.ofType<SimpleLogger>(this::class)
     private val trace: Tracer = Tracer.of(this::class)
+    private val meter: Meter = Meter.of(this::class)
 
     fun run(): Unit = runBlocking {
+        RootLogger.Metering.register(SimpleConsoleMeteringAppender())
+        RootLogger.Metering.register(SimpleMeteringCollectorAppender())
+        val collector = RootLogger.Metering.appenders.get(SimpleMeteringCollectorAppender::class)
+
+        val c1 = meter.counter("thread-counter-in-pool", 0L) {
+            it["pool"] = "pool-a"
+        }
+        c1.add(1)
+        c1.add(2)
+        c1.add(2)
+
+        val c2 = meter.counter("thread-counter-in-pool", 0L) {
+            it["pool"] = "pool-b"
+        }
+        c2.add(1)
+        c2.add(2)
+        c2.add(2)
+
+        delay(2000)
+        val prometheus = collector.prometheusString()
+        println(prometheus)
+        delay(2000)
+
         log.debug("ignore")
         log.debug { "ignore + ${5}" } // Will be evaluated only if DEBUG logs are enabled.
         log.info("this is a test")

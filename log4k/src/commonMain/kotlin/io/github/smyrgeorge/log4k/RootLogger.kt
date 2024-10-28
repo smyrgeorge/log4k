@@ -34,6 +34,7 @@ import kotlin.coroutines.EmptyCoroutineContext
  * Functions:
  * - log(event: LoggingEvent): Sends a logging event to the logging channel.
  * - trace(event: TracingEvent): Sends a tracing event to the tracing channel.
+ * - meter(event: MeteringEvent): Sends a metering event to the metering channel.
  */
 object RootLogger {
     val level: Level = Level.INFO
@@ -63,6 +64,7 @@ object RootLogger {
         // Start consuming the Tracing queue.
         MeterScope.launch(dispatcher) {
             meters.consumeEach { event ->
+                event.id = Logging.id()
                 Metering.appenders.all().forEach { it.append(event) }
             }
         }
@@ -125,11 +127,16 @@ object RootLogger {
     }
 
     /**
-     * The Metering object is responsible for managing meters, appenders, and their interactions.
-     * It provides a factory to create meters, a registry to manage them, and functionality
-     * to register appenders that handle metering events.
+     * Singleton object responsible for metering operations, including creating and managing meters
+     * and registering appenders for metering events.
+     *
+     * @property factory Defines the factory used to create meters. Defaults to `SimpleMeterFactory`.
+     * @property meters Registry holding all the created and registered meters.
+     * @property appenders Registry holding all the registered appenders for metering events.
      */
     object Metering {
+        private var idx: Long = 0
+        fun id(): Long = ++idx
         var factory: MeterFactory = SimpleMeterFactory()
         val meters = LoggerRegistry<Meter>()
         val appenders = AppenderRegistry<MeteringEvent>()

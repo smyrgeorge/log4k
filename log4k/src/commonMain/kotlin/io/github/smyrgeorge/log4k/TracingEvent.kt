@@ -109,7 +109,7 @@ sealed interface TracingEvent {
                 !context.isRemote && level.ordinal >= context.tracer.level.ordinal
 
             private fun shouldLogEvent(level: Level): Boolean =
-                !context.isRemote && level.ordinal >= level.ordinal
+                !context.isRemote && level.ordinal >= this.level.ordinal
 
             private var started: Boolean = false
             private var closed: Boolean = false
