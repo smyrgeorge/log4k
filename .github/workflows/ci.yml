@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-15-arm64
+    runs-on: macos-15
     environment: Maven Central
     steps:
       - name: Checkout Project
