@@ -1,9 +1,5 @@
 package io.github.smyrgeorge.log4k
 
-import io.github.smyrgeorge.log4k.RootLogger.Tracing.appenders
-import io.github.smyrgeorge.log4k.RootLogger.Tracing.factory
-import io.github.smyrgeorge.log4k.RootLogger.Tracing.prefix
-import io.github.smyrgeorge.log4k.RootLogger.Tracing.tracers
 import io.github.smyrgeorge.log4k.impl.SimpleLoggerFactory
 import io.github.smyrgeorge.log4k.impl.SimpleMeterFactory
 import io.github.smyrgeorge.log4k.impl.SimpleTracerFactory
@@ -60,7 +56,6 @@ object RootLogger {
         // Start consuming the Tracing queue.
         TracerScope.launch(dispatcher) {
             traces.consumeEach { event ->
-                @Suppress("RemoveRedundantQualifierName")
                 Tracing.appenders.all().forEach { it.append(event) }
             }
         }
@@ -88,6 +83,14 @@ object RootLogger {
      * @return Unit.
      */
     fun trace(event: TracingEvent): Unit = send(TracerScope) { traces.send(event) }
+
+    /**
+     * Meters a given metering event and sends it using the provided metering infrastructure.
+     *
+     * @param event The metering event to be measured and sent.
+     * @return Unit
+     */
+    fun meter(event: MeteringEvent): Unit = send(MeterScope) { meters.send(event) }
 
     /**
      * Singleton object responsible for managing logging system.
