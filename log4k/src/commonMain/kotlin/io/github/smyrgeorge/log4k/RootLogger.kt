@@ -49,23 +49,29 @@ object RootLogger {
         // Start consuming the Logging queue.
         LoggerScope.launch(dispatcher) {
             logs.consumeEach { event ->
-                event.id = Logging.id()
-                Logging.appenders.all().forEach { it.append(event) }
+                runCatching {
+                    event.id = Logging.id()
+                    Logging.appenders.all().forEach { it.append(event) }
+                }
             }
         }
 
         // Start consuming the Tracing queue.
         TracerScope.launch(dispatcher) {
             traces.consumeEach { event ->
-                Tracing.appenders.all().forEach { it.append(event) }
+                runCatching {
+                    Tracing.appenders.all().forEach { it.append(event) }
+                }
             }
         }
 
         // Start consuming the Tracing queue.
         MeterScope.launch(dispatcher) {
             meters.consumeEach { event ->
-                event.id = Logging.id()
-                Metering.appenders.all().forEach { it.append(event) }
+                runCatching {
+                    event.id = Logging.id()
+                    Metering.appenders.all().forEach { it.append(event) }
+                }
             }
         }
     }

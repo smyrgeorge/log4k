@@ -22,49 +22,20 @@ abstract class Meter(
 
     fun <T : Number> counter(
         name: String,
-        initial: T,
-        attributes: Map<String, Any>? = null,
         unit: String? = null,
         description: String? = null
-    ): Instrument.Counter<T> = Instrument.Counter(name, this, attributes, initial, unit, description)
-
-    inline fun <T : Number> counter(
-        name: String,
-        initial: T,
-        unit: String? = null,
-        description: String? = null,
-        f: (MutableMap<String, Any>) -> Unit
-    ): Instrument.Counter<T> {
-        val attributes = mutableMapOf<String, Any>()
-        f(attributes)
-        return Instrument.Counter(name, this, attributes, initial, unit, description)
-    }
+    ): Instrument.Counter<T> = Instrument.Counter(name, this, unit, description)
 
     fun <T : Number> upDownCounter(
         name: String,
-        initial: T,
-        attributes: Map<String, Any>? = null,
         unit: String? = null,
         description: String? = null
-    ): Instrument.UpDownCounter<T> = Instrument.UpDownCounter(name, this, attributes, initial, unit, description)
-
-    inline fun <T : Number> upDownCounter(
-        name: String,
-        initial: T,
-        unit: String? = null,
-        description: String? = null,
-        f: (MutableMap<String, Any>) -> Unit
-    ): Instrument.UpDownCounter<T> {
-        val attributes = mutableMapOf<String, Any>()
-        f(attributes)
-        return Instrument.UpDownCounter(name, this, attributes, initial, unit, description)
-    }
+    ): Instrument.UpDownCounter<T> = Instrument.UpDownCounter(name, this, unit, description)
 
     // https://opentelemetry.io/docs/specs/otel/metrics/api/#meter
     sealed class Instrument(
         val name: String,
         val meter: Meter,
-        val attributes: Map<String, Any>?,
         val kind: Kind,
         val unit: String? = null,
         val description: String? = null,
@@ -77,57 +48,64 @@ abstract class Meter(
             UpDownCounter,
         }
 
-        sealed class Counting(
+        sealed class AbstractCounter<T : Number>(
             name: String,
             meter: Meter,
-            attributes: Map<String, Any>?,
             kind: Kind,
-            initial: Number,
             unit: String? = null,
             description: String? = null,
-        ) : Instrument(name, meter, attributes, kind, unit, description) {
+        ) : Instrument(name, meter, kind, unit, description) {
             init {
-                if (!meter.isMuted()) {
-                    val event = MeteringEvent.CreateCountingInstrument(
-                        name = name,
-                        attributes = attributes,
-                        kind = kind,
-                        initial = initial,
-                        unit = unit,
-                        description = description
-                    )
-                    RootLogger.meter(event)
-                }
+                init()
             }
 
-            fun add(value: Number) {
+            private fun init() {
                 if (meter.isMuted()) return
-                val event = MeteringEvent.Add(
+                MeteringEvent.CreateCounter(
                     name = name,
-                    attributes = attributes,
-                    value = value
-                )
+                    kind = kind,
+                    unit = unit,
+                    description = description
+                ).also { RootLogger.meter(it) }
+            }
+
+            fun increment(value: T, vararg labels: Pair<String, Any>) {
+                if (meter.isMuted()) return
+                if (value.isLessThanZero()) error("Only positive values are allowed.")
+                val event = MeteringEvent.Increment(name = name, labels = labels.toMap(), value = value)
                 RootLogger.meter(event)
             }
+
+            internal fun Number.isLessThanZero(): Boolean =
+                when (this) {
+                    is Int -> this < 0
+                    is Long -> this < 0
+                    is Float -> this < 0
+                    is Double -> this < 0
+                    else -> error("Unsupported number type: ${this::class.simpleName}")
+                }
         }
 
         class Counter<T : Number>(
             name: String,
             meter: Meter,
-            attributes: Map<String, Any>?,
-            initial: T,
-            unit: String? = null,
-            description: String? = null,
-        ) : Counting(name, meter, attributes, Kind.Counter, initial, unit, description)
+            unit: String?,
+            description: String?,
+        ) : AbstractCounter<T>(name, meter, Kind.Counter, unit, description)
 
         class UpDownCounter<T : Number>(
             name: String,
             meter: Meter,
-            attributes: Map<String, Any>?,
-            initial: T,
-            unit: String? = null,
-            description: String? = null,
-        ) : Counting(name, meter, attributes, Kind.UpDownCounter, initial, unit, description)
+            unit: String?,
+            description: String?,
+        ) : AbstractCounter<T>(name, meter, Kind.UpDownCounter, unit, description) {
+            fun decrement(value: T, vararg labels: Pair<String, Any>) {
+                if (meter.isMuted()) return
+                if (value.isLessThanZero()) error("Only positive values are allowed.")
+                val event = MeteringEvent.Increment(name = name, labels = labels.toMap(), value = value)
+                RootLogger.meter(event)
+            }
+        }
 
 //        class Histogram<T>(
 //            name: String,
