@@ -1,5 +1,6 @@
 package io.github.smyrgeorge.log4k
 
+import io.github.smyrgeorge.log4k.impl.extensions.toName
 import io.github.smyrgeorge.log4k.impl.registry.LoggerRegistry
 import kotlin.reflect.KClass
 
@@ -32,7 +33,14 @@ abstract class Meter(
         description: String? = null
     ): Instrument.UpDownCounter<T> = Instrument.UpDownCounter(name, this, unit, description)
 
+    fun <T : Number> gauge(
+        name: String,
+        unit: String? = null,
+        description: String? = null
+    ): Instrument.Gauge<T> = Instrument.Gauge(name, this, unit, description)
+
     // https://opentelemetry.io/docs/specs/otel/metrics/api/#meter
+    @Suppress("MemberVisibilityCanBePrivate")
     sealed class Instrument(
         val name: String,
         val meter: Meter,
@@ -40,12 +48,25 @@ abstract class Meter(
         val unit: String? = null,
         val description: String? = null,
     ) {
+        init {
+            init()
+        }
+
+        private fun init() {
+            if (meter.isMuted()) return
+            MeteringEvent.CreateInstrument(
+                name = name,
+                kind = kind,
+                unit = unit,
+                description = description
+            ).also { RootLogger.meter(it) }
+        }
 
         enum class Kind {
             Counter,
-            Histogram,
-            Gauge,
             UpDownCounter,
+            Gauge,
+            Histogram,
         }
 
         sealed class AbstractCounter<T : Number>(
@@ -55,35 +76,34 @@ abstract class Meter(
             unit: String? = null,
             description: String? = null,
         ) : Instrument(name, meter, kind, unit, description) {
-            init {
-                init()
-            }
-
-            private fun init() {
-                if (meter.isMuted()) return
-                MeteringEvent.CreateCounter(
-                    name = name,
-                    kind = kind,
-                    unit = unit,
-                    description = description
-                ).also { RootLogger.meter(it) }
-            }
-
             fun increment(value: T, vararg labels: Pair<String, Any>) {
                 if (meter.isMuted()) return
-                if (value.isLessThanZero()) error("Only positive values are allowed.")
+                if (value.isLessThanZero()) error("Only non-negative values are allowed.")
                 val event = MeteringEvent.Increment(name = name, labels = labels.toMap(), value = value)
                 RootLogger.meter(event)
             }
 
-            internal fun Number.isLessThanZero(): Boolean =
-                when (this) {
-                    is Int -> this < 0
-                    is Long -> this < 0
-                    is Float -> this < 0
-                    is Double -> this < 0
-                    else -> error("Unsupported number type: ${this::class.simpleName}")
-                }
+            internal fun Number.isLessThanZero(): Boolean = when (this) {
+                is Int -> this < 0
+                is Long -> this < 0
+                is Float -> this < 0
+                is Double -> this < 0
+                else -> error("Unsupported number type: ${this::class.toName()}")
+            }
+        }
+
+        sealed class AbstractRecorder<T : Number>(
+            name: String,
+            meter: Meter,
+            kind: Kind,
+            unit: String? = null,
+            description: String? = null,
+        ) : Instrument(name, meter, kind, unit, description) {
+            fun record(value: T, vararg labels: Pair<String, Any>) {
+                if (meter.isMuted()) return
+                val event = MeteringEvent.Record(name = name, labels = labels.toMap(), value = value)
+                RootLogger.meter(event)
+            }
         }
 
         class Counter<T : Number>(
@@ -101,58 +121,18 @@ abstract class Meter(
         ) : AbstractCounter<T>(name, meter, Kind.UpDownCounter, unit, description) {
             fun decrement(value: T, vararg labels: Pair<String, Any>) {
                 if (meter.isMuted()) return
-                if (value.isLessThanZero()) error("Only positive values are allowed.")
+                if (value.isLessThanZero()) error("Only non-negative values are allowed.")
                 val event = MeteringEvent.Increment(name = name, labels = labels.toMap(), value = value)
                 RootLogger.meter(event)
             }
         }
 
-//        class Histogram<T>(
-//            name: String,
-//            group: String,
-//            unit: String? = null,
-//            description: String? = null,
-//        ) : Instrument(name, group, Kind.Histogram, unit, description) where T : Number {
-//            private var value: T? = null
-//            private var attributes: Map<String, Any?>? = null
-//
-//            fun record(v: T, attrs: Map<String, Any?> = emptyMap()) {
-//                value = v
-//                attributes = attrs
-//                meter()
-//            }
-//
-//            inline fun record(v: T, f: (MutableMap<String, Any?>) -> Unit) {
-//                mutableMapOf<String, Any?>().also {
-//                    f(it)
-//                    record(v, it)
-//                }
-//            }
-//        }
-//
-//        class Gauge<T>(
-//            name: String,
-//            group: String,
-//            unit: String? = null,
-//            initial: T,
-//            description: String? = null,
-//        ) : Instrument(name, group, Kind.Gauge, unit, description) where T : Number {
-//            private var value: T = initial
-//            private var attributes: Map<String, Any?>? = null
-//
-//            fun record(v: T, attrs: Map<String, Any?> = emptyMap()) {
-//                value = v
-//                attributes = attrs
-//                meter()
-//            }
-//
-//            inline fun record(value: T, f: (MutableMap<String, Any?>) -> Unit) {
-//                mutableMapOf<String, Any?>().also {
-//                    f(it)
-//                    record(value, it)
-//                }
-//            }
-//        }
+        class Gauge<T : Number>(
+            name: String,
+            meter: Meter,
+            unit: String? = null,
+            description: String? = null,
+        ) : Instrument(name, meter, Kind.Gauge, unit, description)
     }
 
     companion object {

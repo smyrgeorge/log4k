@@ -11,18 +11,18 @@ sealed interface MeteringEvent {
 
     fun key(): Int
 
-    data class CreateCounter(
+    data class CreateInstrument(
         override var id: Long = 0L,
         override val name: String,
         val kind: Kind,
-        val unit: String? = null,
-        val description: String? = null,
+        val unit: String?,
+        val description: String?,
         override val timestamp: Instant = Clock.System.now(),
     ) : MeteringEvent {
         override fun key(): Int = name.hashCode()
     }
 
-    sealed interface CounterOperation : MeteringEvent {
+    sealed interface ValueEvent : MeteringEvent {
         val labels: Map<String, Any>
         val value: Number
         override fun key(): Int = "$name.${labels.hashCode()}".hashCode()
@@ -34,7 +34,7 @@ sealed interface MeteringEvent {
         override val labels: Map<String, Any>,
         override val timestamp: Instant = Clock.System.now(),
         override val value: Number,
-    ) : CounterOperation
+    ) : ValueEvent
 
     data class Decrement(
         override var id: Long = 0L,
@@ -42,5 +42,13 @@ sealed interface MeteringEvent {
         override val labels: Map<String, Any>,
         override val timestamp: Instant = Clock.System.now(),
         override val value: Number,
-    ) : CounterOperation
+    ) : ValueEvent
+
+    data class Record(
+        override var id: Long = 0L,
+        override val name: String,
+        override val labels: Map<String, Any>,
+        override val timestamp: Instant = Clock.System.now(),
+        override val value: Number,
+    ) : ValueEvent
 }

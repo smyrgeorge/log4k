@@ -58,7 +58,7 @@ class Main {
         c2.increment(2.0, "pool" to "pool-b")
 
         delay(2000)
-        val prometheus = collector.prometheusString()
+        val prometheus = collector.collectOpenMetricsLineFormatString()
         println(prometheus)
         delay(2000)
 
