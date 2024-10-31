@@ -41,7 +41,7 @@
 <a class="library-name--link" href="../../../index.html">
                             log4k
                     </a>            </div>
-            <div class="library-version">0.18.0
+            <div class="library-version">0.19.0
             </div>
         </div>
         <div class="filter-section" id="filter-section">
@@ -62,7 +62,7 @@
   <div class="breadcrumbs"><a href="../../index.html">log4k</a><span class="delimiter">/</span><a href="../index.html">io.github.smyrgeorge.log4k</a><span class="delimiter">/</span><span class="current">Tracer</span></div>
   <div class="cover ">
     <h1 class="cover"><span><span>Tracer</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">class </span><a href="index.html">Tracer</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>name<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">var </span>level<span class="token operator">: </span><a href="../-level/index.html">Level</a></span></span><span class="token punctuation">)</span> : <a href="../../io.github.smyrgeorge.log4k.impl.registry/-logger-registry/-collector/index.html">LoggerRegistry.Collector</a></div><p class="paragraph">The <code class="lang-kotlin">Tracer</code> class provides functionality for creating and managing tracing spans, both local and remote. This abstract class implements the <code class="lang-kotlin">LoggerRegistry.Collector</code> interface.</p><h4 class="">Inheritors</h4><div class="table"><div class="table-row" data-filterable-current=":log4k:dokkaHtmlPartial/commonMain" data-filterable-set=":log4k:dokkaHtmlPartial/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../../io.github.smyrgeorge.log4k.impl/-simple-tracer/index.html">SimpleTracer</a></div></span></div><div></div></div></div></div></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">class </span><a href="index.html">Tracer</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>name<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">var </span>level<span class="token operator">: </span><a href="../-level/index.html">Level</a></span></span><span class="token punctuation">)</span> : <a href="../../io.github.smyrgeorge.log4k.impl.registry/-collector-registry/-collector/index.html">CollectorRegistry.Collector</a></div><p class="paragraph">The <code class="lang-kotlin">Tracer</code> class provides functionality for creating and managing tracing spans, both local and remote. This abstract class implements the <code class="lang-kotlin">CollectorRegistry.Collector</code> interface.</p><h4 class="">Inheritors</h4><div class="table"><div class="table-row" data-filterable-current=":log4k:dokkaHtmlPartial/commonMain" data-filterable-set=":log4k:dokkaHtmlPartial/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../../io.github.smyrgeorge.log4k.impl/-simple-tracer/index.html">SimpleTracer</a></div></span></div><div></div></div></div></div></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
@@ -122,6 +122,21 @@
               </div>
             </div>
           </div>
+<a data-name="-1534658378%2FProperties%2F1760972170" anchor-label="levelBeforeMute" id="-1534658378%2FProperties%2F1760972170" data-filterable-set=":log4k:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":log4k:dokkaHtmlPartial/commonMain" data-filterable-set=":log4k:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="level-before-mute.html"><span>level</span><wbr><span>Before</span><wbr><span><span>Mute</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1534658378%2FProperties%2F1760972170"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">var </span><a href="level-before-mute.html">levelBeforeMute</a><span class="token operator">: </span><a href="../-level/index.html">Level</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
 <a data-name="-815581091%2FProperties%2F1760972170" anchor-label="name" id="-815581091%2FProperties%2F1760972170" data-filterable-set=":log4k:dokkaHtmlPartial/commonMain"></a>
           <div class="table-row" data-filterable-current=":log4k:dokkaHtmlPartial/commonMain" data-filterable-set=":log4k:dokkaHtmlPartial/commonMain">
             <div class="main-subrow keyValue ">
@@ -141,17 +156,32 @@
       </div>
       <div data-togglable="FUNCTION">
         <h2 class="">Functions</h2>
-        <div class="table"><a data-name="127884431%2FFunctions%2F1760972170" anchor-label="mute" id="127884431%2FFunctions%2F1760972170" data-filterable-set=":log4k:dokkaHtmlPartial/commonMain"></a>
+        <div class="table"><a data-name="-1402893134%2FFunctions%2F1760972170" anchor-label="isMuted" id="-1402893134%2FFunctions%2F1760972170" data-filterable-set=":log4k:dokkaHtmlPartial/commonMain"></a>
           <div class="table-row" data-filterable-current=":log4k:dokkaHtmlPartial/commonMain" data-filterable-set=":log4k:dokkaHtmlPartial/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="mute.html"><span><span>mute</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="127884431%2FFunctions%2F1760972170"></span>
+                  <div><a href="../../io.github.smyrgeorge.log4k.impl.registry/-collector-registry/-collector/is-muted.html"><span>is</span><wbr><span><span>Muted</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1402893134%2FFunctions%2F1760972170"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="mute.html"><span class="token function">mute</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Mutes the tracer by saving the current level and setting it to <code class="lang-kotlin">Level.OFF</code>.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="../../io.github.smyrgeorge.log4k.impl.registry/-collector-registry/-collector/is-muted.html"><span class="token function">isMuted</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-401849522%2FFunctions%2F1760972170" anchor-label="mute" id="-401849522%2FFunctions%2F1760972170" data-filterable-set=":log4k:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":log4k:dokkaHtmlPartial/commonMain" data-filterable-set=":log4k:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../io.github.smyrgeorge.log4k.impl.registry/-collector-registry/-collector/mute.html"><span><span>mute</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-401849522%2FFunctions%2F1760972170"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="../../io.github.smyrgeorge.log4k.impl.registry/-collector-registry/-collector/mute.html"><span class="token function">mute</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Mutes the logger by setting its logging level to <code class="lang-kotlin">Level.OFF</code>.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -171,17 +201,17 @@
               </div>
             </div>
           </div>
-<a data-name="-159606314%2FFunctions%2F1760972170" anchor-label="unmute" id="-159606314%2FFunctions%2F1760972170" data-filterable-set=":log4k:dokkaHtmlPartial/commonMain"></a>
+<a data-name="1867173077%2FFunctions%2F1760972170" anchor-label="unmute" id="1867173077%2FFunctions%2F1760972170" data-filterable-set=":log4k:dokkaHtmlPartial/commonMain"></a>
           <div class="table-row" data-filterable-current=":log4k:dokkaHtmlPartial/commonMain" data-filterable-set=":log4k:dokkaHtmlPartial/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="unmute.html"><span><span>unmute</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-159606314%2FFunctions%2F1760972170"></span>
+                  <div><a href="../../io.github.smyrgeorge.log4k.impl.registry/-collector-registry/-collector/unmute.html"><span><span>unmute</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1867173077%2FFunctions%2F1760972170"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="unmute.html"><span class="token function">unmute</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Unmutes the tracer by restoring the logging level to the value before it was muted. It sets the current level to the previously saved <code class="lang-kotlin">levelBeforeMute</code>.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="../../io.github.smyrgeorge.log4k.impl.registry/-collector-registry/-collector/unmute.html"><span class="token function">unmute</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Reverts the logger to its previous logging level before it was muted.</p></div></div></div>
                 </div>
               </div>
             </div>

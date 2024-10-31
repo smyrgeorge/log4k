@@ -41,7 +41,7 @@
 <a class="library-name--link" href="../../index.html">
                             log4k
                     </a>            </div>
-            <div class="library-version">0.18.0
+            <div class="library-version">0.19.0
             </div>
         </div>
         <div class="filter-section" id="filter-section">
@@ -78,7 +78,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-appender/index.html">Appender</a><span class="token operator">&lt;</span><a href="-appender/index.html">T</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Defines a generic interface for appenders that can process and append events of a specified type.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-appender/index.html">Appender</a><span class="token operator">&lt;</span><a href="-appender/index.html">T</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">An interface for appending events of type T.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -108,7 +108,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">class </span><a href="-logger/index.html">Logger</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>name<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">var </span>level<span class="token operator">: </span><a href="-level/index.html">Level</a></span></span><span class="token punctuation">)</span> : <a href="../io.github.smyrgeorge.log4k.impl.registry/-logger-registry/-collector/index.html">LoggerRegistry.Collector</a></div><div class="brief "><p class="paragraph">Abstract base class for creating customizable loggers.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">class </span><a href="-logger/index.html">Logger</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>name<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">var </span>level<span class="token operator">: </span><a href="-level/index.html">Level</a></span></span><span class="token punctuation">)</span> : <a href="../io.github.smyrgeorge.log4k.impl.registry/-collector-registry/-collector/index.html">CollectorRegistry.Collector</a></div><div class="brief "><p class="paragraph">An abstract logger class providing logging functionality across different levels. Extends the <code class="lang-kotlin">CollectorRegistry.Collector</code> class.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -138,7 +138,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-logging-event/index.html">LoggingEvent</a></div><div class="brief "><p class="paragraph">Represents a logging event that captures the details of a logging instance.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-logging-event/index.html">LoggingEvent</a></div><div class="brief "><p class="paragraph">Represents an event for logging purposes.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -153,7 +153,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">class </span><a href="-meter/index.html">Meter</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>name<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">var </span>level<span class="token operator">: </span><a href="-level/index.html">Level</a></span></span><span class="token punctuation">)</span> : <a href="../io.github.smyrgeorge.log4k.impl.registry/-logger-registry/-collector/index.html">LoggerRegistry.Collector</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">class </span><a href="-meter/index.html">Meter</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>name<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">var </span>level<span class="token operator">: </span><a href="-level/index.html">Level</a></span></span><span class="token punctuation">)</span> : <a href="../io.github.smyrgeorge.log4k.impl.registry/-collector-registry/-collector/index.html">CollectorRegistry.Collector</a></div><div class="brief "><p class="paragraph">The <code class="lang-kotlin">Meter</code> class serves as an abstract base class for creating different types of metering instruments such as Counters, UpDownCounters, and Gauges. It extends <code class="lang-kotlin">CollectorRegistry.Collector</code> and provides specialized methods to create these instruments with specified names, units of measurement, and optional descriptions.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -183,7 +183,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-metering-event/index.html">MeteringEvent</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">sealed </span><span class="token keyword">interface </span><a href="-metering-event/index.html">MeteringEvent</a></div><div class="brief "><p class="paragraph">Sealed interface for metering events used within a telemetry or monitoring system. All events have a unique identifier, a name, and a timestamp. This interface can be extended by different types of metering events.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -213,7 +213,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">class </span><a href="-tracer/index.html">Tracer</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>name<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">var </span>level<span class="token operator">: </span><a href="-level/index.html">Level</a></span></span><span class="token punctuation">)</span> : <a href="../io.github.smyrgeorge.log4k.impl.registry/-logger-registry/-collector/index.html">LoggerRegistry.Collector</a></div><div class="brief "><p class="paragraph">The <code class="lang-kotlin">Tracer</code> class provides functionality for creating and managing tracing spans, both local and remote. This abstract class implements the <code class="lang-kotlin">LoggerRegistry.Collector</code> interface.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">class </span><a href="-tracer/index.html">Tracer</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>name<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">var </span>level<span class="token operator">: </span><a href="-level/index.html">Level</a></span></span><span class="token punctuation">)</span> : <a href="../io.github.smyrgeorge.log4k.impl.registry/-collector-registry/-collector/index.html">CollectorRegistry.Collector</a></div><div class="brief "><p class="paragraph">The <code class="lang-kotlin">Tracer</code> class provides functionality for creating and managing tracing spans, both local and remote. This abstract class implements the <code class="lang-kotlin">CollectorRegistry.Collector</code> interface.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -243,7 +243,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">sealed </span><span class="token keyword">interface </span><a href="-tracing-event/index.html">TracingEvent</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">sealed </span><span class="token keyword">interface </span><a href="-tracing-event/index.html">TracingEvent</a></div><div class="brief "><p class="paragraph">Sealed interface representing a tracing event in a system.</p></div></div></div>
                 </div>
               </div>
             </div>
