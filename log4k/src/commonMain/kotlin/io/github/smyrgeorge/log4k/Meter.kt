@@ -19,7 +19,8 @@ import kotlin.reflect.KClass
 abstract class Meter(
     final override val name: String,
     final override var level: Level
-) : CollectorRegistry.Collector(name, level) {
+) : CollectorRegistry.Collector {
+    override var levelBeforeMute: Level = level
 
     /**
      * Creates a new counter instrument with the specified name, unit, and description.

@@ -17,7 +17,8 @@ import kotlin.uuid.Uuid
 abstract class Tracer(
     final override val name: String,
     final override var level: Level
-) : CollectorRegistry.Collector(name, level) {
+) : CollectorRegistry.Collector {
+    override var levelBeforeMute: Level = level
 
     private fun id(): String {
         @OptIn(ExperimentalUuidApi::class)

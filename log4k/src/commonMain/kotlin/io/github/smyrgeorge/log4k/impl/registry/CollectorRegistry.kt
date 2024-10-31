@@ -38,12 +38,10 @@ class CollectorRegistry<T> where T : CollectorRegistry.Collector {
     fun isMuted(clazz: KClass<*>): Boolean = isMuted(clazz.toName())
     fun isMuted(name: String): Boolean = name in muted
 
-    open class Collector(
-        open val name: String,
-        open var level: Level
-    ) {
-        @Suppress("LeakingThis")
-        private var levelBeforeMute: Level = level
+    interface Collector {
+        val name: String
+        var level: Level
+        var levelBeforeMute: Level
 
         /**
          * Mutes the logger by setting its logging level to `Level.OFF`.
