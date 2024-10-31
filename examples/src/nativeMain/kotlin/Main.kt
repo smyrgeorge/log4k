@@ -21,6 +21,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.measureTime
 
 class Main {
@@ -63,9 +64,10 @@ class Main {
         g1.record(3, "pool" to "pool-a")
         g1.record(6, "pool" to "pool-b")
 
-        /**
-         *
-         */
+        g1.poll(every = 2.seconds) {
+            g1.record(3, "pool" to "pool-a")
+            g1.record(6, "pool" to "pool-b")
+        }
 
         delay(2000)
         val prometheus = collector.toOpenMetricsLineFormatString()

@@ -32,7 +32,6 @@ This project also tries to be fully compatible with `OpenTelemetry` standard.
 
 ## TODO
 
-- [ ] Support for OpenTelemetry's Metrics (in progress)
 - [ ] `CoroutineContexAwareLogger`: `Logger` that will collect more info from the coroutine context (in progress)
 - [ ] Ability to chain appenders
 - [ ] `LogbackAppender`: `Appender` that will publish the logging events to the logback.
@@ -246,37 +245,52 @@ g1.record(3, "pool" to "pool-a")
 g1.record(6, "pool" to "pool-b")
 ```
 
-Each time we make an operation (aka. measure something with a meter) an event is triggered and propagated to all
-registered appenders. In this case we can register the `SimpleMeteringCollectorAppender` appender:
+Each time an operation is performed (i.e., a measurement is taken with a meter), an event is triggered and propagated to
+all registered appenders. For instance, we can register the `SimpleMeteringCollectorAppender` appender:
 
 ```kotlin
 val collector = SimpleMeteringCollectorAppender()
 RootLogger.Metering.register(collector)
 ```
 
-The `SimpleMeteringCollectorAppender` process all events and for each registered instrument and updates the value.
-Also, provides a method that returns a string that contains the information gather in the `OpenMetrics` line format.
+The `SimpleMeteringCollectorAppender` processes all events, updating the value for each registered instrument. It also
+provides a method that returns a string with the collected data in the `OpenMetrics` line format.
 
 ```kotlin
 val metrics = collector.toOpenMetricsLineFormatString()
 println(metrics)
 
-/**
- * The above example will print:
- * # HELP event-a
- * # TYPE event-a counter
- * event-a {label="pool-a"} 2 1730360802506
- *
- * # HELP thread-pool-size
- * # TYPE thread-pool-size gauge
- * thread-pool-size {pool="pool-a"} 3 1730360802506
- * thread-pool-size {pool="pool-b"} 6 1730360802506
- *
- * # HELP event-b
- * # TYPE event-b updowncounter
- * event-b {label="pool-b"} 4.0 1730360802506
- */
+// The above example will print:
+//
+// # HELP event-a
+// # TYPE event-a counter
+// event-a {label="pool-a"} 2 1730360802506
+//
+// # HELP thread-pool-size
+// # TYPE thread-pool-size gauge
+// thread-pool-size {pool="pool-a"} 3 1730360802506
+// thread-pool-size {pool="pool-b"} 6 1730360802506
+//
+// # HELP event-b
+// # TYPE event-b updowncounter
+// event-b {label="pool-b"} 4.0 1730360802506
 ```
+
+### Gauge
+
+We also provide a convenient way to periodically poll and publish value changes, enabling automated and timely updates.
+This approach ensures that values are recorded consistently, which is particularly useful for monitoring changes over
+time and minimizing manual intervention.
+
+```kotlin
+g1.poll(every = 10.seconds) {
+    g1.record(3, "pool" to "pool-a")
+    g1.record(6, "pool" to "pool-b")
+}
+```
+
+Using this method, values are automatically recorded at regular intervals, making it ideal for tracking metrics in
+dynamic environments.
 
 ## Examples
 

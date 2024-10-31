@@ -1,8 +1,16 @@
 package io.github.smyrgeorge.log4k
 
+import io.github.smyrgeorge.log4k.impl.extensions.dispatcher
 import io.github.smyrgeorge.log4k.impl.extensions.toName
 import io.github.smyrgeorge.log4k.impl.registry.CollectorRegistry
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.reflect.KClass
+import kotlin.time.Duration
 
 /**
  * The `Meter` class serves as an abstract base class for creating different types of metering instruments
@@ -140,6 +148,26 @@ abstract class Meter(
                 if (meter.isMuted()) return
                 val event = MeteringEvent.Record(name = name, labels = labels.toMap(), value = value)
                 RootLogger.meter(event)
+            }
+
+            fun poll(every: Duration, f: (AbstractRecorder<T>) -> Unit) {
+                GaugeScope.launch(dispatcher) {
+                    runCatching {
+                        while (true) {
+                            delay(every)
+                            f(this@AbstractRecorder)
+                        }
+                    }
+                }
+            }
+
+            companion object {
+                private val dispatcher: CoroutineDispatcher = dispatcher()
+
+                private object GaugeScope : CoroutineScope {
+                    override val coroutineContext: CoroutineContext
+                        get() = EmptyCoroutineContext
+                }
             }
         }
 
