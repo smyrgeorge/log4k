@@ -6,7 +6,7 @@ import io.github.smyrgeorge.log4k.impl.SimpleTracerFactory
 import io.github.smyrgeorge.log4k.impl.appenders.simple.SimpleConsoleLoggingAppender
 import io.github.smyrgeorge.log4k.impl.extensions.dispatcher
 import io.github.smyrgeorge.log4k.impl.registry.AppenderRegistry
-import io.github.smyrgeorge.log4k.impl.registry.LoggerRegistry
+import io.github.smyrgeorge.log4k.impl.registry.CollectorRegistry
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
@@ -110,7 +110,7 @@ object RootLogger {
         private var idx: Long = 0
         fun id(): Long = ++idx
         var factory: LoggerFactory = SimpleLoggerFactory()
-        val loggers = LoggerRegistry<Logger>()
+        val loggers = CollectorRegistry<Logger>()
         val appenders = AppenderRegistry<LoggingEvent>()
         fun register(appender: Appender<LoggingEvent>) = appenders.register(appender)
     }
@@ -127,7 +127,7 @@ object RootLogger {
     object Tracing {
         var prefix: String = "span"
         var factory: TracerFactory = SimpleTracerFactory()
-        val tracers = LoggerRegistry<Tracer>()
+        val tracers = CollectorRegistry<Tracer>()
         val appenders = AppenderRegistry<TracingEvent>()
         fun register(appender: Appender<TracingEvent>) = appenders.register(appender)
     }
@@ -144,7 +144,7 @@ object RootLogger {
         private var idx: Long = 0
         fun id(): Long = ++idx
         var factory: MeterFactory = SimpleMeterFactory()
-        val meters = LoggerRegistry<Meter>()
+        val meters = CollectorRegistry<Meter>()
         val appenders = AppenderRegistry<MeteringEvent>()
         fun register(appender: Appender<MeteringEvent>) = appenders.register(appender)
     }

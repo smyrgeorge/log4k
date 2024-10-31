@@ -47,19 +47,29 @@ class Main {
         RootLogger.Metering.register(SimpleMeteringCollectorAppender())
         val collector = RootLogger.Metering.appenders.get(SimpleMeteringCollectorAppender::class)
 
-        val c1 = meter.counter<Int>("thread-count-in-pool")
-        c1.increment(1, "pool" to "pool-a")
-        c1.increment(1, "pool" to "pool-a")
-        c1.increment(1, "pool" to "pool-a")
+        // Create a Counter that holds Int values.
+        val c1 = meter.counter<Int>("event-a")
+        c1.increment(1, "label" to "pool-a")
+        c1.increment(1, "label" to "pool-a")
 
-        val c2 = meter.counter<Double>("thread-count-in-pool")
-        c2.increment(2.0, "pool" to "pool-b")
-        c2.increment(2.0, "pool" to "pool-b")
-        c2.increment(2.0, "pool" to "pool-b")
+        // Create a UpDownCounter that holds Double values.
+        val c2 = meter.upDownCounter<Double>("event-b")
+        c2.increment(2.0, "label" to "pool-b")
+        c2.increment(2.0, "label" to "pool-b")
+        c2.decrement(2.0, "label" to "pool-b")
+
+        // Create a Gauge
+        val g1 = meter.gauge<Int>("thread-pool-size")
+        g1.record(3, "pool" to "pool-a")
+        g1.record(6, "pool" to "pool-b")
+
+        /**
+         *
+         */
 
         delay(2000)
-        val prometheus = collector.collectOpenMetricsLineFormatString()
-        println(prometheus)
+        val prometheus = collector.toOpenMetricsLineFormatString()
+        print(prometheus)
         delay(2000)
 
         log.debug("ignore")

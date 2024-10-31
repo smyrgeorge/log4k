@@ -209,6 +209,75 @@ In the examples above, we see two variations of the `Span` class:
 - **Span.Remote**: Represents a span created outside our application and propagated to us (e.g., from an HTTP call). It
   does not expose any methods and serves only as a reference to the parent remote span.
 
+## Metering API
+
+A measurement captured at runtime.
+
+A metric is a measurement of a service captured at runtime. The moment of capturing a measurements is known as a metric
+event, which consists not only of the measurement itself, but also the time at which it was captured and associated
+metadata.
+
+Several types of metrics are supported:
+
+- **Counter**: A value that accumulates over time – you can think of this like an odometer on a car; it only ever goes
+  up.
+- **UpDownCounter**: A value that accumulates over time, but can also go down again. An example could be a queue length,
+  it will increase and decrease with the number of work items in the queue.
+- **Gauge**: Measures a current value at the time it is read. An example would be the fuel gauge in a vehicle. Gauges
+  are asynchronous.
+- **Histogram** (in progress): A client-side aggregation of values, such as request latencies. A histogram is a good
+  choice if you are interested in value statistics. For example: How many requests take fewer than 1s?
+
+```kotlin
+// Create a Counter that holds Int values.
+val c1 = meter.counter<Int>("event-a")
+c1.increment(1, "label" to "pool-a")
+c1.increment(1, "label" to "pool-a")
+
+// Create a UpDownCounter that holds Double values.
+val c2 = meter.upDownCounter<Double>("event-b")
+c2.increment(2.0, "label" to "pool-b")
+c2.increment(2.0, "label" to "pool-b")
+c2.decrement(2.0, "label" to "pool-b")
+
+// Create a Gauge
+val g1 = meter.gauge<Int>("thread-pool-size")
+g1.record(3, "pool" to "pool-a")
+g1.record(6, "pool" to "pool-b")
+```
+
+Each time we make an operation (aka. measure something with a meter) an event is triggered and propagated to all
+registered appenders. In this case we can register the `SimpleMeteringCollectorAppender` appender:
+
+```kotlin
+val collector = SimpleMeteringCollectorAppender()
+RootLogger.Metering.register(collector)
+```
+
+The `SimpleMeteringCollectorAppender` process all events and for each registered instrument and updates the value.
+Also, provides a method that returns a string that contains the information gather in the `OpenMetrics` line format.
+
+```kotlin
+val metrics = collector.toOpenMetricsLineFormatString()
+println(metrics)
+
+/**
+ * The above example will print:
+ * # HELP event-a
+ * # TYPE event-a counter
+ * event-a {label="pool-a"} 2 1730360802506
+ *
+ * # HELP thread-pool-size
+ * # TYPE thread-pool-size gauge
+ * thread-pool-size {pool="pool-a"} 3 1730360802506
+ * thread-pool-size {pool="pool-b"} 6 1730360802506
+ *
+ * # HELP event-b
+ * # TYPE event-b updowncounter
+ * event-b {label="pool-b"} 4.0 1730360802506
+ */
+```
+
 ## Examples
 
 For more detailed examples take also a look at the `examples` module.

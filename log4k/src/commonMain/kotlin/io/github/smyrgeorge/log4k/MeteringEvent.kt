@@ -4,6 +4,11 @@ import io.github.smyrgeorge.log4k.Meter.Instrument.Kind
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 
+/**
+ * Sealed interface for metering events used within a telemetry or monitoring system.
+ * All events have a unique identifier, a name, and a timestamp. This interface can
+ * be extended by different types of metering events.
+ */
 sealed interface MeteringEvent {
     var id: Long
     val name: String

@@ -5,9 +5,14 @@ import io.github.smyrgeorge.log4k.impl.extensions.toName
 import kotlin.reflect.KClass
 
 /**
- * A registry that manages a collection of appenders.
+ * A registry for managing multiple appenders of type T.
  *
- * @param T The type of event to be appended.
+ * This class allows for the registration, retrieval, and management of
+ * appenders, which are responsible for appending events. These appenders
+ * can be registered by their name or class type and can be unregistered
+ * individually or all at once.
+ *
+ * @param T The type of event that the appenders handle.
  */
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 class AppenderRegistry<T> {

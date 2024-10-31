@@ -1,22 +1,21 @@
 package io.github.smyrgeorge.log4k
 
 import io.github.smyrgeorge.log4k.TracingEvent.Span
-import io.github.smyrgeorge.log4k.impl.registry.LoggerRegistry
+import io.github.smyrgeorge.log4k.impl.registry.CollectorRegistry
 import kotlin.reflect.KClass
 
 /**
- * Abstract base class for creating customizable loggers.
+ * An abstract logger class providing logging functionality across different levels.
+ * Extends the `CollectorRegistry.Collector` class.
  *
- * @property name The name of the logger.
- * @property level The logging level of the logger.
+ * @property name The name identifier for the logger.
+ * @property level The logging level threshold.
  */
 @Suppress("unused")
 abstract class Logger(
     final override val name: String,
     final override var level: Level
-) : LoggerRegistry.Collector {
-    private var levelBeforeMute: Level = level
-
+) : CollectorRegistry.Collector(name, level) {
     private fun log(
         level: Level,
         span: Span?,
@@ -49,27 +48,6 @@ abstract class Logger(
 
     fun Level.shouldLog(): Boolean =
         ordinal >= level.ordinal
-
-    /**
-     * Mutes the logger by setting its logging level to `Level.OFF`.
-     *
-     * This method saves the current logging level in the `levelBeforeMute` field before muting.
-     */
-    override fun mute() {
-        levelBeforeMute = level
-        level = Level.OFF
-    }
-
-    /**
-     * Reverts the logger to its previous logging level before it was muted.
-     *
-     * This method restores the logging level stored in `levelBeforeMute` back to `level`.
-     * The `levelBeforeMute` field will also be updated to reflect the current `level`.
-     */
-    override fun unmute() {
-        level = levelBeforeMute
-        levelBeforeMute = level
-    }
 
     inline fun trace(f: () -> String): Unit = if (Level.TRACE.shouldLog()) trace(f()) else Unit
     inline fun trace(t: Throwable, f: () -> String): Unit = if (Level.TRACE.shouldLog()) trace(f(), t) else Unit

@@ -1,6 +1,6 @@
 package io.github.smyrgeorge.log4k
 
-import io.github.smyrgeorge.log4k.impl.registry.LoggerRegistry
+import io.github.smyrgeorge.log4k.impl.registry.CollectorRegistry
 import kotlin.math.absoluteValue
 import kotlin.reflect.KClass
 import kotlin.uuid.ExperimentalUuidApi
@@ -8,7 +8,7 @@ import kotlin.uuid.Uuid
 
 /**
  * The `Tracer` class provides functionality for creating and managing tracing spans, both local and remote.
- * This abstract class implements the `LoggerRegistry.Collector` interface.
+ * This abstract class implements the `CollectorRegistry.Collector` interface.
  *
  * @property name The name of the tracer.
  * @property level The logging level of the tracer.
@@ -17,25 +17,7 @@ import kotlin.uuid.Uuid
 abstract class Tracer(
     final override val name: String,
     final override var level: Level
-) : LoggerRegistry.Collector {
-    private var levelBeforeMute: Level = level
-
-    /**
-     * Mutes the tracer by saving the current level and setting it to `Level.OFF`.
-     */
-    override fun mute() {
-        levelBeforeMute = level
-        level = Level.OFF
-    }
-
-    /**
-     * Unmutes the tracer by restoring the logging level to the value before it was muted.
-     * It sets the current level to the previously saved `levelBeforeMute`.
-     */
-    override fun unmute() {
-        level = levelBeforeMute
-        levelBeforeMute = level
-    }
+) : CollectorRegistry.Collector(name, level) {
 
     private fun id(): String {
         @OptIn(ExperimentalUuidApi::class)

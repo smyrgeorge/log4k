@@ -5,7 +5,7 @@ import io.github.smyrgeorge.log4k.impl.extensions.toName
 import kotlin.reflect.KClass
 
 @Suppress("MemberVisibilityCanBePrivate", "unused")
-class LoggerRegistry<T> where T : LoggerRegistry.Collector {
+class CollectorRegistry<T> where T : CollectorRegistry.Collector {
     private val muted = mutableSetOf<String>()
     private val loggers = mutableMapOf<String, T>()
 
@@ -38,11 +38,34 @@ class LoggerRegistry<T> where T : LoggerRegistry.Collector {
     fun isMuted(clazz: KClass<*>): Boolean = isMuted(clazz.toName())
     fun isMuted(name: String): Boolean = name in muted
 
-    interface Collector {
-        val name: String
-        var level: Level
-        fun mute()
-        fun unmute()
+    open class Collector(
+        open val name: String,
+        open var level: Level
+    ) {
+        @Suppress("LeakingThis")
+        private var levelBeforeMute: Level = level
+
+        /**
+         * Mutes the logger by setting its logging level to `Level.OFF`.
+         *
+         * This method saves the current logging level in the `levelBeforeMute` field before muting.
+         */
+        fun mute() {
+            levelBeforeMute = level
+            level = Level.OFF
+        }
+
+        /**
+         * Reverts the logger to its previous logging level before it was muted.
+         *
+         * This method restores the logging level stored in `levelBeforeMute` back to `level`.
+         * The `levelBeforeMute` field will also be updated to reflect the current `level`.
+         */
+        fun unmute() {
+            level = levelBeforeMute
+            levelBeforeMute = level
+        }
+
         fun isMuted(): Boolean = level == Level.OFF
     }
 }

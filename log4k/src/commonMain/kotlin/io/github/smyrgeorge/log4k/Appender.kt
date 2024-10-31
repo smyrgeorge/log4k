@@ -1,9 +1,13 @@
 package io.github.smyrgeorge.log4k
 
 /**
- * Defines a generic interface for appenders that can process and append events of a specified type.
+ * An interface for appending events of type T.
  *
- * @param T The type of event to be appended.
+ * This interface defines a contract for any appender which is responsible
+ * for handling or appending events. Each appender implementation should
+ * specify how to append events and specify a unique name.
+ *
+ * @param T The type of event that this appender should handle.
  */
 interface Appender<T> {
     val name: String

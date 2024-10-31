@@ -7,6 +7,9 @@ import io.github.smyrgeorge.log4k.impl.extensions.toName
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 
+/**
+ * Sealed interface representing a tracing event in a system.
+ */
 @Suppress("unused")
 sealed interface TracingEvent {
     /**

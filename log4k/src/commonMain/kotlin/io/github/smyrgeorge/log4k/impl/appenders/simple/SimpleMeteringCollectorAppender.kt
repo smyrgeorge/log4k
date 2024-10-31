@@ -54,7 +54,7 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
      *
      * @return An OpenMetrics-compliant string representation of the collected metrics.
      */
-    fun collectOpenMetricsLineFormatString(): String = buildString {
+    fun toOpenMetricsLineFormatString(): String = buildString {
         registry
             .values
             .groupBy { it.name }
@@ -67,6 +67,7 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
                     .forEach {
                         append(it.openMetricsValueString())
                     }
+                appendLine()
             }
     }
 
