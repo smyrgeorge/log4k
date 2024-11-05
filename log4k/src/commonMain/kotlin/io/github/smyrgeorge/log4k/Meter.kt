@@ -150,7 +150,7 @@ abstract class Meter(
                 RootLogger.meter(event)
             }
 
-            fun poll(every: Duration, f: (AbstractRecorder<T>) -> Unit) {
+            fun poll(every: Duration, f: suspend AbstractRecorder<T>.() -> Unit) {
                 GaugeScope.launch(dispatcher) {
                     runCatching {
                         while (true) {

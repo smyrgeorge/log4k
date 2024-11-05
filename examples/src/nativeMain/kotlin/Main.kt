@@ -65,8 +65,8 @@ class Main {
         g1.record(6, "pool" to "pool-b")
 
         g1.poll(every = 2.seconds) {
-            g1.record(3, "pool" to "pool-a")
-            g1.record(6, "pool" to "pool-b")
+            record(3, "pool" to "pool-a")
+            record(6, "pool" to "pool-b")
         }
 
         delay(2000)
