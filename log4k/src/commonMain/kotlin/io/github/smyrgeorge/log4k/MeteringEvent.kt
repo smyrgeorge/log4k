@@ -33,6 +33,14 @@ sealed interface MeteringEvent {
         override fun key(): Int = "$name.${labels.hashCode()}".hashCode()
     }
 
+    data class Set(
+        override var id: Long = 0L,
+        override val name: String,
+        override val labels: Map<String, Any>,
+        override val timestamp: Instant = Clock.System.now(),
+        override val value: Number,
+    ) : ValueEvent
+
     data class Increment(
         override var id: Long = 0L,
         override val name: String,

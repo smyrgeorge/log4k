@@ -284,8 +284,8 @@ time and minimizing manual intervention.
 
 ```kotlin
 g1.poll(every = 10.seconds) {
-    g1.record(3, "pool" to "pool-a")
-    g1.record(6, "pool" to "pool-b")
+    record(3, "pool" to "pool-a")
+    record(6, "pool" to "pool-b")
 }
 ```
 

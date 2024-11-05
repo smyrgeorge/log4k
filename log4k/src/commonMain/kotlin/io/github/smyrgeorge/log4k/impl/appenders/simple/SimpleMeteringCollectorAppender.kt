@@ -23,6 +23,14 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
                 ).also { instruments[event.name] = it }
             }
 
+            is MeteringEvent.Set -> {
+                when (val instrument = event.instrument()) {
+                    is Instrument.Counter -> instrument.set(event)
+                    is Instrument.UpDownCounter -> instrument.set(event)
+                    else -> Unit
+                }
+            }
+
             is MeteringEvent.Increment -> {
                 when (val instrument = event.instrument()) {
                     is Instrument.Counter -> instrument.increment(event)
@@ -170,6 +178,11 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
             override var value: Number,
             override var updatedAt: Instant? = null,
         ) : Instrument {
+            fun set(event: MeteringEvent.Set) {
+                updatedAt = event.timestamp
+                value = event.value
+            }
+
             fun increment(event: MeteringEvent.Increment) {
                 updatedAt = event.timestamp
                 when (event.value) {

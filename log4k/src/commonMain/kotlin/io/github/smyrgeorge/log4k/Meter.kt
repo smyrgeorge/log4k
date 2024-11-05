@@ -11,6 +11,7 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.reflect.KClass
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * The `Meter` class serves as an abstract base class for creating different types of metering instruments
@@ -97,6 +98,11 @@ abstract class Meter(
             init()
         }
 
+        /**
+         * Initializes the instrument by creating a metering event if the meter is not muted.
+         * This method checks if the meter is muted and, if not, creates a `CreateInstrument`
+         * metering event with the instrument's details, then logs the event using the RootLogger.
+         */
         private fun init() {
             if (meter.isMuted()) return
             MeteringEvent.CreateInstrument(
@@ -107,6 +113,14 @@ abstract class Meter(
             ).also { RootLogger.meter(it) }
         }
 
+        /**
+         * Enum class representing the types of instruments that can be used within the metering system.
+         *
+         * - `Counter`: Used for recording numerical values that can only increase.
+         * - `UpDownCounter`: Used for recording numerical values that can both increase and decrease.
+         * - `Gauge`: Used for measuring numerical values that can arbitrarily go up and down.
+         * - `Histogram`: Used for recording distributions of numerical values.
+         */
         enum class Kind {
             Counter,
             UpDownCounter,
@@ -114,6 +128,17 @@ abstract class Meter(
             Histogram,
         }
 
+        /**
+         * AbstractCounter is a sealed class that extends the Instrument class.
+         * It represents a generic counter instrument which can increment its value
+         * based on the provided numerical input of type T. T must extend the Number class.
+         *
+         * @param name Name of the counter.
+         * @param meter Meter instance associated with this counter.
+         * @param kind Kind of instrument.
+         * @param unit Optional unit of measurement.
+         * @param description Optional description of the counter.
+         */
         sealed class AbstractCounter<T : Number>(
             name: String,
             meter: Meter,
@@ -121,6 +146,25 @@ abstract class Meter(
             unit: String? = null,
             description: String? = null,
         ) : Instrument(name, meter, kind, unit, description) {
+            /**
+             * Sets the counter to the specified non-negative value with associated labels.
+             *
+             * @param value The non-negative value to set the counter to.
+             * @param labels A vararg of pairs representing additional labels/metadata associated with the set action.
+             */
+            fun set(value: T, vararg labels: Pair<String, Any>) {
+                if (meter.isMuted()) return
+                if (value.isLessThanZero()) error("Only non-negative values are allowed.")
+                val event = MeteringEvent.Set(name = name, labels = labels.toMap(), value = value)
+                RootLogger.meter(event)
+            }
+
+            /**
+             * Increments the counter by the specified non-negative value with associated labels.
+             *
+             * @param value The non-negative value by which to increment the counter.
+             * @param labels A vararg of pairs representing additional labels/metadata associated with the increment action.
+             */
             fun increment(value: T, vararg labels: Pair<String, Any>) {
                 if (meter.isMuted()) return
                 if (value.isLessThanZero()) error("Only non-negative values are allowed.")
@@ -137,6 +181,17 @@ abstract class Meter(
             }
         }
 
+        /**
+         * AbstractRecorder is a sealed class used for recording numerical data attached to specific labels.
+         * It extends the Instrument class and provides functionality for recording and periodically polling data.
+         *
+         * @param T the type of numerical data to be recorded, constrained by the Number class.
+         * @param name the name of the recorder.
+         * @param meter the Meter instance associated with this recorder.
+         * @param kind the type of the instrument.
+         * @param unit the unit of measurement, default is null.
+         * @param description the description of the recorder, default is null.
+         */
         sealed class AbstractRecorder<T : Number>(
             name: String,
             meter: Meter,
@@ -144,18 +199,33 @@ abstract class Meter(
             unit: String? = null,
             description: String? = null,
         ) : Instrument(name, meter, kind, unit, description) {
+            /**
+             * Records a metering event with a specified value and optional labels.
+             * If the meter is muted, the event will not be recorded.
+             *
+             * @param value The value to be recorded.
+             * @param labels A variable number of pairs representing the labels associated with the event.
+             */
             fun record(value: T, vararg labels: Pair<String, Any>) {
                 if (meter.isMuted()) return
                 val event = MeteringEvent.Record(name = name, labels = labels.toMap(), value = value)
                 RootLogger.meter(event)
             }
 
-            fun poll(every: Duration, f: suspend AbstractRecorder<T>.() -> Unit) {
+            /**
+             * Schedules a polling task that runs a given suspending function at a specified interval.
+             *
+             * @param every The duration between consecutive executions of the function.
+             * @param initial The initial delay before the first execution of the function. Defaults to 10 seconds.
+             * @param f The suspending function to be executed at each polling interval.
+             */
+            fun poll(every: Duration, initial: Duration = 10.seconds, f: suspend AbstractRecorder<T>.() -> Unit) {
                 GaugeScope.launch(dispatcher) {
                     runCatching {
+                        delay(initial)
                         while (true) {
-                            delay(every)
                             f(this@AbstractRecorder)
+                            delay(every)
                         }
                     }
                 }
@@ -206,6 +276,13 @@ abstract class Meter(
             unit: String?,
             description: String?,
         ) : AbstractCounter<T>(name, meter, Kind.UpDownCounter, unit, description) {
+            /**
+             * Decrements the value of an UpDownCounter instrument and logs the event if the meter is not muted.
+             * The value must be non-negative.
+             *
+             * @param value The non-negative value to decrement from the counter.
+             * @param labels Optional key-value pairs of labels associated with the decrement event.
+             */
             fun decrement(value: T, vararg labels: Pair<String, Any>) {
                 if (meter.isMuted()) return
                 if (value.isLessThanZero()) error("Only non-negative values are allowed.")
