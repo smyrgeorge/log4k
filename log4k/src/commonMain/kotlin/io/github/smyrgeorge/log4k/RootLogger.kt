@@ -37,7 +37,7 @@ import kotlin.coroutines.EmptyCoroutineContext
  * - meter(event: MeteringEvent): Sends a metering event to the metering channel.
  */
 object RootLogger {
-    val level: Level = Level.INFO
+    var level: Level = Level.INFO
     private val dispatcher: CoroutineDispatcher = dispatcher()
     private val logs: Channel<LoggingEvent> = Channel(capacity = Channel.UNLIMITED)
     private val traces: Channel<TracingEvent> = Channel(capacity = Channel.UNLIMITED)
