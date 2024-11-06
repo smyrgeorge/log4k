@@ -65,11 +65,12 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
     fun toOpenMetricsLineFormatString(): String = buildString {
         registry
             .values
+            .sortedBy { it.name }
             .groupBy { it.name }
             .forEach { group ->
-                val instruments = group.value
-                val first = instruments.first()
-                append(first.openMetricsHeaderString())
+                val instruments: List<Instrument> = group.value
+                val header: String = instruments.first().openMetricsHeaderString()
+                append(header)
                 instruments
                     .sortedBy { it.sortKey() }
                     .forEach {
@@ -91,7 +92,8 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
      *         associated instrument information is not found or unsupported.
      */
     private fun MeteringEvent.ValueEvent.instrument(): Instrument? {
-        val existing = registry[key()]
+        val key: Int = key()
+        val existing: Instrument? = registry[key]
         return if (existing == null) {
             val info = instruments[name] ?: return null
             when (info.kind) {
@@ -126,7 +128,7 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
                 )
 
                 Meter.Instrument.Kind.Histogram -> TODO()
-            }.also { registry[key()] = it }
+            }.also { registry[key] = it }
         } else existing
     }
 
@@ -142,20 +144,16 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
         fun sortKey(): Int = labels.hashCode()
 
         fun openMetricsHeaderString(): String = buildString {
-            append("# HELP ").append(name).append(" ")
-            description?.let { d ->
-                append(d)
-                unit?.let { append(" (").append(it).append(")") }
-            }
-            appendLine()
+            description?.let { append("# HELP ").append(name).append(" ").append(it).appendLine() }
+            unit?.let { append("# UNIT ").append(name).append(" ").append(it).appendLine() }
             append("# TYPE ").append(name).append(" ").append(kind.name.lowercase()).appendLine()
         }
 
         fun openMetricsValueString(): String = buildString {
-            append(name).append(" ")
-            labels?.let { append(it.format()).append(" ") }
-            append(value)
-            updatedAt?.let { append(" ").append(it.toEpochMilliseconds()) }
+            append(name)
+            labels?.let { append(it.format()) }
+            append(" ").append(value)
+            updatedAt?.let { append(" ").append(it.epochSeconds) }
             appendLine()
         }
 

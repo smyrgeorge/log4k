@@ -230,17 +230,20 @@ Several types of metrics are supported:
 ```kotlin
 // Create a Counter that holds Int values.
 val c1 = meter.counter<Int>("event-a")
+delay(1000)
 c1.increment(1, "label" to "pool-a")
 c1.increment(1, "label" to "pool-a")
 
 // Create a UpDownCounter that holds Double values.
 val c2 = meter.upDownCounter<Double>("event-b")
+delay(1000)
 c2.increment(2.0, "label" to "pool-b")
 c2.increment(2.0, "label" to "pool-b")
 c2.decrement(2.0, "label" to "pool-b")
 
 // Create a Gauge
 val g1 = meter.gauge<Int>("thread-pool-size")
+delay(1000)
 g1.record(3, "pool" to "pool-a")
 g1.record(6, "pool" to "pool-b")
 ```
@@ -283,7 +286,7 @@ This approach ensures that values are recorded consistently, which is particular
 time and minimizing manual intervention.
 
 ```kotlin
-g1.poll(every = 10.seconds) {
+meter.gauge<Int>("thread-pool-size").poll(every = 10.seconds) {
     record(3, "pool" to "pool-a")
     record(6, "pool" to "pool-b")
 }

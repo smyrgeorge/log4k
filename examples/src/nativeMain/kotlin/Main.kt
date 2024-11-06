@@ -48,19 +48,19 @@ class Main {
         RootLogger.Metering.register(SimpleMeteringCollectorAppender())
         val collector = RootLogger.Metering.appenders.get(SimpleMeteringCollectorAppender::class)
 
-        // Create a Counter that holds Int values.
         val c1 = meter.counter<Int>("event-a")
+        val c2 = meter.upDownCounter<Double>("event-b")
+        val g1 = meter.gauge<Int>("thread-pool-size", "a-unit", "a-description")
+
+        delay(1000)
+
         c1.increment(1, "label" to "pool-a")
         c1.increment(1, "label" to "pool-a")
 
-        // Create a UpDownCounter that holds Double values.
-        val c2 = meter.upDownCounter<Double>("event-b")
         c2.increment(2.0, "label" to "pool-b")
         c2.increment(2.0, "label" to "pool-b")
         c2.decrement(2.0, "label" to "pool-b")
 
-        // Create a Gauge
-        val g1 = meter.gauge<Int>("thread-pool-size")
         g1.record(3, "pool" to "pool-a")
         g1.record(6, "pool" to "pool-b")
 
