@@ -10,5 +10,6 @@ pluginManagement {
 }
 
 include("log4k")
+include("log4k-slf4j")
 include("examples")
 

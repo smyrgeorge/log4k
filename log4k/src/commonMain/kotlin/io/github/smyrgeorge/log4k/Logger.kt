@@ -18,7 +18,16 @@ abstract class Logger(
 ) : CollectorRegistry.Collector {
     override var levelBeforeMute: Level = level
 
-    private fun log(
+    /**
+     * Logs a message with the specified logging level and additional context.
+     *
+     * @param level The logging level of the event.
+     * @param span An optional span that can be used for tracing the context.
+     * @param message The log message to be recorded.
+     * @param arguments Additional arguments to be included in the log event.
+     * @param throwable An optional throwable associated with the log event.
+     */
+    fun log(
         level: Level,
         span: Span?,
         message: String,
@@ -48,8 +57,14 @@ abstract class Logger(
         throwable: Throwable?
     ): LoggingEvent
 
-    fun Level.shouldLog(): Boolean =
-        ordinal >= level.ordinal
+    /**
+     * Checks if logging is enabled for the specified logging level.
+     *
+     * @param level The logging level to be checked.
+     * @return `true` if logging is enabled for the specified level, `false` otherwise.
+     */
+    fun isEnabled(level: Level): Boolean = level.shouldLog()
+    fun Level.shouldLog(): Boolean = ordinal >= level.ordinal
 
     inline fun trace(f: () -> String): Unit = if (Level.TRACE.shouldLog()) trace(f()) else Unit
     inline fun trace(t: Throwable, f: () -> String): Unit = if (Level.TRACE.shouldLog()) trace(f(), t) else Unit
