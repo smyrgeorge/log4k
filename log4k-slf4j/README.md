@@ -1,4 +1,4 @@
-# log4k
+# log4k-slf4j
 
 ![Build](https://github.com/smyrgeorge/log4k/actions/workflows/ci.yml/badge.svg)
 ![Maven Central](https://img.shields.io/maven-central/v/io.github.smyrgeorge/log4k)

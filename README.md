@@ -167,7 +167,7 @@ repositories {
 
 dependencies {
     // https://central.sonatype.com/artifact/io.github.smyrgeorge/log4k-slf4j
-    implementation("io.github.smyrgeorge:log4k-slf4k:x.y.z")
+    implementation("io.github.smyrgeorge:log4k-slf4j:x.y.z")
 }
 ```
 
