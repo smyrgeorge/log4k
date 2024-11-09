@@ -5,5 +5,5 @@ import io.github.smyrgeorge.log4k.MeterFactory
 import io.github.smyrgeorge.log4k.RootLogger
 
 class SimpleMeterFactory : MeterFactory() {
-    override fun create(name: String): Meter = SimpleMeter(name, RootLogger.level)
+    override fun create(name: String): Meter = SimpleMeter(name, RootLogger.Metering.level)
 }

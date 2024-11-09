@@ -150,6 +150,29 @@ log.error(e) { e.message } // e: Throwable
 RootLogger.Logging.appenders.register(SimpleJsonConsoleLoggingAppender())
 ```
 
+### Full SLF4J Integration Supported
+
+We’ve ensured complete compatibility with SLF4J, allowing seamless integration into projects that already use SLF4J as a
+logging abstraction layer. By providing SLF4J support, `log4k` can be easily adopted in both new and existing
+applications
+without requiring significant changes to your current logging setup. This means you can leverage log4k’s powerful,
+multiplatform capabilities while maintaining compatibility with other SLF4J-compatible libraries and frameworks.
+
+To enable SLF4J integration, simply add the following dependency to your project:
+
+```kotlin
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // https://central.sonatype.com/artifact/io.github.smyrgeorge/log4k-slf4j
+    implementation("io.github.smyrgeorge:log4k-slf4k:x.y.z")
+}
+```
+
+For detailed setup instructions and usage, see the project’s [README.md](./log4k-slf4j/README.md)
+
 ## Tracing API
 
 The tracing API is fully compatible with the `OpenTelemetry` standard, enabling seamless distributed tracing, metric

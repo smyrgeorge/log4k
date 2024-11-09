@@ -1,5 +1,12 @@
 package io.github.smyrgeorge.log4k
 
+import io.github.smyrgeorge.log4k.RootLogger.Metering.appenders
+import io.github.smyrgeorge.log4k.RootLogger.Metering.factory
+import io.github.smyrgeorge.log4k.RootLogger.Metering.meters
+import io.github.smyrgeorge.log4k.RootLogger.Tracing.appenders
+import io.github.smyrgeorge.log4k.RootLogger.Tracing.factory
+import io.github.smyrgeorge.log4k.RootLogger.Tracing.prefix
+import io.github.smyrgeorge.log4k.RootLogger.Tracing.tracers
 import io.github.smyrgeorge.log4k.impl.SimpleLoggerFactory
 import io.github.smyrgeorge.log4k.impl.SimpleMeterFactory
 import io.github.smyrgeorge.log4k.impl.SimpleTracerFactory
@@ -37,7 +44,6 @@ import kotlin.coroutines.EmptyCoroutineContext
  * - meter(event: MeteringEvent): Sends a metering event to the metering channel.
  */
 object RootLogger {
-    var level: Level = Level.INFO
     private val dispatcher: CoroutineDispatcher = dispatcher()
     private val logs: Channel<LoggingEvent> = Channel(capacity = Channel.UNLIMITED)
     private val traces: Channel<TracingEvent> = Channel(capacity = Channel.UNLIMITED)
@@ -107,6 +113,7 @@ object RootLogger {
      * and appenders. Facilitates the registration of new appenders to process logging events.
      */
     object Logging {
+        var level: Level = Level.INFO
         private var idx: Long = 0
         fun id(): Long = ++idx
         var factory: LoggerFactory = SimpleLoggerFactory()
@@ -125,6 +132,7 @@ object RootLogger {
      * @property appenders A registry that maintains all registered appenders for tracing events.
      */
     object Tracing {
+        var level: Level = Level.INFO
         var prefix: String = "span"
         var factory: TracerFactory = SimpleTracerFactory()
         val tracers = CollectorRegistry<Tracer>()
@@ -141,6 +149,7 @@ object RootLogger {
      * @property appenders Registry holding all the registered appenders for metering events.
      */
     object Metering {
+        var level: Level = Level.INFO
         private var idx: Long = 0
         fun id(): Long = ++idx
         var factory: MeterFactory = SimpleMeterFactory()
