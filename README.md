@@ -30,12 +30,6 @@ This project also tries to be fully compatible with `OpenTelemetry` standard.
 
 🏠 [Homepage](https://smyrgeorge.github.io/) (under construction)
 
-## TODO
-
-- [ ] `CoroutineContexAwareLogger`: `Logger` that will collect more info from the coroutine context (in progress)
-- [ ] Ability to chain appenders
-- [ ] `LogbackAppender`: `Appender` that will publish the logging events to the logback.
-
 ## Usage
 
 ```kotlin

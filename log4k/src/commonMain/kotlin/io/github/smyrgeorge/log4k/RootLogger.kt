@@ -1,12 +1,6 @@
 package io.github.smyrgeorge.log4k
 
-import io.github.smyrgeorge.log4k.RootLogger.Metering.appenders
-import io.github.smyrgeorge.log4k.RootLogger.Metering.factory
-import io.github.smyrgeorge.log4k.RootLogger.Metering.meters
-import io.github.smyrgeorge.log4k.RootLogger.Tracing.appenders
-import io.github.smyrgeorge.log4k.RootLogger.Tracing.factory
-import io.github.smyrgeorge.log4k.RootLogger.Tracing.prefix
-import io.github.smyrgeorge.log4k.RootLogger.Tracing.tracers
+import io.github.smyrgeorge.log4k.impl.SimpleCoLoggerFactory
 import io.github.smyrgeorge.log4k.impl.SimpleLoggerFactory
 import io.github.smyrgeorge.log4k.impl.SimpleMeterFactory
 import io.github.smyrgeorge.log4k.impl.SimpleTracerFactory
@@ -117,7 +111,9 @@ object RootLogger {
         private var idx: Long = 0
         fun id(): Long = ++idx
         var factory: LoggerFactory = SimpleLoggerFactory()
+        var coFactory: CoLoggerFactory = SimpleCoLoggerFactory()
         val loggers = CollectorRegistry<Logger>()
+        val coLoggers = CollectorRegistry<CoLogger>()
         val appenders = AppenderRegistry<LoggingEvent>()
         fun register(appender: Appender<LoggingEvent>) = appenders.register(appender)
     }

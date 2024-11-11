@@ -20,10 +20,7 @@ class SimpleConsoleLoggingAppender : Appender<LoggingEvent> {
         }
 
         private fun LoggingEvent.format(): String = buildString {
-            if (id > 0) {
-                append(id)
-                append(' ')
-            }
+            if (id > 0) append(id).append(' ')
             append(span?.context?.spanId?.let { "[$it] " } ?: "")
             append(timestamp)
             append(" [")
@@ -31,9 +28,24 @@ class SimpleConsoleLoggingAppender : Appender<LoggingEvent> {
             append("] - ")
             append(level.name.padEnd(5))
             append(' ')
-            append(logger)
+            if (logger.length > 36) append(logger.compact()) else append(logger)
             append(" - ")
             append(message.format(arguments))
+        }
+
+        private fun String.compact(): String = buildString {
+            if (this@compact.isEmpty()) return@buildString
+            if (!this@compact.contains('.')) {
+                append(this@compact)
+                return@buildString
+            }
+            val parts = this@compact.split('.')
+            if (parts.size < 2) {
+                append(this@compact)
+                return@buildString
+            }
+            val res = parts.take(parts.size - 2).joinToString(".") { it.first().toString() }
+            append(res).append('.').append(parts.takeLast(2).joinToString("."))
         }
     }
 }
