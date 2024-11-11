@@ -26,26 +26,23 @@ import kotlin.coroutines.EmptyCoroutineContext
  * The event processing logic is defined in the `setup` and `handle` methods which need to be implemented by subclasses.
  */
 abstract class FlowAppender<T, E> : Appender<E> {
-    private val scope = FlowAppenderScope()
     private val dispatcher: CoroutineDispatcher = dispatcher()
-    private val logs: Channel<E> = Channel(capacity = Channel.UNLIMITED)
-
-    @Suppress("UNCHECKED_CAST")
-    private var flow: Flow<T> = logs.receiveAsFlow().flowOn(dispatcher) as Flow<T>
+    private val channel: Channel<E> = Channel(capacity = Channel.UNLIMITED)
 
     init {
         FlowAppenderScope().launch(dispatcher) {
-            @Suppress("UNCHECKED_CAST")
-            flow = setup(this@FlowAppender.flow as Flow<E>)
-            flow.onEach { event: T -> runCatching { handle(event) } }.launchIn(this)
+            setup(channel.receiveAsFlow())
+                .flowOn(dispatcher)
+                .onEach { event: T -> runCatching { handle(event) } }
+                .launchIn(this)
         }
     }
 
+    final override val name: String = this::class.toName()
+    final override suspend fun append(event: E): Unit = channel.send(event)
+
     abstract fun setup(flow: Flow<E>): Flow<T>
     abstract suspend fun handle(event: T)
-
-    final override val name: String = this::class.toName()
-    final override suspend fun append(event: E): Unit = logs.send(event)
 
     private class FlowAppenderScope : CoroutineScope {
         override val coroutineContext: CoroutineContext
