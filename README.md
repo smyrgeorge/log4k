@@ -192,15 +192,15 @@ Similarly to the logging API, we also support a more kotlin style API:
 // Starts immediately the span.
 trace.span("test") {
     // it is [TracingEvent.Span.Local]
-    // Set span attributes.
-    it.attributes["key"] = "value"
+    // Set span tags.
+    it.tags["key"] = "value"
     // Send events that are related to the current span.
     it.event(name = "event-1", level = Level.DEBUG)
     it.debug(name = "event-1") // Same as event(name = "event-1", level = Level.DEBUG)
-    // Include attributes in the event.
-    it.event(name = "event-2", attributes = mapOf("key" to "value"))
-    it.event(name = "event-2") { attrs: MutableMap<String, Any?> ->
-        attrs["key"] = "value"
+    // Include tags in the event.
+    it.event(name = "event-2", tags = mapOf("key" to "value"))
+    it.event(name = "event-2") { tags: MutableMap<String, Any?> ->
+        tags["key"] = "value"
     }
     // Automatically closes at the end of te scope.
 }

@@ -31,14 +31,14 @@ class MainTests {
         trace.span("test", parent) {
             log.info(it, "this is a test with span") // The log will contain the span id.
             // Set span attributes.
-            it.attributes["key"] = "value"
+            it.tags["key"] = "value"
             // Send events that are related to the current span.
             it.event(name = "event-1", level = Level.DEBUG)
             it.debug(name = "event-1") // Same as event(name = "event-1", level = Level.DEBUG)
             // Include attributes in the event.
-            it.event(name = "event-2", attrs = mapOf("key" to "value"))
-            it.event(name = "event-2") { attrs ->
-                attrs["key"] = "value"
+            it.event(name = "event-2", tags = mapOf("key" to "value"))
+            it.event(name = "event-2") { tags ->
+                tags["key"] = "value"
             }
             // Automatically closes at the end of te scope.
         }

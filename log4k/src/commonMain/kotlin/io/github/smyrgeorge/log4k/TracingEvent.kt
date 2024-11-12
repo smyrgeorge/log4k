@@ -15,7 +15,7 @@ sealed interface TracingEvent {
     /**
      * Represents a span in a tracing system, which can either be a [Local] or [Remote] span.
      *
-     * A span is a unit of work within a trace and may contain child spans, attributes, events, and a status.
+     * A span is a unit of work within a trace and may contain child spans, tags, events, and a status.
      * https://opentelemetry.io/docs/specs/otel/trace/api/#span
      *
      * @property name The name of the span.
@@ -24,7 +24,7 @@ sealed interface TracingEvent {
      * @property parent The parent span, if any; can be null.
      * @property startAt The start timestamp of the span, set when the span starts.
      * @property endAt The end timestamp of the span, set when the span ends.
-     * @property attributes A map of attributes associated with the span.
+     * @property tags A map of tags associated with the span.
      * @property events A list of events associated with the span.
      * @property status The status of the span, containing the result of its execution.
      */
@@ -35,7 +35,7 @@ sealed interface TracingEvent {
         open val parent: Span?,
         var startAt: Instant?,
         var endAt: Instant?,
-        val attributes: MutableMap<String, Any?>,
+        val tags: MutableMap<String, Any?>,
         val events: MutableList<Event>,
         var status: Status,
     ) : TracingEvent {
@@ -45,7 +45,7 @@ sealed interface TracingEvent {
          *
          * This constructor initializes a local Span with the provided identifier, name,
          * level, tracer, parent span, and trace identifier. The start and end timestamps
-         * are initially set to null. Attributes and events are initialized to empty mutable
+         * are initially set to null. Tags and events are initialized to empty mutable
          * collections, and the status is initialized to a default Status object.
          *
          * @param id Unique identifier for the span.
@@ -62,7 +62,7 @@ sealed interface TracingEvent {
             parent = parent,
             startAt = null,
             endAt = null,
-            attributes = mutableMapOf(),
+            tags = mutableMapOf(),
             events = mutableListOf(),
             status = Status(),
         )
@@ -83,7 +83,7 @@ sealed interface TracingEvent {
             parent = null,
             startAt = null,
             endAt = null,
-            attributes = mutableMapOf(),
+            tags = mutableMapOf(),
             events = mutableListOf(),
             status = Status(),
         )
@@ -152,19 +152,19 @@ sealed interface TracingEvent {
             }
 
             /**
-             * Records an event with the given name, level, and attributes.
+             * Records an event with the given name, level, and tags.
              *
              * @param name The name of the event.
              * @param level The logging level of the event, determining its severity.
-             * @param attrs A map of attributes associated with the event, defaults to an empty map.
+             * @param tags A map of tags associated with the event, defaults to an empty map.
              */
-            fun event(name: String, level: Level, attrs: Map<String, Any?> = emptyMap()) {
+            fun event(name: String, level: Level, tags: Map<String, Any?> = emptyMap()) {
                 if (!shouldStart()) return
                 if (!shouldLogEvent(level)) return
                 if (!started || closed) return
                 val event = Event(
                     name = name,
-                    attributes = attrs,
+                    tags = tags,
                     timestamp = Clock.System.now()
                 )
                 events.add(event)
@@ -172,17 +172,17 @@ sealed interface TracingEvent {
 
             /**
              * https://opentelemetry.io/docs/specs/otel/trace/exceptions/
-             * Records an exception event with the given attributes.
+             * Records an exception event with the given tags.
              *
              * @param error The throwable error to be recorded.
              * @param escaped A boolean indicating if the exception was propagated.
-             * @param attrs A map of additional attributes to associate with the exception event.
+             * @param tags A map of additional tags to associate with the exception event.
              */
-            fun exception(error: Throwable, escaped: Boolean, attrs: Map<String, Any?> = emptyMap()) {
+            fun exception(error: Throwable, escaped: Boolean, tags: Map<String, Any?> = emptyMap()) {
                 val event = Event(
                     name = OpenTelemetry.EXCEPTION,
                     timestamp = Clock.System.now(),
-                    attributes = attrs + mapOf(
+                    tags = tags + mapOf(
                         OpenTelemetry.EXCEPTION_TYPE to error::class.toName(),
                         OpenTelemetry.EXCEPTION_ESCAPED to escaped,
                         OpenTelemetry.EXCEPTION_MESSAGE to error.message,
@@ -193,16 +193,16 @@ sealed interface TracingEvent {
             }
 
             /**
-             * Records an exception event with the given attributes.
+             * Records an exception event with the given tags.
              *
              * @param error The throwable error to be recorded.
              * @param escaped Boolean indicating if the exception was propagated.
-             * @param f Function to populate a mutable map of additional attributes to associate with the exception event.
+             * @param f Function to populate a mutable map of additional tags to associate with the exception event.
              */
             fun exception(error: Throwable, escaped: Boolean, f: (MutableMap<String, Any?>) -> Unit) {
-                val attributes: MutableMap<String, Any?> = mutableMapOf()
-                f(attributes)
-                exception(error, escaped, attributes)
+                val tags: MutableMap<String, Any?> = mutableMapOf()
+                f(tags)
+                exception(error, escaped, tags)
             }
 
             inline fun trace(name: String, f: (MutableMap<String, Any?>) -> Unit) = event(name, Level.TRACE, f)
@@ -211,14 +211,14 @@ sealed interface TracingEvent {
             inline fun warn(name: String, f: (MutableMap<String, Any?>) -> Unit) = event(name, Level.WARN, f)
             inline fun error(name: String, f: (MutableMap<String, Any?>) -> Unit) = event(name, Level.ERROR, f)
 
-            fun trace(name: String, attrs: Map<String, Any?> = emptyMap()) = event(name, Level.TRACE, attrs)
-            fun debug(name: String, attrs: Map<String, Any?> = emptyMap()) = event(name, Level.DEBUG, attrs)
-            fun info(name: String, attrs: Map<String, Any?> = emptyMap()) = event(name, Level.INFO, attrs)
-            fun warn(name: String, attrs: Map<String, Any?> = emptyMap()) = event(name, Level.WARN, attrs)
-            fun error(name: String, attrs: Map<String, Any?> = emptyMap()) = event(name, Level.ERROR, attrs)
+            fun trace(name: String, tags: Map<String, Any?> = emptyMap()) = event(name, Level.TRACE, tags)
+            fun debug(name: String, tags: Map<String, Any?> = emptyMap()) = event(name, Level.DEBUG, tags)
+            fun info(name: String, tags: Map<String, Any?> = emptyMap()) = event(name, Level.INFO, tags)
+            fun warn(name: String, tags: Map<String, Any?> = emptyMap()) = event(name, Level.WARN, tags)
+            fun error(name: String, tags: Map<String, Any?> = emptyMap()) = event(name, Level.ERROR, tags)
 
             fun event(name: String, f: (MutableMap<String, Any?>) -> Unit) = event(name, level, f)
-            fun event(name: String, attrs: Map<String, Any?> = emptyMap()) = event(name, level, attrs)
+            fun event(name: String, tags: Map<String, Any?> = emptyMap()) = event(name, level, tags)
 
             inline fun event(name: String, level: Level, f: (MutableMap<String, Any?>) -> Unit) {
                 mutableMapOf<String, Any?>().also {
@@ -263,7 +263,7 @@ sealed interface TracingEvent {
         data class Event(
             val name: String,
             val timestamp: Instant,
-            val attributes: Map<String, Any?>,
+            val tags: Map<String, Any?>,
         )
 
         // https://opentelemetry.io/docs/specs/otel/trace/api/#set-status
@@ -276,7 +276,7 @@ sealed interface TracingEvent {
         }
 
         override fun toString(): String {
-            return "Span(name='$name', level=$level, context=$context, parent=$parent, startAt=$startAt, endAt=$endAt, attributes=$attributes, events=$events, status=$status)"
+            return "Span(name='$name', level=$level, context=$context, parent=$parent, startAt=$startAt, endAt=$endAt, tags=$tags, events=$events, status=$status)"
         }
     }
 }
