@@ -127,7 +127,7 @@ class Main {
             // Send events that are related to the current span.
             it.event(name = "event-1", level = Level.DEBUG)
             it.debug(name = "event-1") // Same as event(name = "event-1", level = Level.DEBUG)
-            // Include attributes in the event.
+            // Include tags in the event.
             it.event(name = "event-2", tags = mapOf("key" to "value"))
             it.event(name = "event-2") { tags ->
                 tags["key"] = "value"
