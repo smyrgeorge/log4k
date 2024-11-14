@@ -3,6 +3,8 @@ package io.github.smyrgeorge.log4k
 import io.github.smyrgeorge.log4k.TracingEvent.Span.Local
 import io.github.smyrgeorge.log4k.TracingEvent.Span.Remote
 import io.github.smyrgeorge.log4k.impl.OpenTelemetry
+import io.github.smyrgeorge.log4k.impl.MutableTags
+import io.github.smyrgeorge.log4k.impl.Tags
 import io.github.smyrgeorge.log4k.impl.extensions.toName
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -35,7 +37,7 @@ sealed interface TracingEvent {
         open val parent: Span?,
         var startAt: Instant?,
         var endAt: Instant?,
-        val tags: MutableMap<String, Any?>,
+        val tags: MutableTags,
         val events: MutableList<Event>,
         var status: Status,
     ) : TracingEvent {
@@ -45,7 +47,7 @@ sealed interface TracingEvent {
          *
          * This constructor initializes a local Span with the provided identifier, name,
          * level, tracer, parent span, and trace identifier. The start and end timestamps
-         * are initially set to null. Tags and events are initialized to empty mutable
+         * are initially set to null. MutableTags and events are initialized to empty mutable
          * collections, and the status is initialized to a default Status object.
          *
          * @param id Unique identifier for the span.
@@ -158,7 +160,7 @@ sealed interface TracingEvent {
              * @param level The logging level of the event, determining its severity.
              * @param tags A map of tags associated with the event, defaults to an empty map.
              */
-            fun event(name: String, level: Level, tags: Map<String, Any?> = emptyMap()) {
+            fun event(name: String, level: Level, tags: Tags = emptyMap()) {
                 if (!shouldStart()) return
                 if (!shouldLogEvent(level)) return
                 if (!started || closed) return
@@ -178,7 +180,7 @@ sealed interface TracingEvent {
              * @param escaped A boolean indicating if the exception was propagated.
              * @param tags A map of additional tags to associate with the exception event.
              */
-            fun exception(error: Throwable, escaped: Boolean, tags: Map<String, Any?> = emptyMap()) {
+            fun exception(error: Throwable, escaped: Boolean, tags: Tags = emptyMap()) {
                 val event = Event(
                     name = OpenTelemetry.EXCEPTION,
                     timestamp = Clock.System.now(),
@@ -199,29 +201,30 @@ sealed interface TracingEvent {
              * @param escaped Boolean indicating if the exception was propagated.
              * @param f Function to populate a mutable map of additional tags to associate with the exception event.
              */
-            fun exception(error: Throwable, escaped: Boolean, f: (MutableMap<String, Any?>) -> Unit) {
-                val tags: MutableMap<String, Any?> = mutableMapOf()
-                f(tags)
-                exception(error, escaped, tags)
+            fun exception(error: Throwable, escaped: Boolean, f: (MutableTags) -> Unit) {
+                mutableMapOf<String, Any>().also {
+                    f(it)
+                    exception(error, escaped, it)
+                }
             }
 
-            inline fun trace(name: String, f: (MutableMap<String, Any?>) -> Unit) = event(name, Level.TRACE, f)
-            inline fun debug(name: String, f: (MutableMap<String, Any?>) -> Unit) = event(name, Level.DEBUG, f)
-            inline fun info(name: String, f: (MutableMap<String, Any?>) -> Unit) = event(name, Level.INFO, f)
-            inline fun warn(name: String, f: (MutableMap<String, Any?>) -> Unit) = event(name, Level.WARN, f)
-            inline fun error(name: String, f: (MutableMap<String, Any?>) -> Unit) = event(name, Level.ERROR, f)
+            inline fun trace(name: String, f: (Tags) -> Unit) = event(name, Level.TRACE, f)
+            inline fun debug(name: String, f: (Tags) -> Unit) = event(name, Level.DEBUG, f)
+            inline fun info(name: String, f: (Tags) -> Unit) = event(name, Level.INFO, f)
+            inline fun warn(name: String, f: (Tags) -> Unit) = event(name, Level.WARN, f)
+            inline fun error(name: String, f: (Tags) -> Unit) = event(name, Level.ERROR, f)
 
-            fun trace(name: String, tags: Map<String, Any?> = emptyMap()) = event(name, Level.TRACE, tags)
-            fun debug(name: String, tags: Map<String, Any?> = emptyMap()) = event(name, Level.DEBUG, tags)
-            fun info(name: String, tags: Map<String, Any?> = emptyMap()) = event(name, Level.INFO, tags)
-            fun warn(name: String, tags: Map<String, Any?> = emptyMap()) = event(name, Level.WARN, tags)
-            fun error(name: String, tags: Map<String, Any?> = emptyMap()) = event(name, Level.ERROR, tags)
+            fun trace(name: String, tags: Tags = emptyMap()) = event(name, Level.TRACE, tags)
+            fun debug(name: String, tags: Tags = emptyMap()) = event(name, Level.DEBUG, tags)
+            fun info(name: String, tags: Tags = emptyMap()) = event(name, Level.INFO, tags)
+            fun warn(name: String, tags: Tags = emptyMap()) = event(name, Level.WARN, tags)
+            fun error(name: String, tags: Tags = emptyMap()) = event(name, Level.ERROR, tags)
 
-            fun event(name: String, f: (MutableMap<String, Any?>) -> Unit) = event(name, level, f)
-            fun event(name: String, tags: Map<String, Any?> = emptyMap()) = event(name, level, tags)
+            fun event(name: String, f: (MutableTags) -> Unit) = event(name, level, f)
+            fun event(name: String, tags: Tags = emptyMap()) = event(name, level, tags)
 
-            inline fun event(name: String, level: Level, f: (MutableMap<String, Any?>) -> Unit) {
-                mutableMapOf<String, Any?>().also {
+            inline fun event(name: String, level: Level, f: (MutableTags) -> Unit) {
+                mutableMapOf<String, Any>().also {
                     f(it)
                     event(name, level, it)
                 }

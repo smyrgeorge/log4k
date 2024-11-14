@@ -99,7 +99,7 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
             when (info.kind) {
                 Meter.Instrument.Kind.Counter -> Instrument.Counter(
                     name = name,
-                    labels = labels,
+                    tags = tags,
                     kind = info.kind,
                     unit = info.unit,
                     description = info.description,
@@ -109,7 +109,7 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
 
                 Meter.Instrument.Kind.UpDownCounter -> Instrument.UpDownCounter(
                     name = name,
-                    labels = labels,
+                    tags = tags,
                     kind = info.kind,
                     unit = info.unit,
                     description = info.description,
@@ -119,7 +119,7 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
 
                 Meter.Instrument.Kind.Gauge -> Instrument.Gauge(
                     name = name,
-                    labels = labels,
+                    tags = tags,
                     kind = info.kind,
                     unit = info.unit,
                     description = info.description,
@@ -137,11 +137,11 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
         val kind: Meter.Instrument.Kind
         val unit: String?
         val description: String?
-        val labels: Map<String, Any>?
+        val tags: Map<String, Any>?
         var value: Number
         var updatedAt: Instant?
 
-        fun sortKey(): Int = labels.hashCode()
+        fun sortKey(): Int = tags.hashCode()
 
         fun openMetricsHeaderString(): String = buildString {
             description?.let { append("# HELP ").append(name).append(" ").append(it).appendLine() }
@@ -151,7 +151,7 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
 
         fun openMetricsValueString(): String = buildString {
             append(name)
-            labels?.let { append(it.format()) }
+            tags?.let { append(it.format()) }
             append(" ").append(value)
             updatedAt?.let { append(" ").append(it.epochSeconds) }
             appendLine()
@@ -169,7 +169,7 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
 
         abstract class AbstractCounter(
             override val name: String,
-            override val labels: Map<String, Any>?,
+            override val tags: Map<String, Any>?,
             override val kind: Meter.Instrument.Kind,
             override val unit: String?,
             override val description: String?,
@@ -194,7 +194,7 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
 
         abstract class AbstractRecorder(
             override val name: String,
-            override val labels: Map<String, Any>?,
+            override val tags: Map<String, Any>?,
             override val kind: Meter.Instrument.Kind,
             override val unit: String?,
             override val description: String?,
@@ -209,23 +209,23 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
 
         class Counter(
             name: String,
-            labels: Map<String, Any>?,
+            tags: Map<String, Any>?,
             kind: Meter.Instrument.Kind,
             unit: String?,
             description: String?,
             value: Number,
             updatedAt: Instant? = null,
-        ) : AbstractCounter(name, labels, kind, unit, description, value, updatedAt)
+        ) : AbstractCounter(name, tags, kind, unit, description, value, updatedAt)
 
         class UpDownCounter(
             name: String,
-            labels: Map<String, Any>?,
+            tags: Map<String, Any>?,
             kind: Meter.Instrument.Kind,
             unit: String?,
             description: String?,
             value: Number,
             updatedAt: Instant? = null,
-        ) : AbstractCounter(name, labels, kind, unit, description, value, updatedAt) {
+        ) : AbstractCounter(name, tags, kind, unit, description, value, updatedAt) {
             fun decrement(event: MeteringEvent.Decrement) {
                 if (kind == Meter.Instrument.Kind.Counter) return
                 updatedAt = event.timestamp
@@ -240,12 +240,12 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
 
         class Gauge(
             name: String,
-            labels: Map<String, Any>?,
+            tags: Map<String, Any>?,
             kind: Meter.Instrument.Kind,
             unit: String?,
             description: String?,
             value: Number,
             updatedAt: Instant? = null,
-        ) : AbstractRecorder(name, labels, kind, unit, description, value, updatedAt)
+        ) : AbstractRecorder(name, tags, kind, unit, description, value, updatedAt)
     }
 }

@@ -29,15 +29,15 @@ class MainTests {
         val parent: TracingEvent.Span = trace.span(id = "ID_EXAMPLE", traceId = "TRACE_ID_EXAMPLE", name = "parent")
         // Starts immediately the span.
         trace.span("test", parent) {
-            log.info(it, "this is a test with span") // The log will contain the span id.
+            log.info(this, "this is a test with span") // The log will contain the span id.
             // Set span tags.
-            it.tags["key"] = "value"
+            tags["key"] = "value"
             // Send events that are related to the current span.
-            it.event(name = "event-1", level = Level.DEBUG)
-            it.debug(name = "event-1") // Same as event(name = "event-1", level = Level.DEBUG)
+            event(name = "event-1", level = Level.DEBUG)
+            debug(name = "event-1") // Same as event(name = "event-1", level = Level.DEBUG)
             // Include tags in the event.
-            it.event(name = "event-2", tags = mapOf("key" to "value"))
-            it.event(name = "event-2") { tags ->
+            event(name = "event-2", tags = mapOf("key" to "value"))
+            event(name = "event-2") { tags ->
                 tags["key"] = "value"
             }
             // Automatically closes at the end of te scope.

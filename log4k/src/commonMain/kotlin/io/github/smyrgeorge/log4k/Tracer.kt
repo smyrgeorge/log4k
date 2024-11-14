@@ -60,7 +60,7 @@ abstract class Tracer(
     inline fun <T> span(
         name: String,
         parent: TracingEvent.Span? = null,
-        f: (TracingEvent.Span.Local) -> T
+        f: TracingEvent.Span.Local.() -> T
     ): T {
         val span = span(name, parent).start()
         return try {

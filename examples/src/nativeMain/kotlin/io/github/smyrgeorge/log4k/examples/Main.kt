@@ -120,17 +120,22 @@ class Main {
         // NOTICE: we do not start it, since it's already started.
         val parent: TracingEvent.Span.Remote = trace.span(id = "ID_EXAMPLE", traceId = "TRACE_ID_EXAMPLE")
         // Starts immediately the span.
-        trace.span("test", parent) {
-            log.info(it, "this is a test with span") // The log will contain the span id.
+        trace.span("test-1", parent) {
+            log.info(this, "this is a test with span") // The log will contain the span id.
             // Set span tags.
-            it.tags["key"] = "value"
+            tags["key"] = "value"
             // Send events that are related to the current span.
-            it.event(name = "event-1", level = Level.DEBUG)
-            it.debug(name = "event-1") // Same as event(name = "event-1", level = Level.DEBUG)
+            event(name = "event-1", level = Level.DEBUG)
+            debug(name = "event-1") // Same as event(name = "event-1", level = Level.DEBUG)
             // Include tags in the event.
-            it.event(name = "event-2", tags = mapOf("key" to "value"))
-            it.event(name = "event-2") { tags ->
+            event(name = "event-2", tags = mapOf("key" to "value"))
+            event(name = "event-2") { tags ->
                 tags["key"] = "value"
+            }
+            // Nested Span.
+            trace.span("test-2", this) {
+                event(name = "event-3", tags = mapOf("key" to "value"))
+                log.info(this@span, "this is a test with span") // The log will contain the span id.
             }
             // Automatically closes at the end of te scope.
         }

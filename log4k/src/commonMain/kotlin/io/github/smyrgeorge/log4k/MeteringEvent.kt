@@ -1,6 +1,7 @@
 package io.github.smyrgeorge.log4k
 
 import io.github.smyrgeorge.log4k.Meter.Instrument.Kind
+import io.github.smyrgeorge.log4k.impl.Tags
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 
@@ -28,15 +29,15 @@ sealed interface MeteringEvent {
     }
 
     sealed interface ValueEvent : MeteringEvent {
-        val labels: Map<String, Any>
+        val tags: Tags
         val value: Number
-        override fun key(): Int = "$name.${labels.hashCode()}".hashCode()
+        override fun key(): Int = "$name.${tags.hashCode()}".hashCode()
     }
 
     data class Set(
         override var id: Long = 0L,
         override val name: String,
-        override val labels: Map<String, Any>,
+        override val tags: Tags,
         override val timestamp: Instant = Clock.System.now(),
         override val value: Number,
     ) : ValueEvent
@@ -44,7 +45,7 @@ sealed interface MeteringEvent {
     data class Increment(
         override var id: Long = 0L,
         override val name: String,
-        override val labels: Map<String, Any>,
+        override val tags: Tags,
         override val timestamp: Instant = Clock.System.now(),
         override val value: Number,
     ) : ValueEvent
@@ -52,7 +53,7 @@ sealed interface MeteringEvent {
     data class Decrement(
         override var id: Long = 0L,
         override val name: String,
-        override val labels: Map<String, Any>,
+        override val tags: Tags,
         override val timestamp: Instant = Clock.System.now(),
         override val value: Number,
     ) : ValueEvent
@@ -60,7 +61,7 @@ sealed interface MeteringEvent {
     data class Record(
         override var id: Long = 0L,
         override val name: String,
-        override val labels: Map<String, Any>,
+        override val tags: Tags,
         override val timestamp: Instant = Clock.System.now(),
         override val value: Number,
     ) : ValueEvent

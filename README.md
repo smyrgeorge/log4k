@@ -100,9 +100,9 @@ repeat(1_000_000) {
 // # ...
 // # After some ~4k logs starts to drop.
 // 991339 2024-10-24T07:19:38.294933Z [native-1] - INFO  Main - 991224
-// 2024-10-24T07:19:38.295050Z [native-13] - WARN  FlowFloodProtectedAppender - Dropped 6556 log messages due to flooding (total: 987299).
+// 2024-10-24T07:19:38.295050Z [native-13] - WARN  FlowFloodProtectedAppender - Dropped 6556 log messages due to flooding (total dropped: 987299).
 // 995897 2024-10-24T07:19:38.314454Z [native-1] - INFO  Main - 995782
-// 2024-10-24T07:19:38.315134Z [native-19] - WARN  FlowFloodProtectedAppender - Dropped 4557 log messages due to flooding (total: 991856).
+// 2024-10-24T07:19:38.315134Z [native-19] - WARN  FlowFloodProtectedAppender - Dropped 4557 log messages due to flooding (total dropped: 991856).
 ```
 
 To tackle similar issues, we can apply dynamic rate-limiting based on system load or log severity, prioritizing critical
@@ -189,18 +189,22 @@ span.end()
 Similarly to the logging API, we also support a more kotlin style API:
 
 ```kotlin
-// Starts immediately the span.
-trace.span("test") {
-    // it is [TracingEvent.Span.Local]
+trace.span("test", parent) {
+    log.info(this, "this is a test with span") // The log will contain the span id.
     // Set span tags.
-    it.tags["key"] = "value"
+    tags["key"] = "value"
     // Send events that are related to the current span.
-    it.event(name = "event-1", level = Level.DEBUG)
-    it.debug(name = "event-1") // Same as event(name = "event-1", level = Level.DEBUG)
+    event(name = "event-1", level = Level.DEBUG)
+    debug(name = "event-1") // Same as event(name = "event-1", level = Level.DEBUG)
     // Include tags in the event.
-    it.event(name = "event-2", tags = mapOf("key" to "value"))
-    it.event(name = "event-2") { tags: MutableMap<String, Any?> ->
+    event(name = "event-2", tags = mapOf("key" to "value"))
+    event(name = "event-2") { tags ->
         tags["key"] = "value"
+    }
+    // Nested Span.
+    trace.span("test-2", this) {
+        event(name = "event-3", tags = mapOf("key" to "value"))
+        log.info(this@span, "this is a test with span") // The log will contain the span id.
     }
     // Automatically closes at the end of te scope.
 }

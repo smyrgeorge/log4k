@@ -147,28 +147,28 @@ abstract class Meter(
             description: String? = null,
         ) : Instrument(name, meter, kind, unit, description) {
             /**
-             * Sets the counter to the specified non-negative value with associated labels.
+             * Sets the counter to the specified non-negative value with associated tags.
              *
              * @param value The non-negative value to set the counter to.
-             * @param labels A vararg of pairs representing additional labels/metadata associated with the set action.
+             * @param tags A vararg of pairs representing additional tags/metadata associated with the set action.
              */
-            fun set(value: T, vararg labels: Pair<String, Any>) {
+            fun set(value: T, vararg tags: Pair<String, Any>) {
                 if (meter.isMuted()) return
                 if (value.isLessThanZero()) error("Only non-negative values are allowed.")
-                val event = MeteringEvent.Set(name = name, labels = labels.toMap(), value = value)
+                val event = MeteringEvent.Set(name = name, tags = tags.toMap(), value = value)
                 RootLogger.meter(event)
             }
 
             /**
-             * Increments the counter by the specified non-negative value with associated labels.
+             * Increments the counter by the specified non-negative value with associated tags.
              *
              * @param value The non-negative value by which to increment the counter.
-             * @param labels A vararg of pairs representing additional labels/metadata associated with the increment action.
+             * @param tags A vararg of pairs representing additional tags/metadata associated with the increment action.
              */
-            fun increment(value: T, vararg labels: Pair<String, Any>) {
+            fun increment(value: T, vararg tags: Pair<String, Any>) {
                 if (meter.isMuted()) return
                 if (value.isLessThanZero()) error("Only non-negative values are allowed.")
-                val event = MeteringEvent.Increment(name = name, labels = labels.toMap(), value = value)
+                val event = MeteringEvent.Increment(name = name, tags = tags.toMap(), value = value)
                 RootLogger.meter(event)
             }
 
@@ -182,7 +182,7 @@ abstract class Meter(
         }
 
         /**
-         * AbstractRecorder is a sealed class used for recording numerical data attached to specific labels.
+         * AbstractRecorder is a sealed class used for recording numerical data attached to specific tags.
          * It extends the Instrument class and provides functionality for recording and periodically polling data.
          *
          * @param T the type of numerical data to be recorded, constrained by the Number class.
@@ -200,15 +200,15 @@ abstract class Meter(
             description: String? = null,
         ) : Instrument(name, meter, kind, unit, description) {
             /**
-             * Records a metering event with a specified value and optional labels.
+             * Records a metering event with a specified value and optional tags.
              * If the meter is muted, the event will not be recorded.
              *
              * @param value The value to be recorded.
-             * @param labels A variable number of pairs representing the labels associated with the event.
+             * @param tags A variable number of pairs representing the tags associated with the event.
              */
-            fun record(value: T, vararg labels: Pair<String, Any>) {
+            fun record(value: T, vararg tags: Pair<String, Any>) {
                 if (meter.isMuted()) return
-                val event = MeteringEvent.Record(name = name, labels = labels.toMap(), value = value)
+                val event = MeteringEvent.Record(name = name, tags = tags.toMap(), value = value)
                 RootLogger.meter(event)
             }
 
@@ -281,12 +281,12 @@ abstract class Meter(
              * The value must be non-negative.
              *
              * @param value The non-negative value to decrement from the counter.
-             * @param labels Optional key-value pairs of labels associated with the decrement event.
+             * @param tags Optional key-value pairs of tags associated with the decrement event.
              */
-            fun decrement(value: T, vararg labels: Pair<String, Any>) {
+            fun decrement(value: T, vararg tags: Pair<String, Any>) {
                 if (meter.isMuted()) return
                 if (value.isLessThanZero()) error("Only non-negative values are allowed.")
-                val event = MeteringEvent.Increment(name = name, labels = labels.toMap(), value = value)
+                val event = MeteringEvent.Increment(name = name, tags = tags.toMap(), value = value)
                 RootLogger.meter(event)
             }
         }
