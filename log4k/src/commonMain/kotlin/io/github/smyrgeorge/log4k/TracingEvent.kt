@@ -2,8 +2,8 @@ package io.github.smyrgeorge.log4k
 
 import io.github.smyrgeorge.log4k.TracingEvent.Span.Local
 import io.github.smyrgeorge.log4k.TracingEvent.Span.Remote
-import io.github.smyrgeorge.log4k.impl.OpenTelemetry
 import io.github.smyrgeorge.log4k.impl.MutableTags
+import io.github.smyrgeorge.log4k.impl.OpenTelemetry
 import io.github.smyrgeorge.log4k.impl.Tags
 import io.github.smyrgeorge.log4k.impl.extensions.toName
 import kotlinx.datetime.Clock
@@ -187,7 +187,7 @@ sealed interface TracingEvent {
                     tags = tags + mapOf(
                         OpenTelemetry.EXCEPTION_TYPE to error::class.toName(),
                         OpenTelemetry.EXCEPTION_ESCAPED to escaped,
-                        OpenTelemetry.EXCEPTION_MESSAGE to error.message,
+                        OpenTelemetry.EXCEPTION_MESSAGE to (error.message ?: ""),
                         OpenTelemetry.EXCEPTION_STACKTRACE to error.stackTraceToString(),
                     )
                 )
@@ -266,7 +266,7 @@ sealed interface TracingEvent {
         data class Event(
             val name: String,
             val timestamp: Instant,
-            val tags: Map<String, Any?>,
+            val tags: Tags,
         )
 
         // https://opentelemetry.io/docs/specs/otel/trace/api/#set-status

@@ -3,6 +3,7 @@ package io.github.smyrgeorge.log4k.impl.appenders.simple
 import io.github.smyrgeorge.log4k.Appender
 import io.github.smyrgeorge.log4k.Meter
 import io.github.smyrgeorge.log4k.MeteringEvent
+import io.github.smyrgeorge.log4k.impl.Tags
 import io.github.smyrgeorge.log4k.impl.extensions.toName
 import kotlinx.datetime.Instant
 
@@ -137,7 +138,7 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
         val kind: Meter.Instrument.Kind
         val unit: String?
         val description: String?
-        val tags: Map<String, Any>?
+        val tags: Tags?
         var value: Number
         var updatedAt: Instant?
 
@@ -157,7 +158,7 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
             appendLine()
         }
 
-        fun Map<String, Any>.format(): String =
+        fun Tags.format(): String =
             entries.joinToString(prefix = "{", postfix = "}") { (k, v) -> "$k=\"$v\"" }
 
         data class Info(
@@ -169,7 +170,7 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
 
         abstract class AbstractCounter(
             override val name: String,
-            override val tags: Map<String, Any>?,
+            override val tags: Tags?,
             override val kind: Meter.Instrument.Kind,
             override val unit: String?,
             override val description: String?,
@@ -194,7 +195,7 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
 
         abstract class AbstractRecorder(
             override val name: String,
-            override val tags: Map<String, Any>?,
+            override val tags: Tags?,
             override val kind: Meter.Instrument.Kind,
             override val unit: String?,
             override val description: String?,
@@ -209,7 +210,7 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
 
         class Counter(
             name: String,
-            tags: Map<String, Any>?,
+            tags: Tags?,
             kind: Meter.Instrument.Kind,
             unit: String?,
             description: String?,
@@ -219,7 +220,7 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
 
         class UpDownCounter(
             name: String,
-            tags: Map<String, Any>?,
+            tags: Tags?,
             kind: Meter.Instrument.Kind,
             unit: String?,
             description: String?,
@@ -240,7 +241,7 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
 
         class Gauge(
             name: String,
-            tags: Map<String, Any>?,
+            tags: Tags?,
             kind: Meter.Instrument.Kind,
             unit: String?,
             description: String?,
