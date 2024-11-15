@@ -1,6 +1,5 @@
 package io.github.smyrgeorge.log4k.slf4j
 
-import io.github.smyrgeorge.log4k.RootLogger
 import org.slf4j.ILoggerFactory
 import org.slf4j.Logger
 
@@ -13,5 +12,5 @@ import org.slf4j.Logger
  */
 public class Log4kILoggerFactory : ILoggerFactory {
     override fun getLogger(name: String): Logger =
-        RootLogger.Logging.factory.get(name).let { Log4kLogger(it) }
+        io.github.smyrgeorge.log4k.Logger.factory.get(name).let { Log4kLogger(it) }
 }
