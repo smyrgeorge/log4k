@@ -1,9 +1,9 @@
-package io.github.smyrgeorge.log4k
+package io.github.smyrgeorge.log4k.coroutines
 
 import io.github.smyrgeorge.log4k.impl.extensions.toName
 import kotlin.reflect.KClass
 
-abstract class LoggerFactory {
+abstract class CoroutinesLoggerFactory {
     abstract fun create(name: String): Logger
     fun get(clazz: KClass<*>): Logger = get(clazz.toName())
     fun get(name: String): Logger {

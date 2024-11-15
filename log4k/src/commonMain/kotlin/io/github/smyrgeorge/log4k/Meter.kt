@@ -1,5 +1,6 @@
 package io.github.smyrgeorge.log4k
 
+import io.github.smyrgeorge.log4k.impl.SimpleMeterFactory
 import io.github.smyrgeorge.log4k.impl.extensions.dispatcher
 import io.github.smyrgeorge.log4k.impl.extensions.toName
 import io.github.smyrgeorge.log4k.impl.registry.CollectorRegistry
@@ -24,7 +25,7 @@ import kotlin.time.Duration.Companion.seconds
  * @param name The name of the meter.
  * @param level The logging level for the meter.
  */
-@Suppress("unused")
+@Suppress("unused", "MemberVisibilityCanBePrivate")
 abstract class Meter(
     final override val name: String,
     final override var level: Level
@@ -310,8 +311,10 @@ abstract class Meter(
     }
 
     companion object {
-        fun of(name: String): Meter = RootLogger.Metering.factory.get(name)
-        fun of(clazz: KClass<*>): Meter = RootLogger.Metering.factory.get(clazz)
+        val registry = CollectorRegistry<Meter>()
+        var factory: MeterFactory = SimpleMeterFactory()
+        fun of(name: String): Meter = factory.get(name)
+        fun of(clazz: KClass<*>): Meter = factory.get(clazz)
         inline fun <reified T : Meter> ofType(name: String): T = of(name) as T
         inline fun <reified T : Meter> ofType(clazz: KClass<*>): T = of(clazz) as T
     }

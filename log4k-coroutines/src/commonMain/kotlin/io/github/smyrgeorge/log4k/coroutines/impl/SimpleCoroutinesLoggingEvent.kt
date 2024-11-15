@@ -1,12 +1,12 @@
-package io.github.smyrgeorge.log4k.impl
+package io.github.smyrgeorge.log4k.coroutines.impl
 
-import io.github.smyrgeorge.log4k.CoLogger
 import io.github.smyrgeorge.log4k.Level
 import io.github.smyrgeorge.log4k.LoggingEvent
 import io.github.smyrgeorge.log4k.TracingEvent
+import io.github.smyrgeorge.log4k.coroutines.Logger
 import kotlinx.datetime.Instant
 
-class SimpleCoLoggingEvent(
+class SimpleCoroutinesLoggingEvent(
     override var id: Long = 0,
     override val level: Level,
     override val span: TracingEvent.Span?,
@@ -16,5 +16,5 @@ class SimpleCoLoggingEvent(
     override val arguments: Array<out Any?>,
     override val thread: String,
     override val throwable: Throwable?,
-    val ctx: CoLogger.LoggingContext
+    val ctx: Logger.LoggingContext
 ) : LoggingEvent

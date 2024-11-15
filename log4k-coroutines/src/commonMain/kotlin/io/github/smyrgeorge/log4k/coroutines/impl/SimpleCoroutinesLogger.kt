@@ -1,12 +1,12 @@
-package io.github.smyrgeorge.log4k.impl
+package io.github.smyrgeorge.log4k.coroutines.impl
 
-import io.github.smyrgeorge.log4k.CoLogger
 import io.github.smyrgeorge.log4k.Level
 import io.github.smyrgeorge.log4k.LoggingEvent
+import io.github.smyrgeorge.log4k.coroutines.Logger
 import io.github.smyrgeorge.log4k.impl.extensions.thread
 import kotlinx.datetime.Clock
 
-class SimpleCoLogger(name: String, level: Level) : CoLogger(name, level) {
+class SimpleCoroutinesLogger(name: String, level: Level) : Logger(name, level) {
     override fun toLoggingEvent(
         level: Level,
         ctx: LoggingContext,
@@ -14,7 +14,7 @@ class SimpleCoLogger(name: String, level: Level) : CoLogger(name, level) {
         arguments: Array<out Any?>,
         throwable: Throwable?
     ): LoggingEvent {
-        return SimpleCoLoggingEvent(
+        return SimpleCoroutinesLoggingEvent(
             level = level,
             span = ctx.span,
             timestamp = Clock.System.now(),

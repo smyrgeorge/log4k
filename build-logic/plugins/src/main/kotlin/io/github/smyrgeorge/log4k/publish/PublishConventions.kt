@@ -12,6 +12,7 @@ class PublishConventions : Plugin<Project> {
 
     private val descriptions: Map<String, String> = mapOf(
         "log4k" to "A Comprehensive Logging and Tracing Solution for Kotlin Multiplatform.",
+        "log4k-coroutines" to "A Comprehensive Logging and Tracing Solution for Kotlin Multiplatform.",
         "log4k-slf4j" to "A Comprehensive Logging and Tracing Solution for Kotlin Multiplatform.",
     )
 

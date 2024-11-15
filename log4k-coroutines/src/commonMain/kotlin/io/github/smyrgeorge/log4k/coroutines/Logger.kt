@@ -1,11 +1,15 @@
-package io.github.smyrgeorge.log4k
+package io.github.smyrgeorge.log4k.coroutines
 
+import io.github.smyrgeorge.log4k.Level
 import io.github.smyrgeorge.log4k.Level.DEBUG
 import io.github.smyrgeorge.log4k.Level.ERROR
 import io.github.smyrgeorge.log4k.Level.INFO
 import io.github.smyrgeorge.log4k.Level.TRACE
 import io.github.smyrgeorge.log4k.Level.WARN
+import io.github.smyrgeorge.log4k.LoggingEvent
+import io.github.smyrgeorge.log4k.RootLogger
 import io.github.smyrgeorge.log4k.TracingEvent.Span
+import io.github.smyrgeorge.log4k.coroutines.impl.SimpleCoroutinesLoggerFactory
 import io.github.smyrgeorge.log4k.impl.MutableTags
 import io.github.smyrgeorge.log4k.impl.Tag
 import io.github.smyrgeorge.log4k.impl.Tags
@@ -14,8 +18,8 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.coroutineContext
 import kotlin.reflect.KClass
 
-@Suppress("unused")
-abstract class CoLogger(
+@Suppress("unused", "MemberVisibilityCanBePrivate")
+abstract class Logger(
     final override val name: String,
     final override var level: Level
 ) : CollectorRegistry.Collector {
@@ -115,9 +119,11 @@ abstract class CoLogger(
     }
 
     companion object {
-        fun of(name: String): CoLogger = RootLogger.Logging.coFactory.get(name)
-        fun of(clazz: KClass<*>): CoLogger = RootLogger.Logging.coFactory.get(clazz)
-        inline fun <reified T : CoLogger> ofType(name: String): T = of(name) as T
-        inline fun <reified T : CoLogger> ofType(clazz: KClass<*>): T = of(clazz) as T
+        val registry = CollectorRegistry<Logger>()
+        var factory: CoroutinesLoggerFactory = SimpleCoroutinesLoggerFactory()
+        fun of(name: String): Logger = factory.get(name)
+        fun of(clazz: KClass<*>): Logger = factory.get(clazz)
+        inline fun <reified T : Logger> ofType(name: String): T = of(name) as T
+        inline fun <reified T : Logger> ofType(clazz: KClass<*>): T = of(clazz) as T
     }
 }

@@ -7,10 +7,10 @@ abstract class TracerFactory {
     abstract fun create(name: String): Tracer
     fun get(clazz: KClass<*>): Tracer = get(clazz.toName())
     fun get(name: String): Tracer {
-        val existing = RootLogger.Tracing.tracers.get(name)
+        val existing = Tracer.registry.get(name)
         if (existing != null) return existing
         return create(name).also {
-            RootLogger.Tracing.tracers.register(it)
+            Tracer.registry.register(it)
         }
     }
 }

@@ -50,8 +50,8 @@ class Main {
 
         delay(1000)
 
-        RootLogger.Metering.register(SimpleConsoleMeteringAppender())
-        RootLogger.Metering.register(SimpleMeteringCollectorAppender())
+        RootLogger.Metering.appenders.register(SimpleConsoleMeteringAppender())
+        RootLogger.Metering.appenders.register(SimpleMeteringCollectorAppender())
         val collector = RootLogger.Metering.appenders.get(SimpleMeteringCollectorAppender::class)
 
         val c1 = meter.counter<Int>("event-a")
@@ -83,7 +83,7 @@ class Main {
         log.debug("ignore")
         log.debug { "ignore + ${5}" } // Will be evaluated only if DEBUG logs are enabled.
         log.info("this is a test")
-        RootLogger.Logging.loggers.mute(Main::class)
+        Logger.registry.mute(Main::class)
         log.info("this is a test with 1 arg: {}", "hello")
         log.unmute()
         log.info("this is a test with 1 arg: {}", "hello")
@@ -114,7 +114,7 @@ class Main {
 
         delay(2000)
 
-        RootLogger.Tracing.register(SimpleConsoleTracingAppender())
+        RootLogger.Tracing.appenders.register(SimpleConsoleTracingAppender())
         // Create the parent span.
         // This is useful in cases that the parent span is not created by us (e.g. from a http call).
         // NOTICE: we do not start it, since it's already started.
@@ -135,7 +135,7 @@ class Main {
             // Nested Span.
             trace.span("test-2", this) {
                 event(name = "event-3", tags = mapOf("key" to "value"))
-                log.info(this@span, "this is a test with span") // The log will contain the span id.
+                log.info(this, "this is a test with span") // The log will contain the span id.
             }
             // Automatically closes at the end of te scope.
         }

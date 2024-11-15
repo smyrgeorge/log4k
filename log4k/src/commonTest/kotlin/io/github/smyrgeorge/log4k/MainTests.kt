@@ -12,7 +12,7 @@ class MainTests {
         log.debug("ignore")
         log.debug { "ignore + ${5}" } // Will be evaluated only if DEBUG logs are enabled.
         log.info("this is a test")
-        RootLogger.Logging.loggers.mute("io.github.smyrgeorge.log4k.MainTests")
+        Logger.registry.mute("io.github.smyrgeorge.log4k.MainTests")
         log.info("this is a test with 1 arg: {}", "hello")
         log.unmute()
         log.info("this is a test with 1 arg: {}", "hello")
@@ -23,7 +23,7 @@ class MainTests {
             log.error(e) { e.message }
         }
 
-        RootLogger.Tracing.register(SimpleConsoleTracingAppender())
+        RootLogger.Tracing.appenders.register(SimpleConsoleTracingAppender())
         // Create the parent span.
         // NOTICE: we do not start it, since it's already started.
         val parent: TracingEvent.Span = trace.span(id = "ID_EXAMPLE", traceId = "TRACE_ID_EXAMPLE", name = "parent")

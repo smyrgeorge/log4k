@@ -1,5 +1,6 @@
 package io.github.smyrgeorge.log4k
 
+import io.github.smyrgeorge.log4k.impl.SimpleTracerFactory
 import io.github.smyrgeorge.log4k.impl.registry.CollectorRegistry
 import kotlin.math.absoluteValue
 import kotlin.reflect.KClass
@@ -13,7 +14,7 @@ import kotlin.uuid.Uuid
  * @property name The name of the tracer.
  * @property level The logging level of the tracer.
  */
-@Suppress("unused")
+@Suppress("unused", "MemberVisibilityCanBePrivate")
 abstract class Tracer(
     final override val name: String,
     final override var level: Level
@@ -73,8 +74,10 @@ abstract class Tracer(
     }
 
     companion object {
-        fun of(name: String): Tracer = RootLogger.Tracing.factory.get(name)
-        fun of(clazz: KClass<*>): Tracer = RootLogger.Tracing.factory.get(clazz)
+        val registry = CollectorRegistry<Tracer>()
+        var factory: TracerFactory = SimpleTracerFactory()
+        fun of(name: String): Tracer = factory.get(name)
+        fun of(clazz: KClass<*>): Tracer = factory.get(clazz)
         inline fun <reified T : Tracer> ofType(name: String): T = of(name) as T
         inline fun <reified T : Tracer> ofType(clazz: KClass<*>): T = of(clazz) as T
     }

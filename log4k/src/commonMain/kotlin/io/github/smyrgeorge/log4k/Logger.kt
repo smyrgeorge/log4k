@@ -6,6 +6,7 @@ import io.github.smyrgeorge.log4k.Level.INFO
 import io.github.smyrgeorge.log4k.Level.TRACE
 import io.github.smyrgeorge.log4k.Level.WARN
 import io.github.smyrgeorge.log4k.TracingEvent.Span
+import io.github.smyrgeorge.log4k.impl.SimpleLoggerFactory
 import io.github.smyrgeorge.log4k.impl.registry.CollectorRegistry
 import kotlin.reflect.KClass
 
@@ -16,7 +17,7 @@ import kotlin.reflect.KClass
  * @property name The name identifier for the logger.
  * @property level The logging level threshold.
  */
-@Suppress("unused")
+@Suppress("unused", "MemberVisibilityCanBePrivate")
 abstract class Logger(
     final override val name: String,
     final override var level: Level
@@ -125,8 +126,10 @@ abstract class Logger(
     fun error(span: Span, msg: String?, t: Throwable, vararg args: Any?): Unit = log(ERROR, span, msg ?: "", args, t)
 
     companion object {
-        fun of(name: String): Logger = RootLogger.Logging.factory.get(name)
-        fun of(clazz: KClass<*>): Logger = RootLogger.Logging.factory.get(clazz)
+        val registry = CollectorRegistry<Logger>()
+        var factory: LoggerFactory = SimpleLoggerFactory()
+        fun of(name: String): Logger = factory.get(name)
+        fun of(clazz: KClass<*>): Logger = factory.get(clazz)
         inline fun <reified T : Logger> ofType(name: String): T = of(name) as T
         inline fun <reified T : Logger> ofType(clazz: KClass<*>): T = of(clazz) as T
     }

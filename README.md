@@ -177,7 +177,7 @@ private val trace: Tracer = Tracer.of(this::class)
 // We need to manually register an appender.
 // The [SimpleConsoleTracingAppender] will print the traces in the console
 // (is just an example, should not be used as a real example).
-RootLogger.Tracing.register(SimpleConsoleTracingAppender())
+RootLogger.Tracing.appenders.register(SimpleConsoleTracingAppender())
 
 // Create the span and then start it.
 val span: TracingEvent.Span.Local = trace.span("test").start()
@@ -204,7 +204,7 @@ trace.span("test", parent) {
     // Nested Span.
     trace.span("test-2", this) {
         event(name = "event-3", tags = mapOf("key" to "value"))
-        log.info(this@span, "this is a test with span") // The log will contain the span id.
+        log.info(this, "this is a test with span") // The log will contain the span id.
     }
     // Automatically closes at the end of te scope.
 }
@@ -274,7 +274,7 @@ all registered appenders. For instance, we can register the `SimpleMeteringColle
 
 ```kotlin
 val collector = SimpleMeteringCollectorAppender()
-RootLogger.Metering.register(collector)
+RootLogger.Metering.appenders.register(collector)
 ```
 
 The `SimpleMeteringCollectorAppender` processes all events, updating the value for each registered instrument. It also

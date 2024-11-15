@@ -1,13 +1,8 @@
 package io.github.smyrgeorge.log4k
 
-import io.github.smyrgeorge.log4k.impl.SimpleCoLoggerFactory
-import io.github.smyrgeorge.log4k.impl.SimpleLoggerFactory
-import io.github.smyrgeorge.log4k.impl.SimpleMeterFactory
-import io.github.smyrgeorge.log4k.impl.SimpleTracerFactory
 import io.github.smyrgeorge.log4k.impl.appenders.simple.SimpleConsoleLoggingAppender
 import io.github.smyrgeorge.log4k.impl.extensions.dispatcher
 import io.github.smyrgeorge.log4k.impl.registry.AppenderRegistry
-import io.github.smyrgeorge.log4k.impl.registry.CollectorRegistry
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
@@ -44,10 +39,10 @@ object RootLogger {
     private val meters: Channel<MeteringEvent> = Channel(capacity = Channel.UNLIMITED)
 
     init {
-        Logging.register(SimpleConsoleLoggingAppender())
+        Logging.appenders.register(SimpleConsoleLoggingAppender())
 
         // Start consuming the Logging queue.
-        LoggerScope.launch(dispatcher) {
+        RootLoggerScope.launch(dispatcher) {
             logs.consumeEach { event ->
                 runCatching {
                     event.id = Logging.id()
@@ -57,7 +52,7 @@ object RootLogger {
         }
 
         // Start consuming the Tracing queue.
-        TracerScope.launch(dispatcher) {
+        RootLoggerScope.launch(dispatcher) {
             traces.consumeEach { event ->
                 runCatching {
                     Tracing.appenders.all().forEach { it.append(event) }
@@ -66,7 +61,7 @@ object RootLogger {
         }
 
         // Start consuming the Tracing queue.
-        MeterScope.launch(dispatcher) {
+        RootLoggerScope.launch(dispatcher) {
             meters.consumeEach { event ->
                 runCatching {
                     event.id = Logging.id()
@@ -82,7 +77,7 @@ object RootLogger {
      * @param event The logging event to be recorded.
      * @return Unit This function does not return a value.
      */
-    fun log(event: LoggingEvent): Unit = send(LoggerScope) { logs.send(event) }
+    fun log(event: LoggingEvent): Unit = send(RootLoggerScope) { logs.send(event) }
 
     /**
      * Sends a tracing event through the tracer scope.
@@ -90,7 +85,7 @@ object RootLogger {
      * @param event The tracing event to be sent.
      * @return Unit.
      */
-    fun trace(event: TracingEvent): Unit = send(TracerScope) { traces.send(event) }
+    fun trace(event: TracingEvent): Unit = send(RootLoggerScope) { traces.send(event) }
 
     /**
      * Meters a given metering event and sends it using the provided metering infrastructure.
@@ -98,77 +93,54 @@ object RootLogger {
      * @param event The metering event to be measured and sent.
      * @return Unit
      */
-    fun meter(event: MeteringEvent): Unit = send(MeterScope) { meters.send(event) }
+    fun meter(event: MeteringEvent): Unit = send(RootLoggerScope) { meters.send(event) }
 
     /**
-     * Singleton object responsible for managing logging system.
+     * Provides logging functionality with various configurable logging levels.
      *
-     * Provides unique identifiers for log entries, and manages registries for loggers
-     * and appenders. Facilitates the registration of new appenders to process logging events.
+     * This object manages the current logging level and provides unique identifiers
+     * for logging events. It also maintains a registry of appenders that handle
+     * log events.
      */
     object Logging {
         var level: Level = Level.INFO
         private var idx: Long = 0
         fun id(): Long = ++idx
-        var factory: LoggerFactory = SimpleLoggerFactory()
-        var coFactory: CoLoggerFactory = SimpleCoLoggerFactory()
-        val loggers = CollectorRegistry<Logger>()
-        val coLoggers = CollectorRegistry<CoLogger>()
         val appenders = AppenderRegistry<LoggingEvent>()
-        fun register(appender: Appender<LoggingEvent>) = appenders.register(appender)
     }
 
     /**
-     * The `Tracing` object provides a centralized registry for tracers and appenders, enabling the management
-     * of tracing spans across different parts of the application.
+     * Object responsible for managing tracing configurations and appenders.
      *
-     * @property prefix The prefix used for span identifiers.
-     * @property factory An instance of `SimpleTracerFactory` used to create new tracers.
-     * @property tracers A registry that maintains all registered tracers.
-     * @property appenders A registry that maintains all registered appenders for tracing events.
+     * This object allows setting the logging level and prefix for tracing spans.
+     * It also holds an instance of `AppenderRegistry` to manage tracing event appenders.
+     * The `AppenderRegistry` is utilized for registering, retrieving, and managing
+     * different appenders that handle `TracingEvent`.
      */
     object Tracing {
         var level: Level = Level.INFO
         var prefix: String = "span"
-        var factory: TracerFactory = SimpleTracerFactory()
-        val tracers = CollectorRegistry<Tracer>()
         val appenders = AppenderRegistry<TracingEvent>()
-        fun register(appender: Appender<TracingEvent>) = appenders.register(appender)
     }
 
     /**
-     * Singleton object responsible for metering operations, including creating and managing meters
-     * and registering appenders for metering events.
-     *
-     * @property factory Defines the factory used to create meters. Defaults to `SimpleMeterFactory`.
-     * @property meters Registry holding all the created and registered meters.
-     * @property appenders Registry holding all the registered appenders for metering events.
+     * Singleton object responsible for managing the metering system.
+     * Provides functionality for generating unique identifiers for metering events,
+     * maintaining the logging level, and registering appenders for handling
+     * metering events.
      */
     object Metering {
         var level: Level = Level.INFO
         private var idx: Long = 0
         fun id(): Long = ++idx
-        var factory: MeterFactory = SimpleMeterFactory()
-        val meters = CollectorRegistry<Meter>()
         val appenders = AppenderRegistry<MeteringEvent>()
-        fun register(appender: Appender<MeteringEvent>) = appenders.register(appender)
     }
 
     private inline fun send(scope: CoroutineScope, crossinline f: suspend () -> Unit) {
         scope.launch { f() }
     }
 
-    private object LoggerScope : CoroutineScope {
-        override val coroutineContext: CoroutineContext
-            get() = EmptyCoroutineContext
-    }
-
-    private object TracerScope : CoroutineScope {
-        override val coroutineContext: CoroutineContext
-            get() = EmptyCoroutineContext
-    }
-
-    private object MeterScope : CoroutineScope {
+    private object RootLoggerScope : CoroutineScope {
         override val coroutineContext: CoroutineContext
             get() = EmptyCoroutineContext
     }

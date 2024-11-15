@@ -7,10 +7,10 @@ abstract class MeterFactory {
     abstract fun create(name: String): Meter
     fun get(clazz: KClass<*>): Meter = get(clazz.toName())
     fun get(name: String): Meter {
-        val existing = RootLogger.Metering.meters.get(name)
+        val existing = Meter.registry.get(name)
         if (existing != null) return existing
         return create(name).also {
-            RootLogger.Metering.meters.register(it)
+            Meter.registry.register(it)
         }
     }
 }
