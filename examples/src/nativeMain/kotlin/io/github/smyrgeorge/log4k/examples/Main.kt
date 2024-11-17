@@ -132,8 +132,9 @@ class Main {
             event(name = "event-2") { tags ->
                 tags["key"] = "value"
             }
+
             // Nested Span.
-            trace.span("test-2", this) {
+            span("test-2") {
                 event(name = "event-3", tags = mapOf("key" to "value"))
                 log.info(this, "this is a test with span") // The log will contain the span id.
             }

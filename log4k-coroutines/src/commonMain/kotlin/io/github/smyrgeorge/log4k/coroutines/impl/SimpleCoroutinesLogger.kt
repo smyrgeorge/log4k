@@ -3,6 +3,7 @@ package io.github.smyrgeorge.log4k.coroutines.impl
 import io.github.smyrgeorge.log4k.Level
 import io.github.smyrgeorge.log4k.LoggingEvent
 import io.github.smyrgeorge.log4k.coroutines.Logger
+import io.github.smyrgeorge.log4k.coroutines.LoggingContext
 import io.github.smyrgeorge.log4k.impl.extensions.thread
 import kotlinx.datetime.Clock
 

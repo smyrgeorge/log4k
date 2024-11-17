@@ -3,7 +3,7 @@ package io.github.smyrgeorge.log4k.coroutines.impl
 import io.github.smyrgeorge.log4k.Level
 import io.github.smyrgeorge.log4k.LoggingEvent
 import io.github.smyrgeorge.log4k.TracingEvent
-import io.github.smyrgeorge.log4k.coroutines.Logger
+import io.github.smyrgeorge.log4k.coroutines.LoggingContext
 import kotlinx.datetime.Instant
 
 class SimpleCoroutinesLoggingEvent(
@@ -16,5 +16,5 @@ class SimpleCoroutinesLoggingEvent(
     override val arguments: Array<out Any?>,
     override val thread: String,
     override val throwable: Throwable?,
-    val ctx: Logger.LoggingContext
+    val ctx: LoggingContext
 ) : LoggingEvent

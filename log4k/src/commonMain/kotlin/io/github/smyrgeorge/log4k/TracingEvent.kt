@@ -60,7 +60,7 @@ sealed interface TracingEvent {
         constructor(id: String, name: String, level: Level, tracer: Tracer, parent: Span?, traceId: String) : this(
             name = name,
             level = level,
-            context = Context(traceId, id, false, Context.Tracer(tracer.name, tracer.level)),
+            context = Context(traceId, id, false, tracer),
             parent = parent,
             startAt = null,
             endAt = null,
@@ -81,7 +81,7 @@ sealed interface TracingEvent {
         constructor(id: String, traceId: String, name: String, level: Level, tracer: Tracer) : this(
             name = name,
             level = level,
-            context = Context(traceId, id, true, Context.Tracer(tracer.name, tracer.level)),
+            context = Context(traceId, id, true, tracer),
             parent = null,
             startAt = null,
             endAt = null,
@@ -89,6 +89,24 @@ sealed interface TracingEvent {
             events = mutableListOf(),
             status = Status(),
         )
+
+        /**
+         * Creates and returns a new local span with the given name associated with the current context.
+         *
+         * @param name The name of the new span.
+         * @return A new instance of `Local`.
+         */
+        fun span(name: String): Local = context.tracer.span(name, this)
+
+        /**
+         * Executes a function within the scope of a tracing span.
+         *
+         * @param T The type of the result produced by the function.
+         * @param name The name of the span.
+         * @param f A function to be executed within the local span context.
+         * @return The result produced by the function `f`.
+         */
+        inline fun <T> span(name: String, f: Local.() -> T): T = context.tracer.span(name, this, f)
 
         /**
          * Represents a local span in a tracing system. A span is a unit of work within a trace and can
@@ -258,9 +276,7 @@ sealed interface TracingEvent {
             val spanId: String,
             val isRemote: Boolean, // Indicates whether the Span was received from somewhere else or locally generated.
             val tracer: Tracer, // Information about the local [Tracer].
-        ) {
-            data class Tracer(val name: String, val level: Level)
-        }
+        )
 
         // https://opentelemetry.io/docs/specs/otel/trace/api/#add-events
         data class Event(

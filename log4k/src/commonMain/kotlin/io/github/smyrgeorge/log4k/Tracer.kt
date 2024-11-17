@@ -73,6 +73,10 @@ abstract class Tracer(
         }
     }
 
+    override fun toString(): String {
+        return "Tracer(name='$name', level=$level)"
+    }
+
     companion object {
         val registry = CollectorRegistry<Tracer>()
         var factory: TracerFactory = SimpleTracerFactory()
