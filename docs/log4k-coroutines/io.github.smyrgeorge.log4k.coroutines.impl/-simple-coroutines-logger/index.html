@@ -1,0 +1,303 @@
+<!doctype html>
+<html class="no-js">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>SimpleCoroutinesLogger</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">    <script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js","js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async></script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
+<body>
+    <div class="root">
+<nav class="navigation" id="navigation-wrapper">
+    <div class="navigation--inner">
+        <div class="navigation-title">
+            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
+            <div class="library-name">
+<a class="library-name--link" href="../../../index.html">
+                            log4k
+                    </a>            </div>
+            <div class="library-version">0.26.0
+            </div>
+        </div>
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector common-like" data-active="" data-filter=":log4k-coroutines:dokkaHtmlPartial/commonMain">common</button>
+        </div>
+    </div>
+    <div class="navigation-controls">
+        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
+        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
+    </div>
+</nav>
+        <div id="container">
+            <div class="sidebar" id="leftColumn">
+                <div class="sidebar--inner" id="sideMenu"></div>
+            </div>
+            <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="log4k-coroutines::io.github.smyrgeorge.log4k.coroutines.impl/SimpleCoroutinesLogger///PointingToDeclaration//1739779526">
+  <div class="breadcrumbs"><a href="../../index.html">log4k-coroutines</a><span class="delimiter">/</span><a href="../index.html">io.github.smyrgeorge.log4k.coroutines.impl</a><span class="delimiter">/</span><span class="current">SimpleCoroutinesLogger</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Simple</span><wbr><span>Coroutines</span><wbr><span><span>Logger</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k-coroutines:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">SimpleCoroutinesLogger</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>name<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">var </span>level<span class="token operator">: </span><a href="../../../log4k/io.github.smyrgeorge.log4k/-level/index.html">Level</a></span></span><span class="token punctuation">)</span> : <a href="../../io.github.smyrgeorge.log4k.coroutines/-logger/index.html">Logger</a></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="">Constructors</h2>
+        <div class="table"><a data-name="923679417%2FConstructors%2F1739779526" anchor-label="SimpleCoroutinesLogger" id="923679417%2FConstructors%2F1739779526" data-filterable-set=":log4k-coroutines:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-togglable="CONSTRUCTOR" data-filterable-current=":log4k-coroutines:dokkaHtmlPartial/commonMain" data-filterable-set=":log4k-coroutines:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-simple-coroutines-logger.html"><span>Simple</span><wbr><span>Coroutines</span><wbr><span><span>Logger</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="923679417%2FConstructors%2F1739779526"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k-coroutines:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">name<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">level<span class="token operator">: </span><a href="../../../log4k/io.github.smyrgeorge.log4k/-level/index.html">Level</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="">Properties</h2>
+        <div class="table"><a data-name="-1071412112%2FProperties%2F1739779526" anchor-label="level" id="-1071412112%2FProperties%2F1739779526" data-filterable-set=":log4k-coroutines:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":log4k-coroutines:dokkaHtmlPartial/commonMain" data-filterable-set=":log4k-coroutines:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../io.github.smyrgeorge.log4k.coroutines/-logger/level.html"><span><span>level</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1071412112%2FProperties%2F1739779526"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k-coroutines:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">override </span><span class="token keyword">var </span><a href="../../io.github.smyrgeorge.log4k.coroutines/-logger/level.html">level</a><span class="token operator">: </span><a href="../../../log4k/io.github.smyrgeorge.log4k/-level/index.html">Level</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1838722728%2FProperties%2F1739779526" anchor-label="levelBeforeMute" id="-1838722728%2FProperties%2F1739779526" data-filterable-set=":log4k-coroutines:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":log4k-coroutines:dokkaHtmlPartial/commonMain" data-filterable-set=":log4k-coroutines:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../io.github.smyrgeorge.log4k.coroutines/-logger/level-before-mute.html"><span>level</span><wbr><span>Before</span><wbr><span><span>Mute</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1838722728%2FProperties%2F1739779526"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k-coroutines:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">var </span><a href="../../io.github.smyrgeorge.log4k.coroutines/-logger/level-before-mute.html">levelBeforeMute</a><span class="token operator">: </span><a href="../../../log4k/io.github.smyrgeorge.log4k/-level/index.html">Level</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="738455803%2FProperties%2F1739779526" anchor-label="name" id="738455803%2FProperties%2F1739779526" data-filterable-set=":log4k-coroutines:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":log4k-coroutines:dokkaHtmlPartial/commonMain" data-filterable-set=":log4k-coroutines:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../io.github.smyrgeorge.log4k.coroutines/-logger/name.html"><span><span>name</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="738455803%2FProperties%2F1739779526"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k-coroutines:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">override </span><span class="token keyword">val </span><a href="../../io.github.smyrgeorge.log4k.coroutines/-logger/name.html">name</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="802444034%2FFunctions%2F1739779526" anchor-label="debug" id="802444034%2FFunctions%2F1739779526" data-filterable-set=":log4k-coroutines:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":log4k-coroutines:dokkaHtmlPartial/commonMain" data-filterable-set=":log4k-coroutines:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../io.github.smyrgeorge.log4k.coroutines/-logger/debug.html"><span><span>debug</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="802444034%2FFunctions%2F1739779526"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k-coroutines:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><a href="../../io.github.smyrgeorge.log4k.coroutines/-logger/debug.html"><span class="token function">debug</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">f<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="../../io.github.smyrgeorge.log4k.coroutines/-logger/debug.html"><span class="token function">debug</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">msg<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">vararg </span>args<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><a href="../../io.github.smyrgeorge.log4k.coroutines/-logger/debug.html"><span class="token function">debug</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">t<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token punctuation">, </span></span><span class="parameter ">f<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="../../io.github.smyrgeorge.log4k.coroutines/-logger/debug.html"><span class="token function">debug</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">msg<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">t<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">vararg </span>args<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="398962312%2FFunctions%2F1739779526" anchor-label="error" id="398962312%2FFunctions%2F1739779526" data-filterable-set=":log4k-coroutines:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":log4k-coroutines:dokkaHtmlPartial/commonMain" data-filterable-set=":log4k-coroutines:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../io.github.smyrgeorge.log4k.coroutines/-logger/error.html"><span><span>error</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="398962312%2FFunctions%2F1739779526"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k-coroutines:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><a href="../../io.github.smyrgeorge.log4k.coroutines/-logger/error.html"><span class="token function">error</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">f<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="../../io.github.smyrgeorge.log4k.coroutines/-logger/error.html"><span class="token function">error</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">msg<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">vararg </span>args<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><a href="../../io.github.smyrgeorge.log4k.coroutines/-logger/error.html"><span class="token function">error</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">t<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token punctuation">, </span></span><span class="parameter ">f<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="../../io.github.smyrgeorge.log4k.coroutines/-logger/error.html"><span class="token function">error</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">msg<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">t<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">vararg </span>args<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1053498388%2FFunctions%2F1739779526" anchor-label="info" id="-1053498388%2FFunctions%2F1739779526" data-filterable-set=":log4k-coroutines:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":log4k-coroutines:dokkaHtmlPartial/commonMain" data-filterable-set=":log4k-coroutines:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../io.github.smyrgeorge.log4k.coroutines/-logger/info.html"><span><span>info</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1053498388%2FFunctions%2F1739779526"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k-coroutines:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><a href="../../io.github.smyrgeorge.log4k.coroutines/-logger/info.html"><span class="token function">info</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">f<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="../../io.github.smyrgeorge.log4k.coroutines/-logger/info.html"><span class="token function">info</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">msg<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">vararg </span>args<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><a href="../../io.github.smyrgeorge.log4k.coroutines/-logger/info.html"><span class="token function">info</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">t<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token punctuation">, </span></span><span class="parameter ">f<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="../../io.github.smyrgeorge.log4k.coroutines/-logger/info.html"><span class="token function">info</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">msg<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">t<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">vararg </span>args<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1402893134%2FFunctions%2F1739779526" anchor-label="isMuted" id="-1402893134%2FFunctions%2F1739779526" data-filterable-set=":log4k-coroutines:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":log4k-coroutines:dokkaHtmlPartial/commonMain" data-filterable-set=":log4k-coroutines:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1402893134%2FFunctions%2F1739779526"><span>is</span><wbr><span><span>Muted</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1402893134%2FFunctions%2F1739779526"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k-coroutines:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#-1402893134%2FFunctions%2F1739779526"><span class="token function">isMuted</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-401849522%2FFunctions%2F1739779526" anchor-label="mute" id="-401849522%2FFunctions%2F1739779526" data-filterable-set=":log4k-coroutines:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":log4k-coroutines:dokkaHtmlPartial/commonMain" data-filterable-set=":log4k-coroutines:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-401849522%2FFunctions%2F1739779526"><span><span>mute</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-401849522%2FFunctions%2F1739779526"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k-coroutines:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#-401849522%2FFunctions%2F1739779526"><span class="token function">mute</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="78964091%2FFunctions%2F1739779526" anchor-label="shouldLog" id="78964091%2FFunctions%2F1739779526" data-filterable-set=":log4k-coroutines:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":log4k-coroutines:dokkaHtmlPartial/commonMain" data-filterable-set=":log4k-coroutines:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../io.github.smyrgeorge.log4k.coroutines/-logger/should-log.html"><span>should</span><wbr><span><span>Log</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="78964091%2FFunctions%2F1739779526"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k-coroutines:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../../../log4k/io.github.smyrgeorge.log4k/-level/index.html">Level</a><span class="token punctuation">.</span><a href="../../io.github.smyrgeorge.log4k.coroutines/-logger/should-log.html"><span class="token function">shouldLog</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1816640726%2FFunctions%2F1739779526" anchor-label="toLoggingEvent" id="1816640726%2FFunctions%2F1739779526" data-filterable-set=":log4k-coroutines:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":log4k-coroutines:dokkaHtmlPartial/commonMain" data-filterable-set=":log4k-coroutines:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="to-logging-event.html"><span>to</span><wbr><span>Logging</span><wbr><span><span>Event</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1816640726%2FFunctions%2F1739779526"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k-coroutines:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="to-logging-event.html"><span class="token function">toLoggingEvent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">level<span class="token operator">: </span><a href="../../../log4k/io.github.smyrgeorge.log4k/-level/index.html">Level</a><span class="token punctuation">, </span></span><span class="parameter ">ctx<span class="token operator">: </span><a href="../../io.github.smyrgeorge.log4k.coroutines/-logging-context/index.html">LoggingContext</a><span class="token punctuation">, </span></span><span class="parameter ">message<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">arguments<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><span class="token keyword">out </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">?</span><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">throwable<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../log4k/io.github.smyrgeorge.log4k/-logging-event/index.html">LoggingEvent</a></div><div class="brief "><p class="paragraph">Converts the provided parameters into a <code class="lang-kotlin">LoggingEvent</code> object.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-229601882%2FFunctions%2F1739779526" anchor-label="trace" id="-229601882%2FFunctions%2F1739779526" data-filterable-set=":log4k-coroutines:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":log4k-coroutines:dokkaHtmlPartial/commonMain" data-filterable-set=":log4k-coroutines:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../io.github.smyrgeorge.log4k.coroutines/-logger/trace.html"><span><span>trace</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-229601882%2FFunctions%2F1739779526"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k-coroutines:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><a href="../../io.github.smyrgeorge.log4k.coroutines/-logger/trace.html"><span class="token function">trace</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">f<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="../../io.github.smyrgeorge.log4k.coroutines/-logger/trace.html"><span class="token function">trace</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">msg<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">vararg </span>args<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><a href="../../io.github.smyrgeorge.log4k.coroutines/-logger/trace.html"><span class="token function">trace</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">t<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token punctuation">, </span></span><span class="parameter ">f<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="../../io.github.smyrgeorge.log4k.coroutines/-logger/trace.html"><span class="token function">trace</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">msg<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">t<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">vararg </span>args<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1867173077%2FFunctions%2F1739779526" anchor-label="unmute" id="1867173077%2FFunctions%2F1739779526" data-filterable-set=":log4k-coroutines:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":log4k-coroutines:dokkaHtmlPartial/commonMain" data-filterable-set=":log4k-coroutines:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1867173077%2FFunctions%2F1739779526"><span><span>unmute</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1867173077%2FFunctions%2F1739779526"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k-coroutines:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#1867173077%2FFunctions%2F1739779526"><span class="token function">unmute</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="116024124%2FFunctions%2F1739779526" anchor-label="warn" id="116024124%2FFunctions%2F1739779526" data-filterable-set=":log4k-coroutines:dokkaHtmlPartial/commonMain"></a>
+          <div class="table-row" data-filterable-current=":log4k-coroutines:dokkaHtmlPartial/commonMain" data-filterable-set=":log4k-coroutines:dokkaHtmlPartial/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../io.github.smyrgeorge.log4k.coroutines/-logger/warn.html"><span><span>warn</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="116024124%2FFunctions%2F1739779526"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k-coroutines:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><a href="../../io.github.smyrgeorge.log4k.coroutines/-logger/warn.html"><span class="token function">warn</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">f<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="../../io.github.smyrgeorge.log4k.coroutines/-logger/warn.html"><span class="token function">warn</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">msg<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">vararg </span>args<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword">inline suspend </span><span class="token keyword">fun </span><a href="../../io.github.smyrgeorge.log4k.coroutines/-logger/warn.html"><span class="token function">warn</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">t<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token punctuation">, </span></span><span class="parameter ">f<span class="token operator">: </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="../../io.github.smyrgeorge.log4k.coroutines/-logger/warn.html"><span class="token function">warn</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">msg<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">t<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-throwable/index.html">Throwable</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">vararg </span>args<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2024 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

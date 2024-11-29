@@ -41,7 +41,7 @@
 <a class="library-name--link" href="../../../../index.html">
                             log4k
                     </a>            </div>
-            <div class="library-version">0.25.0
+            <div class="library-version">0.26.0
             </div>
         </div>
         <div class="filter-section" id="filter-section">
@@ -62,7 +62,7 @@
   <div class="breadcrumbs"><a href="../../../index.html">log4k</a><span class="delimiter">/</span><a href="../../index.html">io.github.smyrgeorge.log4k</a><span class="delimiter">/</span><a href="../index.html">RootLogger</a><span class="delimiter">/</span><span class="current">Metering</span></div>
   <div class="cover ">
     <h1 class="cover"><span><span>Metering</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="index.html">Metering</a></div><p class="paragraph">Singleton object responsible for metering operations, including creating and managing meters and registering appenders for metering events.</p></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="index.html">Metering</a></div><p class="paragraph">Singleton object responsible for managing the metering system. Provides functionality for generating unique identifiers for metering events, maintaining the logging level, and registering appenders for handling metering events.</p></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
@@ -79,22 +79,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="appenders.html">appenders</a><span class="token operator">: </span><a href="../../../io.github.smyrgeorge.log4k.impl.registry/-appender-registry/index.html">AppenderRegistry</a><span class="token operator">&lt;</span><a href="../../-metering-event/index.html">MeteringEvent</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Registry holding all the registered appenders for metering events.</p></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-<a data-name="-1261330150%2FProperties%2F1760972170" anchor-label="factory" id="-1261330150%2FProperties%2F1760972170" data-filterable-set=":log4k:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-filterable-current=":log4k:dokkaHtmlPartial/commonMain" data-filterable-set=":log4k:dokkaHtmlPartial/commonMain">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="factory.html"><span><span>factory</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1261330150%2FProperties%2F1760972170"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">var </span><a href="factory.html">factory</a><span class="token operator">: </span><a href="../../-meter-factory/index.html">MeterFactory</a></div><div class="brief "><p class="paragraph">Defines the factory used to create meters. Defaults to <code class="lang-kotlin">SimpleMeterFactory</code>.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="appenders.html">appenders</a><span class="token operator">: </span><a href="../../../io.github.smyrgeorge.log4k.impl.registry/-appender-registry/index.html">AppenderRegistry</a><span class="token operator">&lt;</span><a href="../../-metering-event/index.html">MeteringEvent</a><span class="token operator">&gt;</span></div></div></div>
                 </div>
               </div>
             </div>
@@ -114,21 +99,6 @@
               </div>
             </div>
           </div>
-<a data-name="1665207532%2FProperties%2F1760972170" anchor-label="meters" id="1665207532%2FProperties%2F1760972170" data-filterable-set=":log4k:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-filterable-current=":log4k:dokkaHtmlPartial/commonMain" data-filterable-set=":log4k:dokkaHtmlPartial/commonMain">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="meters.html"><span><span>meters</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1665207532%2FProperties%2F1760972170"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="meters.html">meters</a><span class="token operator">: </span><a href="../../../io.github.smyrgeorge.log4k.impl.registry/-collector-registry/index.html">CollectorRegistry</a><span class="token operator">&lt;</span><a href="../../-meter/index.html">Meter</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Registry holding all the created and registered meters.</p></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
       <div data-togglable="FUNCTION">
@@ -144,21 +114,6 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="id.html"><span class="token function">id</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-long/index.html">Long</a></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-<a data-name="-977331601%2FFunctions%2F1760972170" anchor-label="register" id="-977331601%2FFunctions%2F1760972170" data-filterable-set=":log4k:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-filterable-current=":log4k:dokkaHtmlPartial/commonMain" data-filterable-set=":log4k:dokkaHtmlPartial/commonMain">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="register.html"><span><span>register</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-977331601%2FFunctions%2F1760972170"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="register.html"><span class="token function">register</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">appender<span class="token operator">: </span><a href="../../-appender/index.html">Appender</a><span class="token operator">&lt;</span><a href="../../-metering-event/index.html">MeteringEvent</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
                 </div>
               </div>
             </div>

@@ -41,7 +41,7 @@
 <a class="library-name--link" href="../../../../index.html">
                             log4k
                     </a>            </div>
-            <div class="library-version">0.25.0
+            <div class="library-version">0.26.0
             </div>
         </div>
         <div class="filter-section" id="filter-section">
@@ -62,7 +62,7 @@
   <div class="breadcrumbs"><a href="../../../index.html">log4k</a><span class="delimiter">/</span><a href="../../index.html">io.github.smyrgeorge.log4k</a><span class="delimiter">/</span><a href="../index.html">RootLogger</a><span class="delimiter">/</span><span class="current">Logging</span></div>
   <div class="cover ">
     <h1 class="cover"><span><span>Logging</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="index.html">Logging</a></div><p class="paragraph">Singleton object responsible for managing logging system.</p><p class="paragraph">Provides unique identifiers for log entries, and manages registries for loggers and appenders. Facilitates the registration of new appenders to process logging events.</p></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="index.html">Logging</a></div><p class="paragraph">Provides logging functionality with various configurable logging levels.</p><p class="paragraph">This object manages the current logging level and provides unique identifiers for logging events. It also maintains a registry of appenders that handle log events.</p></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
@@ -84,21 +84,6 @@
               </div>
             </div>
           </div>
-<a data-name="-1902446350%2FProperties%2F1760972170" anchor-label="factory" id="-1902446350%2FProperties%2F1760972170" data-filterable-set=":log4k:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-filterable-current=":log4k:dokkaHtmlPartial/commonMain" data-filterable-set=":log4k:dokkaHtmlPartial/commonMain">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="factory.html"><span><span>factory</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1902446350%2FProperties%2F1760972170"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">var </span><a href="factory.html">factory</a><span class="token operator">: </span><a href="../../-logger-factory/index.html">LoggerFactory</a></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
 <a data-name="-1683153032%2FProperties%2F1760972170" anchor-label="level" id="-1683153032%2FProperties%2F1760972170" data-filterable-set=":log4k:dokkaHtmlPartial/commonMain"></a>
           <div class="table-row" data-filterable-current=":log4k:dokkaHtmlPartial/commonMain" data-filterable-set=":log4k:dokkaHtmlPartial/commonMain">
             <div class="main-subrow keyValue ">
@@ -110,21 +95,6 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">var </span><a href="level.html">level</a><span class="token operator">: </span><a href="../../-level/index.html">Level</a></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-<a data-name="1524187961%2FProperties%2F1760972170" anchor-label="loggers" id="1524187961%2FProperties%2F1760972170" data-filterable-set=":log4k:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-filterable-current=":log4k:dokkaHtmlPartial/commonMain" data-filterable-set=":log4k:dokkaHtmlPartial/commonMain">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="loggers.html"><span><span>loggers</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1524187961%2FProperties%2F1760972170"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="loggers.html">loggers</a><span class="token operator">: </span><a href="../../../io.github.smyrgeorge.log4k.impl.registry/-collector-registry/index.html">CollectorRegistry</a><span class="token operator">&lt;</span><a href="../../-logger/index.html">Logger</a><span class="token operator">&gt;</span></div></div></div>
                 </div>
               </div>
             </div>
@@ -144,21 +114,6 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="id.html"><span class="token function">id</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-long/index.html">Long</a></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-<a data-name="1533535357%2FFunctions%2F1760972170" anchor-label="register" id="1533535357%2FFunctions%2F1760972170" data-filterable-set=":log4k:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-filterable-current=":log4k:dokkaHtmlPartial/commonMain" data-filterable-set=":log4k:dokkaHtmlPartial/commonMain">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="register.html"><span><span>register</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1533535357%2FFunctions%2F1760972170"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="register.html"><span class="token function">register</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">appender<span class="token operator">: </span><a href="../../-appender/index.html">Appender</a><span class="token operator">&lt;</span><a href="../../-logging-event/index.html">LoggingEvent</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
                 </div>
               </div>
             </div>

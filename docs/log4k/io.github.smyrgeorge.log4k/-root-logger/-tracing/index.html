@@ -41,7 +41,7 @@
 <a class="library-name--link" href="../../../../index.html">
                             log4k
                     </a>            </div>
-            <div class="library-version">0.25.0
+            <div class="library-version">0.26.0
             </div>
         </div>
         <div class="filter-section" id="filter-section">
@@ -62,7 +62,7 @@
   <div class="breadcrumbs"><a href="../../../index.html">log4k</a><span class="delimiter">/</span><a href="../../index.html">io.github.smyrgeorge.log4k</a><span class="delimiter">/</span><a href="../index.html">RootLogger</a><span class="delimiter">/</span><span class="current">Tracing</span></div>
   <div class="cover ">
     <h1 class="cover"><span><span>Tracing</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="index.html">Tracing</a></div><p class="paragraph">The <code class="lang-kotlin">Tracing</code> object provides a centralized registry for tracers and appenders, enabling the management of tracing spans across different parts of the application.</p></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="index.html">Tracing</a></div><p class="paragraph">Object responsible for managing tracing configurations and appenders.</p><p class="paragraph">This object allows setting the logging level and prefix for tracing spans. It also holds an instance of <code class="lang-kotlin">AppenderRegistry</code> to manage tracing event appenders. The <code class="lang-kotlin">AppenderRegistry</code> is utilized for registering, retrieving, and managing different appenders that handle <code class="lang-kotlin">TracingEvent</code>.</p></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
@@ -79,22 +79,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="appenders.html">appenders</a><span class="token operator">: </span><a href="../../../io.github.smyrgeorge.log4k.impl.registry/-appender-registry/index.html">AppenderRegistry</a><span class="token operator">&lt;</span><a href="../../-tracing-event/index.html">TracingEvent</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">A registry that maintains all registered appenders for tracing events.</p></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-<a data-name="201223151%2FProperties%2F1760972170" anchor-label="factory" id="201223151%2FProperties%2F1760972170" data-filterable-set=":log4k:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-filterable-current=":log4k:dokkaHtmlPartial/commonMain" data-filterable-set=":log4k:dokkaHtmlPartial/commonMain">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="factory.html"><span><span>factory</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="201223151%2FProperties%2F1760972170"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">var </span><a href="factory.html">factory</a><span class="token operator">: </span><a href="../../-tracer-factory/index.html">TracerFactory</a></div><div class="brief "><p class="paragraph">An instance of <code class="lang-kotlin">SimpleTracerFactory</code> used to create new tracers.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="appenders.html">appenders</a><span class="token operator">: </span><a href="../../../io.github.smyrgeorge.log4k.impl.registry/-appender-registry/index.html">AppenderRegistry</a><span class="token operator">&lt;</span><a href="../../-tracing-event/index.html">TracingEvent</a><span class="token operator">&gt;</span></div></div></div>
                 </div>
               </div>
             </div>
@@ -124,41 +109,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">var </span><a href="prefix.html">prefix</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">The prefix used for span identifiers.</p></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-<a data-name="-1355975117%2FProperties%2F1760972170" anchor-label="tracers" id="-1355975117%2FProperties%2F1760972170" data-filterable-set=":log4k:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-filterable-current=":log4k:dokkaHtmlPartial/commonMain" data-filterable-set=":log4k:dokkaHtmlPartial/commonMain">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="tracers.html"><span><span>tracers</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1355975117%2FProperties%2F1760972170"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="tracers.html">tracers</a><span class="token operator">: </span><a href="../../../io.github.smyrgeorge.log4k.impl.registry/-collector-registry/index.html">CollectorRegistry</a><span class="token operator">&lt;</span><a href="../../-tracer/index.html">Tracer</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">A registry that maintains all registered tracers.</p></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div data-togglable="FUNCTION">
-        <h2 class="">Functions</h2>
-        <div class="table"><a data-name="1274140189%2FFunctions%2F1760972170" anchor-label="register" id="1274140189%2FFunctions%2F1760972170" data-filterable-set=":log4k:dokkaHtmlPartial/commonMain"></a>
-          <div class="table-row" data-filterable-current=":log4k:dokkaHtmlPartial/commonMain" data-filterable-set=":log4k:dokkaHtmlPartial/commonMain">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="register.html"><span><span>register</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1274140189%2FFunctions%2F1760972170"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="register.html"><span class="token function">register</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">appender<span class="token operator">: </span><a href="../../-appender/index.html">Appender</a><span class="token operator">&lt;</span><a href="../../-tracing-event/index.html">TracingEvent</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k:dokkaHtmlPartial/commonMain"><div class="symbol monospace"><span class="token keyword">var </span><a href="prefix.html">prefix</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
