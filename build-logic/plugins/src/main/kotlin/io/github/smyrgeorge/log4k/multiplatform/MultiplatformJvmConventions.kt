@@ -13,9 +13,6 @@ class MultiplatformJvmConventions : Plugin<Project> {
         project.plugins.apply("org.jetbrains.kotlin.multiplatform")
         project.extensions.configure<KotlinMultiplatformExtension> {
             jvm {
-                compilerOptions {
-                    jvmTarget.set(JVM_17)
-                }
                 withJava()
             }
             applyDefaultHierarchyTemplate()
