@@ -10,6 +10,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(project(":log4k"))
+                implementation(project(":log4k-coroutines"))
             }
         }
     }

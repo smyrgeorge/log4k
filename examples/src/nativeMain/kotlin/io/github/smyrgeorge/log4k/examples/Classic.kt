@@ -7,7 +7,7 @@ import io.github.smyrgeorge.log4k.Meter
 import io.github.smyrgeorge.log4k.RootLogger
 import io.github.smyrgeorge.log4k.Tracer
 import io.github.smyrgeorge.log4k.TracingEvent
-import io.github.smyrgeorge.log4k.impl.SimpleLogger
+import io.github.smyrgeorge.log4k.impl.SimpleLoggerFactory
 import io.github.smyrgeorge.log4k.impl.appenders.BatchAppender
 import io.github.smyrgeorge.log4k.impl.appenders.FlowFloodProtectedAppender
 import io.github.smyrgeorge.log4k.impl.appenders.simple.SimpleConsoleLoggingAppender.Companion.print
@@ -26,7 +26,7 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.measureTime
 
-class Main {
+class Classic {
     class MyBatchAppender(size: Int) : BatchAppender<LoggingEvent>(size) {
         override suspend fun handle(event: List<LoggingEvent>) {
             // E.g. send batch over http.
@@ -41,11 +41,12 @@ class Main {
         override suspend fun handle(event: LoggingEvent) = event.print()
     }
 
-    private val log = Logger.ofType<SimpleLogger>(this::class)
-    private val trace: Tracer = Tracer.of(this::class)
-    private val meter: Meter = Meter.of(this::class)
-
     fun run(): Unit = runBlocking {
+        Logger.factory = SimpleLoggerFactory()
+        val log = Logger.of(this::class)
+        val trace: Tracer = Tracer.of(this::class)
+        val meter: Meter = Meter.of(this::class)
+
         log.info { "this is a test" }
 
         delay(1000)
@@ -83,7 +84,7 @@ class Main {
         log.debug("ignore")
         log.debug { "ignore + ${5}" } // Will be evaluated only if DEBUG logs are enabled.
         log.info("this is a test")
-        Logger.registry.mute(Main::class)
+        Logger.registry.mute(Classic::class)
         log.info("this is a test with 1 arg: {}", "hello")
         log.unmute()
         log.info("this is a test with 1 arg: {}", "hello")

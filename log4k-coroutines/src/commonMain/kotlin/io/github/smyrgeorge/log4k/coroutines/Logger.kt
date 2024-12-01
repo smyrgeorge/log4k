@@ -10,11 +10,7 @@ import io.github.smyrgeorge.log4k.LoggingEvent
 import io.github.smyrgeorge.log4k.RootLogger
 import io.github.smyrgeorge.log4k.TracingEvent.Span
 import io.github.smyrgeorge.log4k.coroutines.impl.SimpleCoroutinesLoggerFactory
-import io.github.smyrgeorge.log4k.impl.MutableTags
-import io.github.smyrgeorge.log4k.impl.Tag
-import io.github.smyrgeorge.log4k.impl.Tags
 import io.github.smyrgeorge.log4k.impl.registry.CollectorRegistry
-import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.coroutineContext
 import kotlin.reflect.KClass
 
@@ -40,24 +36,23 @@ abstract class Logger(
         throwable: Throwable?
     ) {
         if (!level.shouldLog()) return
-        val ctx: LoggingContext = ctx()
-        val event = toLoggingEvent(level, ctx, message, arguments, throwable)
+        val event = toLoggingEvent(level, ctx().spans.peek(), message, arguments, throwable)
         RootLogger.log(event)
     }
 
     /**
-     * Converts the provided parameters into a `LoggingEvent` object.
+     * Converts the provided logging information into a `LoggingEvent`.
      *
      * @param level The logging level of the event.
-     * @param ctx The logging context associated with the event, or null if no context is available.
+     * @param span An optional span that can be used for tracing the context.
      * @param message The log message to be recorded.
      * @param arguments Additional arguments to be included in the log event.
      * @param throwable An optional throwable associated with the log event.
-     * @return A `LoggingEvent` object encapsulating the provided details.
+     * @return A `LoggingEvent` representing the logging details.
      */
     abstract fun toLoggingEvent(
         level: Level,
-        ctx: LoggingContext,
+        span: Span?,
         message: String,
         arguments: Array<out Any?>,
         throwable: Throwable?

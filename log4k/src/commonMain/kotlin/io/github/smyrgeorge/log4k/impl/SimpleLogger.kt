@@ -15,7 +15,7 @@ class SimpleLogger(name: String, level: Level) : Logger(name, level) {
         arguments: Array<out Any?>,
         throwable: Throwable?
     ): LoggingEvent {
-        return SimpleLoggingEvent(
+        return LoggingEvent(
             level = level,
             span = span,
             timestamp = Clock.System.now(),
