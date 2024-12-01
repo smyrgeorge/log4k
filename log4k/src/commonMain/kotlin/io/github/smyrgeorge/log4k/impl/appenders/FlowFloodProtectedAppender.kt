@@ -1,7 +1,7 @@
 package io.github.smyrgeorge.log4k.impl.appenders
 
 import io.github.smyrgeorge.log4k.Level
-import io.github.smyrgeorge.log4k.impl.SimpleLoggingEvent
+import io.github.smyrgeorge.log4k.LoggingEvent
 import io.github.smyrgeorge.log4k.impl.appenders.simple.SimpleConsoleLoggingAppender.Companion.print
 import io.github.smyrgeorge.log4k.impl.extensions.preventFloodingWithBurst
 import io.github.smyrgeorge.log4k.impl.extensions.thread
@@ -26,7 +26,7 @@ abstract class FlowFloodProtectedAppender<T>(
 ) : FlowAppender<T, T>() {
     override fun setup(flow: Flow<T>): Flow<T> =
         flow.preventFloodingWithBurst(requestPerSecond, burstDurationMillis, burstResetPeriodMillis) { d, t ->
-            SimpleLoggingEvent(
+            LoggingEvent(
                 id = 0,
                 level = Level.WARN,
                 span = null,
