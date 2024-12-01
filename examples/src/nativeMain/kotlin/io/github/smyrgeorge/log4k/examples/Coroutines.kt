@@ -25,19 +25,19 @@ class Coroutines {
 
         withContext(ctx) {
             val ctx = LoggingContext.current()
-            log.info("Hello from coroutines logger with context=$ctx!")
+            log.info("1. Hello from coroutines logger with context=$ctx!")
 
             ctx.span("span-1") {
-                log.info("Hello from span '${ctx.spans.peek()?.name}'!")
+                log.info("2. Hello from span '${ctx.spans.peek()?.name}'!")
                 ctx.span("span-2") {
-                    log.info("Hello from span '${ctx.spans.peek()?.name}'!")
+                    log.info("3. Hello from span '${ctx.spans.peek()?.name}'!")
                     ctx.span("span-3") {
-                        log.info("Hello from span '${ctx.spans.peek()?.name}'!")
+                        log.info("4. Hello from span '${ctx.spans.peek()?.name}'!")
                     }
                 }
             }
 
-            log.info("Hello from coroutines logger with context=$ctx!")
+            log.info("5. Hello from coroutines logger with context=$ctx!")
         }
 
         delay(5000)
