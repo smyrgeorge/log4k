@@ -14,7 +14,7 @@ dokka = "2.0.0"
 # https://github.com/willowtreeapps/assertk
 assertk = "0.28.1"
 # https://mvnrepository.com/artifact/org.slf4j/slf4j-api
-slf4j = "2.0.16"
+slf4j = "2.0.17"
 
 [libraries]
 gradle-kotlin-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
