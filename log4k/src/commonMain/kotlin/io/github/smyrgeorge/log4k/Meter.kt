@@ -222,9 +222,9 @@ abstract class Meter(
              */
             fun poll(every: Duration, initial: Duration = 10.seconds, f: suspend AbstractRecorder<T>.() -> Unit) {
                 GaugeScope.launch(dispatcher) {
-                    runCatching {
-                        delay(initial)
-                        while (true) {
+                    delay(initial)
+                    while (true) {
+                        runCatching {
                             f(this@AbstractRecorder)
                             delay(every)
                         }
