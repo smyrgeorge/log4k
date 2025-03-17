@@ -8,6 +8,7 @@ kotlin {
         configureEach {
             languageSettings.progressiveMode = true
         }
+        @Suppress("unused")
         val commonMain by getting {
             dependencies {
                 api(libs.kotlinx.coroutines.core)
@@ -15,6 +16,8 @@ kotlin {
                 api(libs.kotlinx.datetime)
             }
         }
+
+        @Suppress("unused")
         val commonTest by getting {
             dependencies {
                 implementation(libs.kotlin.test)

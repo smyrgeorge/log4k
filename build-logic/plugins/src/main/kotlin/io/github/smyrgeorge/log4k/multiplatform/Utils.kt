@@ -74,10 +74,10 @@ object Utils {
                     "jvm",
                     "js",
                     "wasmJs",
-//                    "wasmWasi",
+                    "wasmWasi",
                 )
 
                 else -> it.split(",").map { t -> t.trim() }
             }
-        } ?: listOf(defaultTarget, "jvm", "js", "wasmJs") // Default for local development.
+        } ?: listOf(defaultTarget, "jvm", "js", "wasmJs", "wasmWasi") // Default for local development.
 }

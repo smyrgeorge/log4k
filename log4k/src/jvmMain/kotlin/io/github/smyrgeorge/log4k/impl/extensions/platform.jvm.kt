@@ -9,5 +9,5 @@ actual fun KClass<*>.toName(): String =
 
 actual fun dispatcher(): CoroutineDispatcher = Dispatchers.IO
 actual fun thread(): String = Thread.currentThread().name
-actual fun threadId(): Int = Thread.currentThread().id.toInt()
+actual fun threadId(): Int = Thread.currentThread().threadId().toInt()
 actual fun platformPrintlnError(message: String) = println(message)
