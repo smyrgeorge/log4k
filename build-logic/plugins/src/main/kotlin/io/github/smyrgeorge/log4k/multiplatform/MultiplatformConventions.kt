@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package io.github.smyrgeorge.log4k.multiplatform
 
 import org.gradle.api.Plugin
