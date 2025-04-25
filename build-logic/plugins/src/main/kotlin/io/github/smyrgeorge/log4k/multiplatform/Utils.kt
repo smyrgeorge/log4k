@@ -64,6 +64,8 @@ object Utils {
             when (it) {
                 "all" -> listOf(
                     "iosArm64",
+                    "iosX64",
+                    "iosSimulatorArm64",
                     "androidNativeX64",
                     "androidNativeArm64",
                     "macosArm64",
