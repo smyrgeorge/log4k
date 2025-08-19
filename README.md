@@ -5,7 +5,7 @@
 ![GitHub License](https://img.shields.io/github/license/smyrgeorge/log4k)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/w/smyrgeorge/log4k)
 ![GitHub issues](https://img.shields.io/github/issues/smyrgeorge/log4k)
-[![Kotlin](https://img.shields.io/badge/kotlin-2.1.20-blue.svg?logo=kotlin)](http://kotlinlang.org)
+[![Kotlin](https://img.shields.io/badge/kotlin-2.2.10-blue.svg?logo=kotlin)](http://kotlinlang.org)
 
 ![](https://img.shields.io/static/v1?label=&message=Platforms&color=grey)
 ![](https://img.shields.io/static/v1?label=&message=Jvm&color=blue)
@@ -25,9 +25,6 @@ Multiplatform (also compatible with the Java ecosystem). Built with coroutines a
 asynchronous, scalable logging across multiple platforms.
 
 This project also tries to be fully compatible with `OpenTelemetry` standard.
-
-> [!IMPORTANT]  
-> The project is in a very early stage; thus, breaking changes should be expected.
 
 📖 [Documentation](https://smyrgeorge.github.io/log4k/)
 

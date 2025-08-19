@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalTime::class)
+
 package io.github.smyrgeorge.log4k.impl.appenders.simple
 
 import io.github.smyrgeorge.log4k.Appender
@@ -7,8 +9,8 @@ import io.github.smyrgeorge.log4k.impl.extensions.format
 import io.github.smyrgeorge.log4k.impl.extensions.platformPrintlnError
 import io.github.smyrgeorge.log4k.impl.extensions.toJsonElement
 import io.github.smyrgeorge.log4k.impl.extensions.toName
+import kotlin.time.ExperimentalTime
 
-@Suppress("MemberVisibilityCanBePrivate")
 class SimpleJsonConsoleLoggingAppender : Appender<LoggingEvent> {
     override val name: String = this::class.toName()
     override suspend fun append(event: LoggingEvent) = event.printJson()

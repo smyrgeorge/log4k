@@ -4,8 +4,8 @@ import io.github.smyrgeorge.log4k.TracingEvent.Span
 import io.github.smyrgeorge.log4k.impl.MutableTags
 import io.github.smyrgeorge.log4k.impl.Tag
 import io.github.smyrgeorge.log4k.impl.Tags
+import kotlinx.coroutines.currentCoroutineContext
 import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.coroutineContext
 
 /**
  * Represents a logging context that is used within a coroutine for tracing and tagging operations.
@@ -82,7 +82,7 @@ class LoggingContext : CoroutineContext.Element {
          *
          * @return The current `LoggingContext` if available, or an empty context if not.
          */
-        suspend fun current(): LoggingContext = coroutineContext[LoggingContext] ?: EMPTY
+        suspend fun current(): LoggingContext = currentCoroutineContext()[LoggingContext] ?: EMPTY
     }
 
     /**

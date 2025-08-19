@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalTime::class)
+
 package io.github.smyrgeorge.log4k.impl.appenders
 
 import io.github.smyrgeorge.log4k.Level
@@ -6,7 +8,8 @@ import io.github.smyrgeorge.log4k.impl.appenders.simple.SimpleConsoleLoggingAppe
 import io.github.smyrgeorge.log4k.impl.extensions.preventFloodingWithBurst
 import io.github.smyrgeorge.log4k.impl.extensions.thread
 import kotlinx.coroutines.flow.Flow
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 /**
  * A specialized implementation of `FlowAppender` designed for protective flooding control.

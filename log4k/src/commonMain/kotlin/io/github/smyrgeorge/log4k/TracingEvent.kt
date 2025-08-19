@@ -1,13 +1,14 @@
+@file:OptIn(ExperimentalTime::class)
+
 package io.github.smyrgeorge.log4k
 
-import io.github.smyrgeorge.log4k.TracingEvent.Span.Local
-import io.github.smyrgeorge.log4k.TracingEvent.Span.Remote
 import io.github.smyrgeorge.log4k.impl.MutableTags
 import io.github.smyrgeorge.log4k.impl.OpenTelemetry
 import io.github.smyrgeorge.log4k.impl.Tags
 import io.github.smyrgeorge.log4k.impl.extensions.toName
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 /**
  * Sealed interface representing a tracing event in a system.

@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalTime::class)
+
 package io.github.smyrgeorge.log4k.coroutines.impl
 
 import io.github.smyrgeorge.log4k.Level
@@ -5,7 +7,8 @@ import io.github.smyrgeorge.log4k.LoggingEvent
 import io.github.smyrgeorge.log4k.TracingEvent
 import io.github.smyrgeorge.log4k.coroutines.Logger
 import io.github.smyrgeorge.log4k.impl.extensions.thread
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 class SimpleCoroutinesLogger(name: String, level: Level) : Logger(name, level) {
     override fun toLoggingEvent(

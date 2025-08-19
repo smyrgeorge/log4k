@@ -1,18 +1,20 @@
+@file:OptIn(ExperimentalTime::class)
+
 package io.github.smyrgeorge.log4k
 
 import io.github.smyrgeorge.log4k.impl.SimpleMeterFactory
 import io.github.smyrgeorge.log4k.impl.extensions.dispatcher
+import io.github.smyrgeorge.log4k.impl.extensions.doEvery
 import io.github.smyrgeorge.log4k.impl.extensions.toName
 import io.github.smyrgeorge.log4k.impl.registry.CollectorRegistry
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.reflect.KClass
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.ExperimentalTime
 
 /**
  * The `Meter` class serves as an abstract base class for creating different types of metering instruments
@@ -25,7 +27,7 @@ import kotlin.time.Duration.Companion.seconds
  * @param name The name of the meter.
  * @param level The logging level for the meter.
  */
-@Suppress("unused", "MemberVisibilityCanBePrivate")
+@Suppress("unused")
 abstract class Meter(
     final override val name: String,
     final override var level: Level
@@ -87,7 +89,6 @@ abstract class Meter(
      * @param unit the unit of measurement for the instrument, which is optional.
      * @param description a description of the instrument, which is optional.
      */
-    @Suppress("MemberVisibilityCanBePrivate")
     sealed class Instrument(
         val name: String,
         val meter: Meter,
@@ -221,14 +222,8 @@ abstract class Meter(
              * @param f The suspending function to be executed at each polling interval.
              */
             fun poll(every: Duration, initial: Duration = 10.seconds, f: suspend AbstractRecorder<T>.() -> Unit) {
-                GaugeScope.launch(dispatcher) {
-                    delay(initial)
-                    while (true) {
-                        runCatching {
-                            f(this@AbstractRecorder)
-                            delay(every)
-                        }
-                    }
+                doEvery(every, dispatcher) {
+                    f(this@AbstractRecorder)
                 }
             }
 

@@ -1,6 +1,9 @@
+@file:OptIn(ExperimentalTime::class)
+
 package io.github.smyrgeorge.log4k
 
-import kotlinx.datetime.Instant
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 /**
  * Represents an event for logging purposes, capturing essential details about a specific logging occurrence.

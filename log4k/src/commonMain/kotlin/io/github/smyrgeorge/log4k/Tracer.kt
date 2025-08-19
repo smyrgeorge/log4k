@@ -14,7 +14,7 @@ import kotlin.uuid.Uuid
  * @property name The name of the tracer.
  * @property level The logging level of the tracer.
  */
-@Suppress("unused", "MemberVisibilityCanBePrivate")
+@Suppress("unused")
 abstract class Tracer(
     final override val name: String,
     final override var level: Level

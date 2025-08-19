@@ -1,9 +1,12 @@
+@file:OptIn(ExperimentalTime::class)
+
 package io.github.smyrgeorge.log4k
 
 import io.github.smyrgeorge.log4k.Meter.Instrument.Kind
 import io.github.smyrgeorge.log4k.impl.Tags
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 /**
  * Sealed interface for metering events used within a telemetry or monitoring system.

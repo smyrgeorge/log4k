@@ -1,8 +1,11 @@
+@file:OptIn(ExperimentalTime::class)
+
 package io.github.smyrgeorge.log4k.impl.extensions
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.transform
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 inline fun <T> Flow<T>.preventFloodingWithBurst(
     requestsPerSecond: Int,

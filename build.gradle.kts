@@ -1,5 +1,5 @@
 group = "io.github.smyrgeorge"
-version = "0.50.0"
+version = "1.0.0"
 
 plugins {
     alias(libs.plugins.dokka)
@@ -17,7 +17,6 @@ subprojects {
 
     repositories {
         mavenCentral()
-        // IMPORTANT: must be last.
         mavenLocal()
     }
 
