@@ -188,10 +188,10 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
             fun increment(event: MeteringEvent.Increment) {
                 updatedAt = event.timestamp
                 when (event.value) {
-                    is Int -> value = value.toInt() + event.value.toInt()
-                    is Long -> value = value.toLong() + event.value.toLong()
-                    is Float -> value = value.toFloat() + event.value.toFloat()
-                    is Double -> value = value.toDouble() + event.value.toDouble()
+                    is Int -> value = value.toInt() + event.value
+                    is Long -> value = value.toLong() + event.value
+                    is Float -> value = value.toFloat() + event.value
+                    is Double -> value = value.toDouble() + event.value
                 }
             }
         }
@@ -234,10 +234,10 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
                 if (kind == Meter.Instrument.Kind.Counter) return
                 updatedAt = event.timestamp
                 when (event.value) {
-                    is Int -> value = value.toInt() - event.value.toInt()
-                    is Long -> value = value.toLong() - event.value.toLong()
-                    is Float -> value = value.toFloat() - event.value.toFloat()
-                    is Double -> value = value.toDouble() - event.value.toDouble()
+                    is Int -> value = value.toInt() - event.value
+                    is Long -> value = value.toLong() - event.value
+                    is Float -> value = value.toFloat() - event.value
+                    is Double -> value = value.toDouble() - event.value
                 }
             }
         }

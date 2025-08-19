@@ -23,6 +23,7 @@ inline fun <T> Flow<T>.preventFloodingWithBurst(
     var totalDropped = 0L
     var startBurstTime: Long = 0
 
+    @Suppress("AssignedValueIsNeverRead")
     return transform { value ->
         val currentTime = Clock.System.now().toEpochMilliseconds()
         if (currentTime - lastEmissionTime >= windowMillis) {
