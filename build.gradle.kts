@@ -17,6 +17,7 @@ subprojects {
 
     repositories {
         mavenCentral()
+        // IMPORTANT: must be last.
         mavenLocal()
     }
 
