@@ -23,9 +23,6 @@ asynchronous, scalable logging across multiple platforms.
 
 This project also tries to be fully compatible with `OpenTelemetry` standard.
 
-> [!IMPORTANT]  
-> The project is in a very early stage; thus, breaking changes should be expected.
-
 📖 [Documentation](https://smyrgeorge.github.io/log4k/)
 
 🏠 [Homepage](https://smyrgeorge.github.io/) (under construction)
