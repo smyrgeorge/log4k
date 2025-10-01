@@ -24,9 +24,9 @@ import org.slf4j.spi.SLF4JServiceProvider
  * using the Log4k logging framework.
  */
 public class Log4kSLF4JServiceProvider : SLF4JServiceProvider {
-    private lateinit var loggerFactory: ILoggerFactory
-    private lateinit var markerFactory: IMarkerFactory
-    private lateinit var mdcAdapter: MDCAdapter
+    private val loggerFactory: ILoggerFactory = Log4kILoggerFactory()
+    private val markerFactory: IMarkerFactory = BasicMarkerFactory()
+    private val mdcAdapter: MDCAdapter = BasicMDCAdapter()
 
     override fun getLoggerFactory(): ILoggerFactory = loggerFactory
     override fun getMarkerFactory(): IMarkerFactory = markerFactory
@@ -34,8 +34,6 @@ public class Log4kSLF4JServiceProvider : SLF4JServiceProvider {
     override fun getRequestedApiVersion(): String = REQUESTED_API_VERSION
 
     override fun initialize() {
-        loggerFactory = Log4kILoggerFactory()
-        markerFactory = BasicMarkerFactory()
-        mdcAdapter = BasicMDCAdapter()
+        // No-op
     }
 }
