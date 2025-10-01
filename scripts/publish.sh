@@ -2,7 +2,7 @@
 
 set -e
 
-./gradlew clean build -Ptargets=all -x iosSimulatorArm64Test
+./gradlew clean build -Ptargets=all
 
 ./gradlew :dokka:dokkaGenerate
 rm -rf ./docs/*
