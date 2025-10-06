@@ -1,13 +1,13 @@
-@file:Suppress("unused")
-
 package io.github.smyrgeorge.log4k.multiplatform
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
+@Suppress("unused")
 class MultiplatformConventions : Plugin<Project> {
     override fun apply(project: Project) {
         val targets = Utils.targetsOf(project)
@@ -24,7 +24,13 @@ class MultiplatformConventions : Plugin<Project> {
                 Pair("linuxArm64") { linuxArm64() },
                 Pair("linuxX64") { linuxX64() },
                 Pair("mingwX64") { mingwX64() },
-                Pair("jvm") { jvm() },
+                Pair("jvm") {
+                    jvm {
+                        compilerOptions {
+                            jvmTarget.set(JvmTarget.JVM_21)
+                        }
+                    }
+                },
                 Pair("js") {
                     js {
                         browser()
