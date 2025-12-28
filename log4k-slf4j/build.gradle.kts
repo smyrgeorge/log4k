@@ -6,18 +6,17 @@ plugins {
 
 kotlin {
     explicitApi()
-    @Suppress("unused")
     sourceSets {
         configureEach {
             languageSettings.progressiveMode = true
         }
-        val jvmMain by getting {
+        jvmMain {
             dependencies {
                 api(project(":log4k"))
                 api(libs.slf4j)
             }
         }
-        val jvmTest by getting {
+        jvmTest {
             dependencies {
             }
         }

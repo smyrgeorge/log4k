@@ -7,7 +7,7 @@ kotlin {
         configureEach {
             languageSettings.progressiveMode = true
         }
-        val commonMain by getting {
+        commonMain {
             dependencies {
                 implementation(project(":log4k"))
                 implementation(project(":log4k-coroutines"))

@@ -72,6 +72,7 @@ abstract class Logger(
     fun isEnabled(level: Level): Boolean = level.shouldLog()
     fun Level.shouldLog(): Boolean = ordinal >= level.ordinal
 
+    //@formatter:off
     inline fun trace(f: () -> String): Unit = if (TRACE.shouldLog()) trace(f()) else Unit
     inline fun trace(t: Throwable, f: () -> String): Unit = if (TRACE.shouldLog()) trace(f(), t) else Unit
     inline fun debug(f: () -> String): Unit = if (DEBUG.shouldLog()) debug(f()) else Unit
@@ -84,24 +85,15 @@ abstract class Logger(
     inline fun error(t: Throwable, f: () -> String?): Unit = if (ERROR.shouldLog()) error(f(), t) else Unit
 
     inline fun trace(span: Span, f: () -> String): Unit = if (TRACE.shouldLog()) trace(span, f()) else Unit
-    inline fun trace(span: Span, t: Throwable, f: () -> String): Unit =
-        if (TRACE.shouldLog()) trace(span, f(), t) else Unit
-
+    inline fun trace(span: Span, t: Throwable, f: () -> String): Unit = if (TRACE.shouldLog()) trace(span, f(), t) else Unit
     inline fun debug(span: Span, f: () -> String): Unit = if (DEBUG.shouldLog()) debug(span, f()) else Unit
-    inline fun debug(span: Span, t: Throwable, f: () -> String): Unit =
-        if (DEBUG.shouldLog()) debug(span, f(), t) else Unit
-
+    inline fun debug(span: Span, t: Throwable, f: () -> String): Unit = if (DEBUG.shouldLog()) debug(span, f(), t) else Unit
     inline fun info(span: Span, f: () -> String): Unit = if (INFO.shouldLog()) info(span, f()) else Unit
-    inline fun info(span: Span, t: Throwable, f: () -> String): Unit =
-        if (INFO.shouldLog()) info(span, f(), t) else Unit
-
+    inline fun info(span: Span, t: Throwable, f: () -> String): Unit = if (INFO.shouldLog()) info(span, f(), t) else Unit
     inline fun warn(span: Span, f: () -> String): Unit = if (WARN.shouldLog()) warn(span, f()) else Unit
-    inline fun warn(span: Span, t: Throwable, f: () -> String): Unit =
-        if (WARN.shouldLog()) warn(span, f(), t) else Unit
-
+    inline fun warn(span: Span, t: Throwable, f: () -> String): Unit = if (WARN.shouldLog()) warn(span, f(), t) else Unit
     inline fun error(span: Span, f: () -> String?): Unit = if (ERROR.shouldLog()) error(span, f()) else Unit
-    inline fun error(span: Span, t: Throwable, f: () -> String?): Unit =
-        if (ERROR.shouldLog()) error(span, f(), t) else Unit
+    inline fun error(span: Span, t: Throwable, f: () -> String?): Unit = if (ERROR.shouldLog()) error(span, f(), t) else Unit
 
     fun trace(msg: String, vararg args: Any?): Unit = log(TRACE, null, msg, args, null)
     fun trace(msg: String, t: Throwable, vararg args: Any?): Unit = log(TRACE, null, msg, args, t)
@@ -124,6 +116,29 @@ abstract class Logger(
     fun warn(span: Span, msg: String, t: Throwable, vararg args: Any?): Unit = log(WARN, span, msg, args, t)
     fun error(span: Span, msg: String?, vararg args: Any?): Unit = log(ERROR, span, msg ?: "", args, null)
     fun error(span: Span, msg: String?, t: Throwable, vararg args: Any?): Unit = log(ERROR, span, msg ?: "", args, t)
+
+    context(ctx: LoggingContext) inline fun trace(f: () -> String): Unit = if (TRACE.shouldLog()) trace(f()) else Unit
+    context(ctx: LoggingContext) inline fun trace(t: Throwable, f: () -> String): Unit = if (TRACE.shouldLog()) trace(f(), t) else Unit
+    context(ctx: LoggingContext) inline fun debug(f: () -> String): Unit = if (DEBUG.shouldLog()) debug(f()) else Unit
+    context(ctx: LoggingContext) inline fun debug(t: Throwable, f: () -> String): Unit = if (DEBUG.shouldLog()) debug(f(), t) else Unit
+    context(ctx: LoggingContext) inline fun info(f: () -> String): Unit = if (INFO.shouldLog()) info(f()) else Unit
+    context(ctx: LoggingContext) inline fun info(t: Throwable, f: () -> String): Unit = if (INFO.shouldLog()) info(f(), t) else Unit
+    context(ctx: LoggingContext) inline fun warn(f: () -> String): Unit = if (WARN.shouldLog()) warn(f()) else Unit
+    context(ctx: LoggingContext) inline fun warn(t: Throwable, f: () -> String): Unit = if (WARN.shouldLog()) warn(f(), t) else Unit
+    context(ctx: LoggingContext) inline fun error(f: () -> String?): Unit = if (ERROR.shouldLog()) error(f()) else Unit
+    context(ctx: LoggingContext) inline fun error(t: Throwable, f: () -> String?): Unit = if (ERROR.shouldLog()) error(f(), t) else Unit
+
+    context(ctx: LoggingContext) fun trace(msg: String, vararg args: Any?): Unit = log(TRACE, ctx.spans.current(), msg, args, null)
+    context(ctx: LoggingContext) fun trace(msg: String, t: Throwable, vararg args: Any?): Unit = log(TRACE, ctx.spans.current(), msg, args, t)
+    context(ctx: LoggingContext) fun debug(msg: String, vararg args: Any?): Unit = log(DEBUG, ctx.spans.current(), msg, args, null)
+    context(ctx: LoggingContext) fun debug(msg: String, t: Throwable, vararg args: Any?): Unit = log(DEBUG, ctx.spans.current(), msg, args, t)
+    context(ctx: LoggingContext) fun info(msg: String, vararg args: Any?): Unit = log(INFO, ctx.spans.current(), msg, args, null)
+    context(ctx: LoggingContext) fun info(msg: String, t: Throwable, vararg args: Any?): Unit = log(INFO, ctx.spans.current(), msg, args, t)
+    context(ctx: LoggingContext) fun warn(msg: String, vararg args: Any?): Unit = log(WARN, ctx.spans.current(), msg, args, null)
+    context(ctx: LoggingContext) fun warn(msg: String, t: Throwable, vararg args: Any?): Unit = log(WARN, ctx.spans.current(), msg, args, t)
+    context(ctx: LoggingContext) fun error(msg: String?, vararg args: Any?): Unit = log(ERROR, ctx.spans.current(), msg ?: "", args, null)
+    context(ctx: LoggingContext) fun error(msg: String?, t: Throwable, vararg args: Any?): Unit = log(ERROR, ctx.spans.current(), msg ?: "", args, t)
+    //@formatter:on
 
     companion object {
         val registry = CollectorRegistry<Logger>()

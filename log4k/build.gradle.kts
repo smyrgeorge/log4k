@@ -5,18 +5,20 @@ plugins {
 }
 
 kotlin {
-    @Suppress("unused")
     sourceSets {
+        all {
+            languageSettings.enableLanguageFeature("ContextParameters")
+        }
         configureEach {
             languageSettings.progressiveMode = true
         }
-        val commonMain by getting {
+        commonMain {
             dependencies {
                 api(libs.kotlinx.coroutines.core)
                 api(libs.kotlinx.serialisation.json)
             }
         }
-        val commonTest by getting {
+        commonTest {
             dependencies {
                 implementation(libs.kotlin.test)
                 implementation(libs.assertk)

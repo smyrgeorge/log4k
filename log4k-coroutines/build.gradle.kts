@@ -5,17 +5,16 @@ plugins {
 }
 
 kotlin {
-    @Suppress("unused")
     sourceSets {
         configureEach {
             languageSettings.progressiveMode = true
         }
-        val commonMain by getting {
+        commonMain {
             dependencies {
                 api(project(":log4k"))
             }
         }
-        val commonTest by getting {
+        commonTest {
             dependencies {
                 implementation(libs.kotlin.test)
                 implementation(libs.assertk)

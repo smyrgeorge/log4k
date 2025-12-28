@@ -1,13 +1,17 @@
 package io.github.smyrgeorge.log4k.coroutines
 
 import io.github.smyrgeorge.log4k.Level
-import io.github.smyrgeorge.log4k.Level.*
+import io.github.smyrgeorge.log4k.Level.DEBUG
+import io.github.smyrgeorge.log4k.Level.ERROR
+import io.github.smyrgeorge.log4k.Level.INFO
+import io.github.smyrgeorge.log4k.Level.TRACE
+import io.github.smyrgeorge.log4k.Level.WARN
+import io.github.smyrgeorge.log4k.LoggingContext.Companion.current
 import io.github.smyrgeorge.log4k.LoggingEvent
 import io.github.smyrgeorge.log4k.RootLogger
 import io.github.smyrgeorge.log4k.TracingEvent.Span
 import io.github.smyrgeorge.log4k.coroutines.impl.SimpleCoroutinesLoggerFactory
 import io.github.smyrgeorge.log4k.impl.registry.CollectorRegistry
-import kotlinx.coroutines.currentCoroutineContext
 import kotlin.reflect.KClass
 
 @Suppress("unused")
@@ -78,7 +82,7 @@ abstract class Logger(
     suspend fun error(msg: String?, vararg args: Any?): Unit = log(ERROR, msg ?: "", args, null)
     suspend fun error(msg: String?, t: Throwable, vararg args: Any?): Unit = log(ERROR, msg ?: "", args, t)
 
-    private suspend fun ctx(): LoggingContext = currentCoroutineContext()[LoggingContext] ?: LoggingContext.EMPTY
+    private suspend fun ctx(): LoggingContext = current()
 
     companion object {
         val registry = CollectorRegistry<Logger>()
