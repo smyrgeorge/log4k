@@ -2,7 +2,7 @@
 <html class="no-js" lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
-    <title>Builder</title>
+    <title>SpanStack</title>
 <link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
     <script>document.documentElement.classList.replace("no-js", "js");</script>
     <script>const storage = localStorage.getItem("dokka-dark-mode")
@@ -39,7 +39,7 @@
             </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
         </button>
         <div class="navigation-controls--break ui-kit_mobile-only"></div>
-        <div class="library-version" id="library-version">1.2.0
+        <div class="library-version" id="library-version">1.2.1
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
@@ -90,23 +90,23 @@
         </nav>
         <div id="resizer" class="resizer" data-item-type="BAR"></div>
         <div id="main" data-item-type="SECTION" role="main">
-<div class="main-content" data-page-type="classlike" id="content" pageids="log4k::io.github.smyrgeorge.log4k/LoggingContext.Builder///PointingToDeclaration//-757297100">
-  <div class="breadcrumbs"><a href="../../../index.html">log4k</a><span class="delimiter">/</span><a href="../../index.html">io.github.smyrgeorge.log4k</a><span class="delimiter">/</span><a href="../index.html">LoggingContext</a><span class="delimiter">/</span><span class="current">Builder</span></div>
+<div class="main-content" data-page-type="classlike" id="content" pageids="log4k::io.github.smyrgeorge.log4k/TracingContext.SpanStack///PointingToDeclaration//-757297100">
+  <div class="breadcrumbs"><a href="../../../index.html">log4k</a><span class="delimiter">/</span><a href="../../index.html">io.github.smyrgeorge.log4k</a><span class="delimiter">/</span><a href="../index.html">TracingContext</a><span class="delimiter">/</span><span class="current">SpanStack</span></div>
   <div class="cover ">
-    <h1 class="cover"><span><span>Builder</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">Builder</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/smyrgeorge/log4k/tree/main/log4k/src/commonMain/kotlin/io/github/smyrgeorge/log4k/LoggingContext.kt#L101">source</a>)</span></span></div><p class="paragraph">A builder class used to construct instances of <code class="lang-kotlin">LoggingContext</code>. It allows for the incremental configuration of a <code class="lang-kotlin">LoggingContext</code>'s properties, such as tags, a parent span, and a tracer.</p><p class="paragraph">The main purpose of this class is to provide a fluent interface for customizing and building a specific <code class="lang-kotlin">LoggingContext</code> instance.</p></div></div>
+    <h1 class="cover"><span>Span</span><wbr><span><span>Stack</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">SpanStack</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/smyrgeorge/log4k/tree/main/log4k/src/commonMain/kotlin/io/github/smyrgeorge/log4k/TracingContext.kt#L77">source</a>)</span></span></div><p class="paragraph">A simple stack data structure to manage <code class="lang-kotlin">Span</code> objects, allowing push, pop, and peek operations. Provides functionalities to add a new span to the stack, remove the most recently added span, or view it without removing.</p></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
     <div class="tabs-section-body">
       <div data-togglable="CONSTRUCTOR">
         <h2 class="tableheader">Constructors</h2>
-        <div class="table"><a data-name="1621035751%2FConstructors%2F-757297100" anchor-label="Builder" id="1621035751%2FConstructors%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+        <div class="table"><a data-name="-1610490300%2FConstructors%2F-757297100" anchor-label="SpanStack" id="-1610490300%2FConstructors%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
           <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="-builder.html"><span><span>Builder</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1621035751%2FConstructors%2F-757297100"></span>
+                  <div><a href="-span-stack.html"><span>Span</span><wbr><span><span>Stack</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1610490300%2FConstructors%2F-757297100"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
@@ -120,32 +120,77 @@
       </div>
       <div data-togglable="FUNCTION">
         <h2 class="tableheader">Functions</h2>
-        <div class="table"><a data-name="-1533525868%2FFunctions%2F-757297100" anchor-label="build" id="-1533525868%2FFunctions%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+        <div class="table"><a data-name="1533837225%2FFunctions%2F-757297100" anchor-label="current" id="1533837225%2FFunctions%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="build.html"><span><span>build</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1533525868%2FFunctions%2F-757297100"></span>
+                  <div><a href="current.html"><span><span>current</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1533837225%2FFunctions%2F-757297100"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="build.html"><span class="token function">build</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../index.html">LoggingContext</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="current.html"><span class="token function">current</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../-tracing-event/-span/index.html">TracingEvent.Span</a><span class="token operator">?</span></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-563539990%2FFunctions%2F-757297100" anchor-label="with" id="-563539990%2FFunctions%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+<a data-name="-1296958051%2FFunctions%2F-757297100" anchor-label="peek" id="-1296958051%2FFunctions%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="with.html"><span><span>with</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-563539990%2FFunctions%2F-757297100"></span>
+                  <div><a href="peek.html"><span><span>peek</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1296958051%2FFunctions%2F-757297100"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="with.html"><span class="token function">with</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">tracer<span class="token operator">: </span><a href="../../-tracer/index.html">Tracer</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">LoggingContext.Builder</a></div><div class="symbol monospace"><span class="token keyword">fun </span><a href="with.html"><span class="token function">with</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">parent<span class="token operator">: </span><a href="../../-tracing-event/-span/index.html">TracingEvent.Span</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">LoggingContext.Builder</a></div><div class="symbol monospace"><span class="token keyword">fun </span><a href="with.html"><span class="token function">with</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">f<span class="token operator">: </span><span class="token punctuation">(</span><a href="../../../io.github.smyrgeorge.log4k.impl/-mutable-tags/index.html">MutableTags</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">LoggingContext.Builder</a></div><div class="symbol monospace"><span class="token keyword">fun </span><a href="with.html"><span class="token function">with</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">vararg </span>tags<span class="token operator">: </span><a href="../../../io.github.smyrgeorge.log4k.impl/-tag/index.html">Tag</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">LoggingContext.Builder</a></div><div class="symbol monospace"><span class="token keyword">fun </span><a href="with.html"><span class="token function">with</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">tags<span class="token operator">: </span><a href="../../../io.github.smyrgeorge.log4k.impl/-tags/index.html">Tags</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">LoggingContext.Builder</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="peek.html"><span class="token function">peek</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../-tracing-event/-span/index.html">TracingEvent.Span</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="313235537%2FFunctions%2F-757297100" anchor-label="pop" id="313235537%2FFunctions%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="pop.html"><span><span>pop</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="313235537%2FFunctions%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="pop.html"><span class="token function">pop</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../-tracing-event/-span/index.html">TracingEvent.Span</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1828706986%2FFunctions%2F-757297100" anchor-label="push" id="1828706986%2FFunctions%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="push.html"><span><span>push</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1828706986%2FFunctions%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="push.html"><span class="token function">push</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">span<span class="token operator">: </span><a href="../../-tracing-event/-span/index.html">TracingEvent.Span</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="163372076%2FFunctions%2F-757297100" anchor-label="toString" id="163372076%2FFunctions%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="to-string.html"><span>to</span><wbr><span><span>String</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="163372076%2FFunctions%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="to-string.html"><span class="token function">toString</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
