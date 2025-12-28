@@ -1,6 +1,7 @@
 package io.github.smyrgeorge.log4k
 
 import io.github.smyrgeorge.log4k.impl.SimpleTracerFactory
+import io.github.smyrgeorge.log4k.impl.Tags
 import io.github.smyrgeorge.log4k.impl.registry.CollectorRegistry
 import kotlin.math.absoluteValue
 import kotlin.reflect.KClass
@@ -37,6 +38,17 @@ abstract class Tracer(
      */
     fun span(name: String, parent: TracingEvent.Span? = null): TracingEvent.Span.Local =
         TracingEvent.Span.Local(id = id(), level = level, tracer = this, name = name, parent = parent)
+
+    /**
+     * Creates and returns a new local span with the given name, tags, and optional parent span.
+     *
+     * @param name The name of the new span.
+     * @param parent The parent span, if any. Default is `null`.
+     * @param tags The key-value pairs associated with the span.
+     * @return A new instance of `TracingEvent.Span.Local`.
+     */
+    fun span(name: String, tags: Tags, parent: TracingEvent.Span? = null): TracingEvent.Span.Local =
+        TracingEvent.Span.Local(id = id(), level = level, tracer = this, name = name, parent = parent, tags = tags)
 
     /**
      * Creates and returns a new remote span with the given id, trace ID, and an optional name.

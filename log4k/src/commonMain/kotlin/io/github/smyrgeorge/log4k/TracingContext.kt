@@ -1,8 +1,6 @@
 package io.github.smyrgeorge.log4k
 
 import io.github.smyrgeorge.log4k.TracingEvent.Span
-import io.github.smyrgeorge.log4k.impl.MutableTags
-import io.github.smyrgeorge.log4k.impl.Tag
 import io.github.smyrgeorge.log4k.impl.Tags
 import kotlinx.coroutines.currentCoroutineContext
 import kotlin.coroutines.CoroutineContext
@@ -12,13 +10,11 @@ import kotlin.coroutines.CoroutineContext
  * and tagging information. It provides mechanisms for managing and tracking spans in a tracing
  * context and supports execution within the scope of a specific tracing span.
  *
- * @property tags A mutable map of tags associated with the context for tracing purposes.
  * @property tracer The tracer instance used to create and manage spans, if available.
  * @property parent The parent span of the current context, or `null` if no parent exists.
  * @property spans A stack structure to manage the active spans in this context.
  */
-data class LoggingContext(
-    val tags: MutableTags = mutableMapOf(),
+data class TracingContext(
     val tracer: Tracer? = null,
     val parent: Span? = null,
 ) : CoroutineContext.Element {
@@ -28,7 +24,6 @@ data class LoggingContext(
         parent?.let { spans.push(it) }
     }
 
-
     /**
      * Executes a function within the scope of a tracing span.
      *
@@ -37,10 +32,21 @@ data class LoggingContext(
      * @param f A function to be executed within the span context.
      * @return The result produced by the function `f`.
      */
-    inline fun <T> span(name: String, f: Span.Local.() -> T): T {
-        val current: Span? = spans.peek()
-        val tracer = current?.context?.tracer ?: tracer ?: error("No tracer found for current span.")
-        val span = tracer.span(name, current).start().also {
+    inline fun <T> span(name: String, f: Span.Local.() -> T): T = span(name, emptyMap(), f)
+
+    /**
+     * Executes a function within the scope of a tracing span.
+     *
+     * @param T The type of the result produced by the function.
+     * @param name The name of the span.
+     * @param tags Additional tags to associate with the span.
+     * @param f A function to be executed within the span context.
+     * @return The result produced by the function `f`.
+     */
+    inline fun <T> span(name: String, tags: Tags = emptyMap(), f: Span.Local.() -> T): T {
+        val parent: Span? = spans.peek()
+        val tracer = parent?.context?.tracer ?: tracer ?: error("No tracer found for current span.")
+        val span = tracer.span(name, tags, parent).start().also {
             spans.push(it)
         }
         return try {
@@ -57,24 +63,11 @@ data class LoggingContext(
     }
 
     override fun toString(): String {
-        return "LoggingContext(spans=$spans, tags=$tags)"
+        return "LoggingContext(spans=$spans)"
     }
 
-    override val key: CoroutineContext.Key<LoggingContext>
-        get() = LoggingContext
-
-    companion object : CoroutineContext.Key<LoggingContext> {
-        fun builder(): Builder = Builder()
-
-        /**
-         * Retrieves the current logging context from the coroutine context.
-         *
-         * @return The current [LoggingContext] available in the coroutine context.
-         * @throws IllegalStateException if no logging context is found in the coroutine context.
-         */
-        suspend fun current(): LoggingContext =
-            currentCoroutineContext()[LoggingContext] ?: error("No logging context found.")
-    }
+    override val key: CoroutineContext.Key<TracingContext>
+        get() = TracingContext
 
     /**
      * A simple stack data structure to manage `Span` objects, allowing push, pop, and peek operations.
@@ -93,23 +86,29 @@ data class LoggingContext(
     /**
      * A builder class used to construct instances of `LoggingContext`.
      * It allows for the incremental configuration of a `LoggingContext`'s properties,
-     * such as tags, a parent span, and a tracer.
+     * such as a parent span and a tracer.
      *
      * The main purpose of this class is to provide a fluent interface for customizing
      * and building a specific `LoggingContext` instance.
      */
     class Builder {
-        private var tags: MutableTags = mutableMapOf()
         private var tracer: Tracer? = null
         private var parent: Span? = null
         fun with(parent: Span): Builder = apply { this.parent = parent }
-        fun with(f: (MutableTags) -> Unit): Builder = apply { f(tags) }
-        fun with(vararg tags: Tag): Builder = apply { this.tags.putAll(tags) }
-        fun with(tags: Tags): Builder = apply { this.tags.putAll(tags) }
         fun with(tracer: Tracer): Builder = apply { this.tracer = tracer }
-        fun build(): LoggingContext =
-            parent?.let {
-                LoggingContext(tags = tags, tracer = tracer, parent = it)
-            } ?: LoggingContext(tags = tags, tracer = tracer)
+        fun build(): TracingContext = TracingContext(tracer, parent)
+    }
+
+    companion object : CoroutineContext.Key<TracingContext> {
+        fun builder(): Builder = Builder()
+
+        /**
+         * Retrieves the current logging context from the coroutine context.
+         *
+         * @return The current [TracingContext] available in the coroutine context.
+         * @throws IllegalStateException if no logging context is found in the coroutine context.
+         */
+        suspend fun current(): TracingContext =
+            currentCoroutineContext()[TracingContext] ?: error("No logging context found.")
     }
 }

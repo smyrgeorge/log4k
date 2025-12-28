@@ -73,6 +73,28 @@ abstract class Logger(
     fun Level.shouldLog(): Boolean = ordinal >= level.ordinal
 
     //@formatter:off
+    context(ctx: TracingContext) inline fun trace(f: () -> String): Unit = if (TRACE.shouldLog()) trace(f()) else Unit
+    context(ctx: TracingContext) inline fun trace(t: Throwable, f: () -> String): Unit = if (TRACE.shouldLog()) trace(f(), t) else Unit
+    context(ctx: TracingContext) inline fun debug(f: () -> String): Unit = if (DEBUG.shouldLog()) debug(f()) else Unit
+    context(ctx: TracingContext) inline fun debug(t: Throwable, f: () -> String): Unit = if (DEBUG.shouldLog()) debug(f(), t) else Unit
+    context(ctx: TracingContext) inline fun info(f: () -> String): Unit = if (INFO.shouldLog()) info(f()) else Unit
+    context(ctx: TracingContext) inline fun info(t: Throwable, f: () -> String): Unit = if (INFO.shouldLog()) info(f(), t) else Unit
+    context(ctx: TracingContext) inline fun warn(f: () -> String): Unit = if (WARN.shouldLog()) warn(f()) else Unit
+    context(ctx: TracingContext) inline fun warn(t: Throwable, f: () -> String): Unit = if (WARN.shouldLog()) warn(f(), t) else Unit
+    context(ctx: TracingContext) inline fun error(f: () -> String?): Unit = if (ERROR.shouldLog()) error(f()) else Unit
+    context(ctx: TracingContext) inline fun error(t: Throwable, f: () -> String?): Unit = if (ERROR.shouldLog()) error(f(), t) else Unit
+
+    context(ctx: TracingContext) fun trace(msg: String, vararg args: Any?): Unit = log(TRACE, ctx.spans.current(), msg, args, null)
+    context(ctx: TracingContext) fun trace(msg: String, t: Throwable, vararg args: Any?): Unit = log(TRACE, ctx.spans.current(), msg, args, t)
+    context(ctx: TracingContext) fun debug(msg: String, vararg args: Any?): Unit = log(DEBUG, ctx.spans.current(), msg, args, null)
+    context(ctx: TracingContext) fun debug(msg: String, t: Throwable, vararg args: Any?): Unit = log(DEBUG, ctx.spans.current(), msg, args, t)
+    context(ctx: TracingContext) fun info(msg: String, vararg args: Any?): Unit = log(INFO, ctx.spans.current(), msg, args, null)
+    context(ctx: TracingContext) fun info(msg: String, t: Throwable, vararg args: Any?): Unit = log(INFO, ctx.spans.current(), msg, args, t)
+    context(ctx: TracingContext) fun warn(msg: String, vararg args: Any?): Unit = log(WARN, ctx.spans.current(), msg, args, null)
+    context(ctx: TracingContext) fun warn(msg: String, t: Throwable, vararg args: Any?): Unit = log(WARN, ctx.spans.current(), msg, args, t)
+    context(ctx: TracingContext) fun error(msg: String?, vararg args: Any?): Unit = log(ERROR, ctx.spans.current(), msg ?: "", args, null)
+    context(ctx: TracingContext) fun error(msg: String?, t: Throwable, vararg args: Any?): Unit = log(ERROR, ctx.spans.current(), msg ?: "", args, t)
+
     inline fun trace(f: () -> String): Unit = if (TRACE.shouldLog()) trace(f()) else Unit
     inline fun trace(t: Throwable, f: () -> String): Unit = if (TRACE.shouldLog()) trace(f(), t) else Unit
     inline fun debug(f: () -> String): Unit = if (DEBUG.shouldLog()) debug(f()) else Unit
@@ -116,28 +138,6 @@ abstract class Logger(
     fun warn(span: Span, msg: String, t: Throwable, vararg args: Any?): Unit = log(WARN, span, msg, args, t)
     fun error(span: Span, msg: String?, vararg args: Any?): Unit = log(ERROR, span, msg ?: "", args, null)
     fun error(span: Span, msg: String?, t: Throwable, vararg args: Any?): Unit = log(ERROR, span, msg ?: "", args, t)
-
-    context(ctx: LoggingContext) inline fun trace(f: () -> String): Unit = if (TRACE.shouldLog()) trace(f()) else Unit
-    context(ctx: LoggingContext) inline fun trace(t: Throwable, f: () -> String): Unit = if (TRACE.shouldLog()) trace(f(), t) else Unit
-    context(ctx: LoggingContext) inline fun debug(f: () -> String): Unit = if (DEBUG.shouldLog()) debug(f()) else Unit
-    context(ctx: LoggingContext) inline fun debug(t: Throwable, f: () -> String): Unit = if (DEBUG.shouldLog()) debug(f(), t) else Unit
-    context(ctx: LoggingContext) inline fun info(f: () -> String): Unit = if (INFO.shouldLog()) info(f()) else Unit
-    context(ctx: LoggingContext) inline fun info(t: Throwable, f: () -> String): Unit = if (INFO.shouldLog()) info(f(), t) else Unit
-    context(ctx: LoggingContext) inline fun warn(f: () -> String): Unit = if (WARN.shouldLog()) warn(f()) else Unit
-    context(ctx: LoggingContext) inline fun warn(t: Throwable, f: () -> String): Unit = if (WARN.shouldLog()) warn(f(), t) else Unit
-    context(ctx: LoggingContext) inline fun error(f: () -> String?): Unit = if (ERROR.shouldLog()) error(f()) else Unit
-    context(ctx: LoggingContext) inline fun error(t: Throwable, f: () -> String?): Unit = if (ERROR.shouldLog()) error(f(), t) else Unit
-
-    context(ctx: LoggingContext) fun trace(msg: String, vararg args: Any?): Unit = log(TRACE, ctx.spans.current(), msg, args, null)
-    context(ctx: LoggingContext) fun trace(msg: String, t: Throwable, vararg args: Any?): Unit = log(TRACE, ctx.spans.current(), msg, args, t)
-    context(ctx: LoggingContext) fun debug(msg: String, vararg args: Any?): Unit = log(DEBUG, ctx.spans.current(), msg, args, null)
-    context(ctx: LoggingContext) fun debug(msg: String, t: Throwable, vararg args: Any?): Unit = log(DEBUG, ctx.spans.current(), msg, args, t)
-    context(ctx: LoggingContext) fun info(msg: String, vararg args: Any?): Unit = log(INFO, ctx.spans.current(), msg, args, null)
-    context(ctx: LoggingContext) fun info(msg: String, t: Throwable, vararg args: Any?): Unit = log(INFO, ctx.spans.current(), msg, args, t)
-    context(ctx: LoggingContext) fun warn(msg: String, vararg args: Any?): Unit = log(WARN, ctx.spans.current(), msg, args, null)
-    context(ctx: LoggingContext) fun warn(msg: String, t: Throwable, vararg args: Any?): Unit = log(WARN, ctx.spans.current(), msg, args, t)
-    context(ctx: LoggingContext) fun error(msg: String?, vararg args: Any?): Unit = log(ERROR, ctx.spans.current(), msg ?: "", args, null)
-    context(ctx: LoggingContext) fun error(msg: String?, t: Throwable, vararg args: Any?): Unit = log(ERROR, ctx.spans.current(), msg ?: "", args, t)
     //@formatter:on
 
     companion object {

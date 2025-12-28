@@ -42,55 +42,6 @@ sealed interface TracingEvent {
         val events: MutableList<Event>,
         var status: Status,
     ) : TracingEvent {
-
-        /**
-         * Constructor for creating a [Local] Span.
-         *
-         * This constructor initializes a local Span with the provided identifier, name,
-         * level, tracer, parent span, and trace identifier. The start and end timestamps
-         * are initially set to null. MutableTags and events are initialized to empty mutable
-         * collections, and the status is initialized to a default Status object.
-         *
-         * @param id Unique identifier for the span.
-         * @param name Name of the span.
-         * @param level Logging level for the span.
-         * @param tracer Tracer instance responsible for the span.
-         * @param parent Parent span, if any; can be null.
-         * @param traceId Identifier for the trace to which the span belongs.
-         */
-        constructor(id: String, name: String, level: Level, tracer: Tracer, parent: Span?, traceId: String) : this(
-            name = name,
-            level = level,
-            context = Context(traceId, id, false, tracer),
-            parent = parent,
-            startAt = null,
-            endAt = null,
-            tags = mutableMapOf(),
-            events = mutableListOf(),
-            status = Status(),
-        )
-
-        /**
-         * Constructor for creating a [Remote] span instance with the given parameters.
-         *
-         * @param id The unique identifier of the span.
-         * @param traceId The unique identifier of the trace.
-         * @param name The name of the span.
-         * @param level The logging level of the span.
-         * @param tracer The tracer associated with this span.
-         */
-        constructor(id: String, traceId: String, name: String, level: Level, tracer: Tracer) : this(
-            name = name,
-            level = level,
-            context = Context(traceId, id, true, tracer),
-            parent = null,
-            startAt = null,
-            endAt = null,
-            tags = mutableMapOf(),
-            events = mutableListOf(),
-            status = Status(),
-        )
-
         /**
          * Creates and returns a new local span with the given name associated with the current context.
          *
@@ -118,6 +69,7 @@ sealed interface TracingEvent {
          * @param level The level of the span.
          * @param tracer The tracer associated with this span.
          * @param parent The parent span, if any. Default is `null`.
+         * @param tags Additional tags to associate with the span.
          * @param traceId The unique identifier for the trace. Defaults to the parent's traceId or the span's own id.
          */
         class Local(
@@ -126,8 +78,19 @@ sealed interface TracingEvent {
             override val level: Level,
             tracer: Tracer,
             override val parent: Span? = null,
+            tags: Tags = emptyMap(),
             traceId: String = parent?.context?.traceId ?: id
-        ) : Span(id = id, name = name, level = level, tracer = tracer, parent = parent, traceId = traceId) {
+        ) : Span(
+            name = name,
+            level = level,
+            context = Context(traceId, id, false, tracer),
+            parent = parent,
+            startAt = null,
+            endAt = null,
+            tags = tags.toMutableMap(),
+            events = mutableListOf(),
+            status = Status()
+        ) {
 
             private fun shouldStart(): Boolean =
                 !context.isRemote && level.ordinal >= context.tracer.level.ordinal
@@ -267,7 +230,17 @@ sealed interface TracingEvent {
             override val name: String = "remote-$id",
             override val level: Level,
             tracer: Tracer
-        ) : Span(id = id, traceId = traceId, name = name, level = level, tracer = tracer) {
+        ) : Span(
+            name = name,
+            level = level,
+            context = Context(traceId, id, true, tracer),
+            parent = null,
+            startAt = null,
+            endAt = null,
+            tags = mutableMapOf(),
+            events = mutableListOf(),
+            status = Status()
+        ) {
             override fun toString(): String = "Remote${super.toString()}"
         }
 
@@ -277,7 +250,11 @@ sealed interface TracingEvent {
             val spanId: String,
             val isRemote: Boolean, // Indicates whether the Span was received from somewhere else or locally generated.
             val tracer: Tracer, // Information about the local [Tracer].
-        )
+        ) {
+            override fun toString(): String {
+                return "Context(spanId='$spanId', traceId='$traceId')"
+            }
+        }
 
         // https://opentelemetry.io/docs/specs/otel/trace/api/#add-events
         data class Event(

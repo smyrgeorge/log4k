@@ -6,7 +6,7 @@ import io.github.smyrgeorge.log4k.Level.ERROR
 import io.github.smyrgeorge.log4k.Level.INFO
 import io.github.smyrgeorge.log4k.Level.TRACE
 import io.github.smyrgeorge.log4k.Level.WARN
-import io.github.smyrgeorge.log4k.LoggingContext.Companion.current
+import io.github.smyrgeorge.log4k.TracingContext.Companion.current
 import io.github.smyrgeorge.log4k.LoggingEvent
 import io.github.smyrgeorge.log4k.RootLogger
 import io.github.smyrgeorge.log4k.TracingEvent.Span
