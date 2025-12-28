@@ -1,22 +1,22 @@
 <!doctype html>
-<html class="no-js">
+<html class="no-js" lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
     <title>Counter</title>
-<link href="../../../../../images/logo-icon.svg" rel="icon" type="image/svg">    <script>var pathToRoot = "../../../../../";</script>
-    <script>document.documentElement.classList.replace("no-js","js");</script>
+<link href="../../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
     <script>const storage = localStorage.getItem("dokka-dark-mode")
-    if (storage == null) {
+      if (storage == null) {
         const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
         if (osDarkSchemePreferred === true) {
-            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
         }
-    } else {
+      } else {
         const savedDarkMode = JSON.parse(storage)
-        if(savedDarkMode === true) {
-            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
         }
-    }
+      }
     </script>
 <script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async></script>
 <script type="text/javascript" src="../../../../../scripts/sourceset_dependencies.js" async></script>
@@ -24,33 +24,31 @@
 <link href="../../../../../styles/main.css" rel="Stylesheet">
 <link href="../../../../../styles/prism.css" rel="Stylesheet">
 <link href="../../../../../styles/logo-styles.css" rel="Stylesheet">
-<link href="../../../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
 <link href="../../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
-<script type="text/javascript" src="../../../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../../../scripts/safe-local-storage_blocking.js"></script>
 <script type="text/javascript" src="../../../../../scripts/navigation-loader.js" async></script>
 <script type="text/javascript" src="../../../../../scripts/platform-content-handler.js" async></script>
 <script type="text/javascript" src="../../../../../scripts/main.js" defer></script>
 <script type="text/javascript" src="../../../../../scripts/prism.js" async></script>
-<script type="text/javascript" src="../../../../../ui-kit/ui-kit.min.js" defer></script>
-<script type="text/javascript" src="../../../../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
+<script type="text/javascript" src="../../../../../ui-kit/ui-kit.min.js" defer></script></head>
 <body>
-    <div class="root">
-    <nav class="navigation theme-dark" id="navigation-wrapper">
-<a class="library-name--link" href="../../../../../index.html">
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../../../index.html" tabindex="1">
                     log4k
             </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
         </button>
         <div class="navigation-controls--break ui-kit_mobile-only"></div>
-        <div class="library-version" id="library-version">1.1.2
+        <div class="library-version" id="library-version">1.2.0
         </div>
         <div class="navigation-controls">
-        <div class="filter-section filter-section_loading" id="filter-section">
-                <button class="platform-tag platform-selector common-like" data-active="" data-filter=":log4k/commonMain">common</button>
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":log4k/commonMain">common</button>
             <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
                 <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
-                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox">
-                    <div class="dropdown--header"><span>Platform filter</span>
-                        <button class="button" data-role="dropdown-toggle" aria-label="Close platform filter">
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
                             <i class="ui-kit-icon ui-kit-icon_cross"></i>
                         </button>
                     </div>
@@ -64,45 +62,47 @@
                 </ul>
                 <div class="dropdown--overlay"></div>
             </div>
-        </div>
+        </ul>
             <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
             </button>
             <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
                 API
             </div>
         </div>
-    </nav>
-        <div id="container">
-            <div class="sidebar" id="leftColumn">
-                <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
-                    <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox">
-                        <div class="dropdown--header">
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
                             <span>
                                     log4k
                             </span>
-                            <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
-                                <i class="ui-kit-icon ui-kit-icon_cross"></i>
-                            </button>
-                        </div>
-                        <div class="sidebar--inner" id="sideMenu"></div>
-                    </ul>
-                    <div class="dropdown--overlay"></div>
-                </div>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
             </div>
-            <div id="main">
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
 <div class="main-content" data-page-type="classlike" id="content" pageids="log4k::io.github.smyrgeorge.log4k.impl.appenders.simple/SimpleMeteringCollectorAppender.Instrument.Counter///PointingToDeclaration//-757297100">
   <div class="breadcrumbs"><a href="../../../../index.html">log4k</a><span class="delimiter">/</span><a href="../../../index.html">io.github.smyrgeorge.log4k.impl.appenders.simple</a><span class="delimiter">/</span><a href="../../index.html">SimpleMeteringCollectorAppender</a><span class="delimiter">/</span><a href="../index.html">Instrument</a><span class="delimiter">/</span><span class="current">Counter</span></div>
   <div class="cover ">
     <h1 class="cover"><span><span>Counter</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">Counter</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>name<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>tags<span class="token operator">: </span><a href="../../../../io.github.smyrgeorge.log4k.impl/-tags/index.html">Tags</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>kind<span class="token operator">: </span><a href="../../../../io.github.smyrgeorge.log4k/-meter/-instrument/-kind/index.html">Meter.Instrument.Kind</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>unit<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>description<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">var </span>value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-number/index.html">Number</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">var </span>updatedAt<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.time/-instant/index.html">Instant</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span> : <a href="../-abstract-counter/index.html">SimpleMeteringCollectorAppender.Instrument.AbstractCounter</a><span class="clearfix"><span class="floating-right">(<a href="https://github.com/smyrgeorge/log4k/tree/main/log4k/src/commonMain/kotlin/io/github/smyrgeorge/log4k/impl/appenders/simple/SimpleMeteringCollectorAppender.kt#L214">source</a>)</span></span></div></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">Counter</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">name<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">tags<span class="token operator">: </span><a href="../../../../io.github.smyrgeorge.log4k.impl/-tags/index.html">Tags</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">kind<span class="token operator">: </span><a href="../../../../io.github.smyrgeorge.log4k/-meter/-instrument/-kind/index.html">Meter.Instrument.Kind</a><span class="token punctuation">, </span></span><span class="parameter ">unit<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">description<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-number/index.html">Number</a><span class="token punctuation">, </span></span><span class="parameter ">updatedAt<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.time/-instant/index.html">Instant</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span> : <a href="../-abstract-counter/index.html">SimpleMeteringCollectorAppender.Instrument.AbstractCounter</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/smyrgeorge/log4k/tree/main/log4k/src/commonMain/kotlin/io/github/smyrgeorge/log4k/impl/appenders/simple/SimpleMeteringCollectorAppender.kt#L214">source</a>)</span></span></div></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
     <div class="tabs-section-body">
       <div data-togglable="CONSTRUCTOR">
-        <h2 class="">Constructors</h2>
+        <h2 class="tableheader">Constructors</h2>
         <div class="table"><a data-name="1639712385%2FConstructors%2F-757297100" anchor-label="Counter" id="1639712385%2FConstructors%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
-          <div class="table-row" data-togglable="CONSTRUCTOR" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+          <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-counter.html"><span><span>Counter</span></span></a></div>
@@ -119,9 +119,9 @@
         </div>
       </div>
       <div data-togglable="PROPERTY">
-        <h2 class="">Properties</h2>
+        <h2 class="tableheader">Properties</h2>
         <div class="table"><a data-name="415077983%2FProperties%2F-757297100" anchor-label="description" id="415077983%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
-          <div class="table-row" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="../-abstract-counter/description.html"><span><span>description</span></span></a></div>
@@ -136,7 +136,7 @@
             </div>
           </div>
 <a data-name="485079371%2FProperties%2F-757297100" anchor-label="kind" id="485079371%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
-          <div class="table-row" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="../-abstract-counter/kind.html"><span><span>kind</span></span></a></div>
@@ -151,7 +151,7 @@
             </div>
           </div>
 <a data-name="-623284684%2FProperties%2F-757297100" anchor-label="name" id="-623284684%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
-          <div class="table-row" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="../-abstract-counter/name.html"><span><span>name</span></span></a></div>
@@ -166,7 +166,7 @@
             </div>
           </div>
 <a data-name="-1800081306%2FProperties%2F-757297100" anchor-label="tags" id="-1800081306%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
-          <div class="table-row" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="../-abstract-counter/tags.html"><span><span>tags</span></span></a></div>
@@ -181,7 +181,7 @@
             </div>
           </div>
 <a data-name="1830660443%2FProperties%2F-757297100" anchor-label="unit" id="1830660443%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
-          <div class="table-row" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="../-abstract-counter/unit.html"><span><span>unit</span></span></a></div>
@@ -196,7 +196,7 @@
             </div>
           </div>
 <a data-name="-568687667%2FProperties%2F-757297100" anchor-label="updatedAt" id="-568687667%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
-          <div class="table-row" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="../-abstract-counter/updated-at.html"><span>updated</span><wbr><span><span>At</span></span></a></div>
@@ -211,7 +211,7 @@
             </div>
           </div>
 <a data-name="1836209418%2FProperties%2F-757297100" anchor-label="value" id="1836209418%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
-          <div class="table-row" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="../-abstract-counter/value.html"><span><span>value</span></span></a></div>
@@ -228,9 +228,9 @@
         </div>
       </div>
       <div data-togglable="FUNCTION">
-        <h2 class="">Functions</h2>
+        <h2 class="tableheader">Functions</h2>
         <div class="table"><a data-name="-1995446713%2FFunctions%2F-757297100" anchor-label="format" id="-1995446713%2FFunctions%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
-          <div class="table-row" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="../format.html"><span><span>format</span></span></a></div>
@@ -245,7 +245,7 @@
             </div>
           </div>
 <a data-name="1207345110%2FFunctions%2F-757297100" anchor-label="increment" id="1207345110%2FFunctions%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
-          <div class="table-row" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="../-abstract-counter/increment.html"><span><span>increment</span></span></a></div>
@@ -260,7 +260,7 @@
             </div>
           </div>
 <a data-name="-851899152%2FFunctions%2F-757297100" anchor-label="openMetricsHeaderString" id="-851899152%2FFunctions%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
-          <div class="table-row" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="../open-metrics-header-string.html"><span>open</span><wbr><span>Metrics</span><wbr><span>Header</span><wbr><span><span>String</span></span></a></div>
@@ -275,7 +275,7 @@
             </div>
           </div>
 <a data-name="-118772086%2FFunctions%2F-757297100" anchor-label="openMetricsValueString" id="-118772086%2FFunctions%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
-          <div class="table-row" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="../open-metrics-value-string.html"><span>open</span><wbr><span>Metrics</span><wbr><span>Value</span><wbr><span><span>String</span></span></a></div>
@@ -290,7 +290,7 @@
             </div>
           </div>
 <a data-name="887833072%2FFunctions%2F-757297100" anchor-label="set" id="887833072%2FFunctions%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
-          <div class="table-row" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="../-abstract-counter/set.html"><span><span>set</span></span></a></div>
@@ -305,7 +305,7 @@
             </div>
           </div>
 <a data-name="-280726778%2FFunctions%2F-757297100" anchor-label="sortKey" id="-280726778%2FFunctions%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
-          <div class="table-row" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="../sort-key.html"><span>sort</span><wbr><span><span>Key</span></span></a></div>
@@ -325,17 +325,21 @@
   </div>
 </div>
     <div class="footer">
-        <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
-        <span>© 2025 Copyright</span>
-        <span class="pull-right">
-            <span>Generated by </span>
-            <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
-                <span>dokka</span>
-            </a>
-        </span>
-    </div>
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2025 Copyright</div>
+                </div>
             </div>
         </div>
     </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>
