@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalTime::class)
+@file:Suppress("unused")
 
 package io.github.smyrgeorge.log4k
 
@@ -14,7 +14,6 @@ import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.reflect.KClass
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
-import kotlin.time.ExperimentalTime
 
 /**
  * The `Meter` class serves as an abstract base class for creating different types of metering instruments
@@ -27,7 +26,6 @@ import kotlin.time.ExperimentalTime
  * @param name The name of the meter.
  * @param level The logging level for the meter.
  */
-@Suppress("unused")
 abstract class Meter(
     final override val name: String,
     final override var level: Level
@@ -35,7 +33,7 @@ abstract class Meter(
     override var levelBeforeMute: Level = level
 
     /**
-     * Creates a new counter instrument with the specified name, unit, and description.
+     * Creates a new counter-instrument with the specified name, unit, and description.
      *
      * @param T the numeric type of the counter.
      * @param name the name of the counter.
@@ -132,7 +130,7 @@ abstract class Meter(
 
         /**
          * AbstractCounter is a sealed class that extends the Instrument class.
-         * It represents a generic counter instrument which can increment its value
+         * It represents a generic counter-instrument which can increment its value
          * based on the provided numerical input of type T. T must extend the Number class.
          *
          * @param name Name of the counter.
@@ -240,7 +238,7 @@ abstract class Meter(
         /**
          * Represents a Counter instrument used for recording numerical values
          * that can only increase. This class is a specialized type of AbstractCounter
-         * utilized within a Metering system.
+         * used within a Metering system.
          *
          * @param T the numeric type of the counter.
          * @param name the name of the counter.
@@ -310,7 +308,7 @@ abstract class Meter(
         var factory: MeterFactory = SimpleMeterFactory()
         fun of(name: String): Meter = factory.get(name)
         fun of(clazz: KClass<*>): Meter = factory.get(clazz)
-        inline fun <reified T : Meter> ofType(name: String): T = of(name) as T
-        inline fun <reified T : Meter> ofType(clazz: KClass<*>): T = of(clazz) as T
+        inline fun <reified T : Meter> ofType(name: String): T = factory.get(name) as T
+        inline fun <reified T : Meter> ofType(clazz: KClass<*>): T = factory.get(clazz) as T
     }
 }

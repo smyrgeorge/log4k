@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalTime::class)
-
 package io.github.smyrgeorge.log4k.impl.appenders.simple
 
 import io.github.smyrgeorge.log4k.Appender
@@ -7,7 +5,6 @@ import io.github.smyrgeorge.log4k.Meter
 import io.github.smyrgeorge.log4k.MeteringEvent
 import io.github.smyrgeorge.log4k.impl.Tags
 import io.github.smyrgeorge.log4k.impl.extensions.toName
-import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {

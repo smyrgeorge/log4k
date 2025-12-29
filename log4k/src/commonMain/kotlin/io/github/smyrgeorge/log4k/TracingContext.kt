@@ -24,6 +24,9 @@ data class TracingContext(
         parent?.let { spans.push(it) }
     }
 
+    fun currentOrNull(): Span? = spans.current()
+    fun current(): Span = currentOrNull() ?: error("No span found in current context.")
+
     /**
      * Executes a function within the scope of a tracing span.
      *
@@ -103,12 +106,12 @@ data class TracingContext(
         fun builder(): Builder = Builder()
 
         /**
-         * Retrieves the current logging context from the coroutine context.
+         * Retrieves the current tracing context from the coroutine context.
          *
          * @return The current [TracingContext] available in the coroutine context.
-         * @throws IllegalStateException if no logging context is found in the coroutine context.
+         * @throws IllegalStateException if no tracing context is found in the coroutine context.
          */
         suspend fun current(): TracingContext =
-            currentCoroutineContext()[TracingContext] ?: error("No logging context found.")
+            currentCoroutineContext()[TracingContext] ?: error("No tracing context found.")
     }
 }

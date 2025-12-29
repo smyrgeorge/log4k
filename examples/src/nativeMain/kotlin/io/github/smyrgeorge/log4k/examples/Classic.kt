@@ -29,7 +29,7 @@ import kotlin.time.measureTime
 class Classic {
     class MyBatchAppender(size: Int) : BatchAppender<LoggingEvent>(size) {
         override suspend fun handle(event: List<LoggingEvent>) {
-            // E.g. send batch over http.
+            // E.g., send a batch over http.
             println(event.joinToString { it.message })
         }
     }
@@ -117,10 +117,10 @@ class Classic {
 
         RootLogger.Tracing.appenders.register(SimpleConsoleTracingAppender())
         // Create the parent span.
-        // This is useful in cases that the parent span is not created by us (e.g. from a http call).
+        // This is useful in cases that we do not create the parent span (e.g., from an http call).
         // NOTICE: we do not start it, since it's already started.
         val parent: TracingEvent.Span.Remote = trace.span(id = "ID_EXAMPLE", traceId = "TRACE_ID_EXAMPLE")
-        // Starts immediately the span.
+        // Immediately starts the span.
         trace.span("test-1", parent) {
             log.info(this, "this is a test with span") // The log will contain the span id.
             // Set span tags.
@@ -139,7 +139,7 @@ class Classic {
                 event(name = "event-3", tags = mapOf("key" to "value"))
                 log.info(this, "this is a test with span") // The log will contain the span id.
             }
-            // Automatically closes at the end of te scope.
+            // Automatically closes at the end of the scope.
         }
 
         // Create the span and then start it.

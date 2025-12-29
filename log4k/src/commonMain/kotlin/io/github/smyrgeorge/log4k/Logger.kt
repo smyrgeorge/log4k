@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package io.github.smyrgeorge.log4k
 
 import io.github.smyrgeorge.log4k.Level.DEBUG
@@ -17,7 +19,6 @@ import kotlin.reflect.KClass
  * @property name The name identifier for the logger.
  * @property level The logging level threshold.
  */
-@Suppress("unused", "MemberVisibilityCanBePrivate")
 abstract class Logger(
     final override val name: String,
     final override var level: Level
@@ -145,7 +146,7 @@ abstract class Logger(
         var factory: LoggerFactory = SimpleLoggerFactory()
         fun of(name: String): Logger = factory.get(name)
         fun of(clazz: KClass<*>): Logger = factory.get(clazz)
-        inline fun <reified T : Logger> ofType(name: String): T = of(name) as T
-        inline fun <reified T : Logger> ofType(clazz: KClass<*>): T = of(clazz) as T
+        inline fun <reified T : Logger> ofType(name: String): T = factory.get(name) as T
+        inline fun <reified T : Logger> ofType(clazz: KClass<*>): T = factory.get(clazz) as T
     }
 }

@@ -1,8 +1,5 @@
-@file:OptIn(ExperimentalTime::class)
-
 package io.github.smyrgeorge.log4k
 
-import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 /**

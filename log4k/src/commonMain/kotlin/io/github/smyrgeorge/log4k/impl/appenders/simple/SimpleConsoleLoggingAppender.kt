@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalTime::class)
-
 package io.github.smyrgeorge.log4k.impl.appenders.simple
 
 import io.github.smyrgeorge.log4k.Appender
@@ -7,7 +5,6 @@ import io.github.smyrgeorge.log4k.Level
 import io.github.smyrgeorge.log4k.LoggingEvent
 import io.github.smyrgeorge.log4k.impl.extensions.format
 import io.github.smyrgeorge.log4k.impl.extensions.toName
-import kotlin.time.ExperimentalTime
 
 class SimpleConsoleLoggingAppender : Appender<LoggingEvent> {
     override val name: String = this::class.toName()

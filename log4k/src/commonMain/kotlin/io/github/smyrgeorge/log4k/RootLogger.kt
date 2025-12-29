@@ -114,12 +114,11 @@ object RootLogger {
      *
      * This object allows setting the logging level and prefix for tracing spans.
      * It also holds an instance of `AppenderRegistry` to manage tracing event appenders.
-     * The `AppenderRegistry` is utilized for registering, retrieving, and managing
+     * The `AppenderRegistry` is used for registering, retrieving, and managing
      * different appenders that handle `TracingEvent`.
      */
     object Tracing {
         var level: Level = Level.INFO
-        var prefix: String = "span"
         val appenders = AppenderRegistry<TracingEvent>()
     }
 

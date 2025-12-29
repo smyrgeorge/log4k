@@ -1,11 +1,8 @@
-@file:OptIn(ExperimentalTime::class)
-
 package io.github.smyrgeorge.log4k.impl.extensions
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.transform
 import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
 
 inline fun <T> Flow<T>.preventFloodingWithBurst(
     requestsPerSecond: Int,
@@ -23,7 +20,6 @@ inline fun <T> Flow<T>.preventFloodingWithBurst(
     var totalDropped = 0L
     var startBurstTime: Long = 0
 
-    @Suppress("AssignedValueIsNeverRead")
     return transform { value ->
         val currentTime = Clock.System.now().toEpochMilliseconds()
         if (currentTime - lastEmissionTime >= windowMillis) {

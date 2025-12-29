@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalTime::class)
+@file:Suppress("unused")
 
 package io.github.smyrgeorge.log4k
 
@@ -7,13 +7,11 @@ import io.github.smyrgeorge.log4k.impl.OpenTelemetry
 import io.github.smyrgeorge.log4k.impl.Tags
 import io.github.smyrgeorge.log4k.impl.extensions.toName
 import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 /**
  * Sealed interface representing a tracing event in a system.
  */
-@Suppress("unused")
 sealed interface TracingEvent {
     /**
      * Represents a span in a tracing system, which can either be a [Local] or [Remote] span.
@@ -24,7 +22,8 @@ sealed interface TracingEvent {
      * @property name The name of the span.
      * @property level The logging level of the span.
      * @property context The context of the span, providing trace and span identifiers.
-     * @property parent The parent span, if any; can be null.
+     * @property parent The parent span, if any, can be null.
+     * @property id The unique identifier of the span.
      * @property startAt The start timestamp of the span, set when the span starts.
      * @property endAt The end timestamp of the span, set when the span ends.
      * @property tags A map of tags associated with the span.
@@ -32,6 +31,7 @@ sealed interface TracingEvent {
      * @property status The status of the span, containing the result of its execution.
      */
     abstract class Span(
+        open val id: String,
         open val name: String,
         open val level: Level,
         val context: Context,
@@ -73,7 +73,7 @@ sealed interface TracingEvent {
          * @param traceId The unique identifier for the trace. Defaults to the parent's traceId or the span's own id.
          */
         class Local(
-            id: String,
+            override val id: String,
             override val name: String,
             override val level: Level,
             tracer: Tracer,
@@ -81,6 +81,7 @@ sealed interface TracingEvent {
             tags: Tags = emptyMap(),
             traceId: String = parent?.context?.traceId ?: id
         ) : Span(
+            id = id,
             name = name,
             level = level,
             context = Context(traceId, id, false, tracer),
@@ -225,12 +226,13 @@ sealed interface TracingEvent {
          * @param tracer The tracer associated with this span.
          */
         class Remote(
-            id: String,
+            override val id: String,
             traceId: String,
             override val name: String = "remote-$id",
             override val level: Level,
             tracer: Tracer
         ) : Span(
+            id = id,
             name = name,
             level = level,
             context = Context(traceId, id, true, tracer),

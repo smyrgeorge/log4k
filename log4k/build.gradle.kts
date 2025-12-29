@@ -14,8 +14,8 @@ kotlin {
         }
         commonMain {
             dependencies {
-                api(libs.kotlinx.coroutines.core)
-                api(libs.kotlinx.serialisation.json)
+                implementation(libs.kotlinx.coroutines.core)
+                implementation(libs.kotlinx.serialisation.json)
             }
         }
         commonTest {

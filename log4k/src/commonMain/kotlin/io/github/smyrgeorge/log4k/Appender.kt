@@ -3,7 +3,7 @@ package io.github.smyrgeorge.log4k
 /**
  * An interface for appending events of type T.
  *
- * This interface defines a contract for any appender which is responsible
+ * This interface defines a contract for any appender that is responsible
  * for handling or appending events. Each appender implementation should
  * specify how to append events and specify a unique name.
  *
