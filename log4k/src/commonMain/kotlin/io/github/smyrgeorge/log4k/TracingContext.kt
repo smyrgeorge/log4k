@@ -1,76 +1,17 @@
 package io.github.smyrgeorge.log4k
 
 import io.github.smyrgeorge.log4k.TracingEvent.Span
+import io.github.smyrgeorge.log4k.impl.CoroutinesTracingContext
 import io.github.smyrgeorge.log4k.impl.Tags
 import kotlinx.coroutines.currentCoroutineContext
-import kotlin.coroutines.CoroutineContext
 
-/**
- * The `LoggingContext` class represents an element in the coroutine context that holds tracing
- * and tagging information. It provides mechanisms for managing and tracking spans in a tracing
- * context and supports execution within the scope of a specific tracing span.
- *
- * @property tracer The tracer instance used to create and manage spans, if available.
- * @property parent The parent span of the current context, or `null` if no parent exists.
- * @property spans A stack structure to manage the active spans in this context.
- */
-data class TracingContext(
-    val tracer: Tracer? = null,
-    val parent: Span? = null,
-) : CoroutineContext.Element {
-    val spans: SpanStack = SpanStack()
-
-    init {
-        parent?.let { spans.push(it) }
-    }
+interface TracingContext {
+    val tracer: Tracer?
+    val parent: Span?
+    val spans: SpanStack
 
     fun currentOrNull(): Span? = spans.current()
     fun current(): Span = currentOrNull() ?: error("No span found in current context.")
-
-    /**
-     * Executes a function within the scope of a tracing span.
-     *
-     * @param T The type of the result produced by the function.
-     * @param name The name of the span.
-     * @param f A function to be executed within the span context.
-     * @return The result produced by the function `f`.
-     */
-    inline fun <T> span(name: String, f: Span.Local.() -> T): T = span(name, emptyMap(), f)
-
-    /**
-     * Executes a function within the scope of a tracing span.
-     *
-     * @param T The type of the result produced by the function.
-     * @param name The name of the span.
-     * @param tags Additional tags to associate with the span.
-     * @param f A function to be executed within the span context.
-     * @return The result produced by the function `f`.
-     */
-    inline fun <T> span(name: String, tags: Tags = emptyMap(), f: Span.Local.() -> T): T {
-        val parent: Span? = spans.peek()
-        val tracer = parent?.context?.tracer ?: tracer ?: error("No tracer found for current span.")
-        val span = tracer.span(name, tags, parent).start().also {
-            spans.push(it)
-        }
-        return try {
-            f(span).also {
-                span.end()
-            }
-        } catch (e: Throwable) {
-            span.exception(e, true)
-            span.end(e)
-            throw e
-        } finally {
-            spans.pop()
-        }
-    }
-
-    override fun toString(): String {
-        return "LoggingContext(spans=$spans)"
-    }
-
-    override val key: CoroutineContext.Key<TracingContext>
-        get() = TracingContext
 
     /**
      * A simple stack data structure to manage `Span` objects, allowing push, pop, and peek operations.
@@ -99,19 +40,65 @@ data class TracingContext(
         private var parent: Span? = null
         fun with(parent: Span): Builder = apply { this.parent = parent }
         fun with(tracer: Tracer): Builder = apply { this.tracer = tracer }
-        fun build(): TracingContext = TracingContext(tracer, parent)
+        fun build(): CoroutinesTracingContext = CoroutinesTracingContext(tracer, parent)
     }
 
-    companion object : CoroutineContext.Key<TracingContext> {
+    companion object {
+        /**
+         * Creates and returns a new instance of `Builder` to construct and configure a `LoggingContext`.
+         *
+         * The `Builder` provides a fluent interface for setting up the properties of `LoggingContext`,
+         * such as the parent span and tracer, before building the final instance.
+         *
+         * @return a new instance of `Builder` for constructing a `LoggingContext`.
+         */
         fun builder(): Builder = Builder()
+
+        /**
+         * Creates a new tracing span within the current tracing context, executing the given function
+         * within the scope of the new span.
+         *
+         * @param name The name of the span to create.
+         * @param f The lambda function to execute within the newly created span.
+         * @return The result produced by the execution of the provided function within the span.
+         */
+        inline fun <T> TracingContext.span(name: String, f: Span.Local.() -> T): T = span(name, emptyMap(), f)
+
+        /**
+         * Creates a new span with the specified name and tags, executes the given block of code within the context of the span,
+         * and automatically handles starting, ending, and exception management for the span.
+         *
+         * @param name The name of the span to be created.
+         * @param tags A map of tags to be associated with the span. Defaults to an empty map.
+         * @param f The block of code to be executed within the context of the created span.
+         * @return The result of the block execution.
+         */
+        inline fun <T> TracingContext.span(name: String, tags: Tags = emptyMap(), f: Span.Local.() -> T): T {
+            val parent: Span? = spans.peek()
+            val tracer = parent?.context?.tracer ?: tracer ?: error("No tracer found for current span.")
+            val span = tracer.span(name, tags, parent).start().also {
+                spans.push(it)
+            }
+            return try {
+                f(span).also {
+                    span.end()
+                }
+            } catch (e: Throwable) {
+                span.exception(e, true)
+                span.end(e)
+                throw e
+            } finally {
+                spans.pop()
+            }
+        }
 
         /**
          * Retrieves the current tracing context from the coroutine context.
          *
-         * @return The current [TracingContext] available in the coroutine context.
+         * @return The current [CoroutinesTracingContext] available in the coroutine context.
          * @throws IllegalStateException if no tracing context is found in the coroutine context.
          */
-        suspend fun current(): TracingContext =
-            currentCoroutineContext()[TracingContext] ?: error("No tracing context found.")
+        suspend fun current(): CoroutinesTracingContext =
+            currentCoroutineContext()[CoroutinesTracingContext] ?: error("No tracing context found.")
     }
 }

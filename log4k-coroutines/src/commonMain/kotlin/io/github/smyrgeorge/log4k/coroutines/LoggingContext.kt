@@ -1,5 +1,5 @@
 package io.github.smyrgeorge.log4k.coroutines
 
-import io.github.smyrgeorge.log4k.TracingContext
+import io.github.smyrgeorge.log4k.impl.CoroutinesTracingContext
 
-typealias LoggingContext = TracingContext
+typealias LoggingContext = CoroutinesTracingContext
