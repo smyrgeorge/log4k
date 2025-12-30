@@ -29,7 +29,7 @@ abstract class Tracer(
      * @return A new instance of `TracingEvent.Span.Local`.
      */
     fun span(name: String, parent: TracingEvent.Span? = null): TracingEvent.Span.Local =
-        TracingEvent.Span.Local(id = id(), level = level, tracer = this, name = name, parent = parent)
+        TracingEvent.Span.Local(id = spanId(), level = level, tracer = this, name = name, parent = parent)
 
     /**
      * Creates and returns a new local span with the given name, tags, and optional parent span.
@@ -40,7 +40,7 @@ abstract class Tracer(
      * @return A new instance of `TracingEvent.Span.Local`.
      */
     fun span(name: String, tags: Tags, parent: TracingEvent.Span? = null): TracingEvent.Span.Local =
-        TracingEvent.Span.Local(id = id(), level = level, tracer = this, name = name, parent = parent, tags = tags)
+        TracingEvent.Span.Local(id = spanId(), level = level, tracer = this, name = name, parent = parent, tags = tags)
 
     /**
      * Creates and returns a new remote span with the given id, trace ID, and an optional name.
@@ -82,7 +82,25 @@ abstract class Tracer(
     }
 
     companion object {
-        fun id(): String = Random.nextLong().toULong().toString(32).padStart(8, '0')
+        /**
+         * Generates a 16-character hexadecimal string representing a unique span identifier.
+         *
+         * @return A 16-character hexadecimal string pad-started with zeros if necessary.
+         */
+        fun spanId(): String = Random.nextLong().toULong().toString(16).padStart(16, '0')
+
+        /**
+         * Generates a trace identifier by concatenating two unique span identifiers.
+         *
+         * This method combines two 16-character hexadecimal strings to produce
+         * a 32-character trace ID, ensuring uniqueness across spans within a trace context.
+         *
+         * @return A 32-character hexadecimal string representing the trace ID.
+         */
+        fun traceId(): String = buildString {
+            append(spanId())
+            append(spanId())
+        }
 
         val registry = CollectorRegistry<Tracer>()
         var factory: TracerFactory = SimpleTracerFactory()

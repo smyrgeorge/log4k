@@ -3,7 +3,7 @@
 package io.github.smyrgeorge.log4k
 
 import io.github.smyrgeorge.log4k.impl.MutableTags
-import io.github.smyrgeorge.log4k.impl.OpenTelemetry
+import io.github.smyrgeorge.log4k.impl.OpenTelemetryAttributes
 import io.github.smyrgeorge.log4k.impl.Tags
 import io.github.smyrgeorge.log4k.impl.extensions.toName
 import kotlin.time.Clock
@@ -79,7 +79,7 @@ sealed interface TracingEvent {
             tracer: Tracer,
             override val parent: Span? = null,
             tags: Tags = emptyMap(),
-            traceId: String = parent?.context?.traceId ?: id
+            traceId: String = parent?.context?.traceId ?: Tracer.traceId()
         ) : Span(
             id = id,
             name = name,
@@ -165,13 +165,13 @@ sealed interface TracingEvent {
              */
             fun exception(error: Throwable, escaped: Boolean, tags: Tags = emptyMap()) {
                 val event = Event(
-                    name = OpenTelemetry.EXCEPTION,
+                    name = OpenTelemetryAttributes.EXCEPTION,
                     timestamp = Clock.System.now(),
                     tags = tags + mapOf(
-                        OpenTelemetry.EXCEPTION_TYPE to error::class.toName(),
-                        OpenTelemetry.EXCEPTION_ESCAPED to escaped,
-                        OpenTelemetry.EXCEPTION_MESSAGE to (error.message ?: ""),
-                        OpenTelemetry.EXCEPTION_STACKTRACE to error.stackTraceToString(),
+                        OpenTelemetryAttributes.EXCEPTION_TYPE to error::class.toName(),
+                        OpenTelemetryAttributes.EXCEPTION_ESCAPED to escaped,
+                        OpenTelemetryAttributes.EXCEPTION_MESSAGE to (error.message ?: ""),
+                        OpenTelemetryAttributes.EXCEPTION_STACKTRACE to error.stackTraceToString(),
                     )
                 )
                 events.add(event)
