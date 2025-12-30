@@ -1,0 +1,1237 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>OpenTelemetryAttributes</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async></script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../index.html" tabindex="1">
+                    log4k
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">1.2.3
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":log4k/commonMain">common</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":log4k/commonMain" data-filter=":log4k/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    log4k
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="log4k::io.github.smyrgeorge.log4k.impl/OpenTelemetryAttributes///PointingToDeclaration//-757297100">
+  <div class="breadcrumbs"><a href="../../index.html">log4k</a><span class="delimiter">/</span><a href="../index.html">io.github.smyrgeorge.log4k.impl</a><span class="delimiter">/</span><span class="current">OpenTelemetryAttributes</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Open</span><wbr><span>Telemetry</span><wbr><span><span>Attributes</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="index.html">OpenTelemetryAttributes</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/smyrgeorge/log4k/tree/main/log4k/src/commonMain/kotlin/io/github/smyrgeorge/log4k/impl/OpenTelemetryAttributes.kt#L11">source</a>)</span></span></div><p class="paragraph">The <code class="lang-kotlin">OpenTelemetry</code> object provides a set of constants used for tracing and monitoring various parts of an application or system. These constants represent standard attributes that can be used to describe exceptions, HTTP requests and responses, database operations, and thread states.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="-854583973%2FProperties%2F-757297100" anchor-label="CODE_FILE_PATH" id="-854583973%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-c-o-d-e_-f-i-l-e_-p-a-t-h.html"><span>CODE_</span><wbr><span>FILE_</span><wbr><span>PATH</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-854583973%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-c-o-d-e_-f-i-l-e_-p-a-t-h.html">CODE_FILE_PATH</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="614172689%2FProperties%2F-757297100" anchor-label="CODE_FUNCTION_NAME" id="614172689%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-c-o-d-e_-f-u-n-c-t-i-o-n_-n-a-m-e.html"><span>CODE_</span><wbr><span>FUNCTION_</span><wbr><span>NAME</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="614172689%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-c-o-d-e_-f-u-n-c-t-i-o-n_-n-a-m-e.html">CODE_FUNCTION_NAME</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1015124079%2FProperties%2F-757297100" anchor-label="CODE_LINE_NUMBER" id="1015124079%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-c-o-d-e_-l-i-n-e_-n-u-m-b-e-r.html"><span>CODE_</span><wbr><span>LINE_</span><wbr><span>NUMBER</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1015124079%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-c-o-d-e_-l-i-n-e_-n-u-m-b-e-r.html">CODE_LINE_NUMBER</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1588771258%2FProperties%2F-757297100" anchor-label="CODE_STACKTRACE" id="1588771258%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-c-o-d-e_-s-t-a-c-k-t-r-a-c-e.html"><span>CODE_</span><wbr><span>STACKTRACE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1588771258%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-c-o-d-e_-s-t-a-c-k-t-r-a-c-e.html">CODE_STACKTRACE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1362475286%2FProperties%2F-757297100" anchor-label="DB_CONNECTION_ID" id="1362475286%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-d-b_-c-o-n-n-e-c-t-i-o-n_-i-d.html"><span>DB_</span><wbr><span>CONNECTION_</span><wbr><span>ID</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1362475286%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-d-b_-c-o-n-n-e-c-t-i-o-n_-i-d.html">DB_CONNECTION_ID</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1545037024%2FProperties%2F-757297100" anchor-label="DB_CONNECTION_STRING" id="1545037024%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-d-b_-c-o-n-n-e-c-t-i-o-n_-s-t-r-i-n-g.html"><span>DB_</span><wbr><span>CONNECTION_</span><wbr><span>STRING</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1545037024%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-d-b_-c-o-n-n-e-c-t-i-o-n_-s-t-r-i-n-g.html">DB_CONNECTION_STRING</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1832747280%2FProperties%2F-757297100" anchor-label="DB_DRIVER_NAME" id="-1832747280%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-d-b_-d-r-i-v-e-r_-n-a-m-e.html"><span>DB_</span><wbr><span>DRIVER_</span><wbr><span>NAME</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1832747280%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-d-b_-d-r-i-v-e-r_-n-a-m-e.html">DB_DRIVER_NAME</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1156863513%2FProperties%2F-757297100" anchor-label="DB_DRIVER_VERSION" id="-1156863513%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-d-b_-d-r-i-v-e-r_-v-e-r-s-i-o-n.html"><span>DB_</span><wbr><span>DRIVER_</span><wbr><span>VERSION</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1156863513%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-d-b_-d-r-i-v-e-r_-v-e-r-s-i-o-n.html">DB_DRIVER_VERSION</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-725585923%2FProperties%2F-757297100" anchor-label="DB_NAME" id="-725585923%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-d-b_-n-a-m-e.html"><span>DB_</span><wbr><span>NAME</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-725585923%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-d-b_-n-a-m-e.html">DB_NAME</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="448633547%2FProperties%2F-757297100" anchor-label="DB_OPERATION" id="448633547%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-d-b_-o-p-e-r-a-t-i-o-n.html"><span>DB_</span><wbr><span>OPERATION</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="448633547%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-d-b_-o-p-e-r-a-t-i-o-n.html">DB_OPERATION</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-736541447%2FProperties%2F-757297100" anchor-label="DB_SQL_ROW_COUNT" id="-736541447%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-d-b_-s-q-l_-r-o-w_-c-o-u-n-t.html"><span>DB_</span><wbr><span>SQL_</span><wbr><span>ROW_</span><wbr><span>COUNT</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-736541447%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-d-b_-s-q-l_-r-o-w_-c-o-u-n-t.html">DB_SQL_ROW_COUNT</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-3356939%2FProperties%2F-757297100" anchor-label="DB_SQL_TABLE" id="-3356939%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-d-b_-s-q-l_-t-a-b-l-e.html"><span>DB_</span><wbr><span>SQL_</span><wbr><span>TABLE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-3356939%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-d-b_-s-q-l_-t-a-b-l-e.html">DB_SQL_TABLE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-5087293%2FProperties%2F-757297100" anchor-label="DB_STATEMENT" id="-5087293%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-d-b_-s-t-a-t-e-m-e-n-t.html"><span>DB_</span><wbr><span>STATEMENT</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-5087293%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-d-b_-s-t-a-t-e-m-e-n-t.html">DB_STATEMENT</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1674334598%2FProperties%2F-757297100" anchor-label="DB_STATEMENT_ERROR" id="-1674334598%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-d-b_-s-t-a-t-e-m-e-n-t_-e-r-r-o-r.html"><span>DB_</span><wbr><span>STATEMENT_</span><wbr><span>ERROR</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1674334598%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-d-b_-s-t-a-t-e-m-e-n-t_-e-r-r-o-r.html">DB_STATEMENT_ERROR</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1271967257%2FProperties%2F-757297100" anchor-label="DB_SYSTEM" id="1271967257%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-d-b_-s-y-s-t-e-m.html"><span>DB_</span><wbr><span>SYSTEM</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1271967257%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-d-b_-s-y-s-t-e-m.html">DB_SYSTEM</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="841148093%2FProperties%2F-757297100" anchor-label="DB_USER" id="841148093%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-d-b_-u-s-e-r.html"><span>DB_</span><wbr><span>USER</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="841148093%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-d-b_-u-s-e-r.html">DB_USER</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="417569720%2FProperties%2F-757297100" anchor-label="DEPLOYMENT_ENVIRONMENT_NAME" id="417569720%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-d-e-p-l-o-y-m-e-n-t_-e-n-v-i-r-o-n-m-e-n-t_-n-a-m-e.html"><span>DEPLOYMENT_</span><wbr><span>ENVIRONMENT_</span><wbr><span>NAME</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="417569720%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-d-e-p-l-o-y-m-e-n-t_-e-n-v-i-r-o-n-m-e-n-t_-n-a-m-e.html">DEPLOYMENT_ENVIRONMENT_NAME</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1835944948%2FProperties%2F-757297100" anchor-label="DEPLOYMENT_ID" id="1835944948%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-d-e-p-l-o-y-m-e-n-t_-i-d.html"><span>DEPLOYMENT_</span><wbr><span>ID</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1835944948%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-d-e-p-l-o-y-m-e-n-t_-i-d.html">DEPLOYMENT_ID</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1686705148%2FProperties%2F-757297100" anchor-label="DEPLOYMENT_NAME" id="-1686705148%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-d-e-p-l-o-y-m-e-n-t_-n-a-m-e.html"><span>DEPLOYMENT_</span><wbr><span>NAME</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1686705148%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-d-e-p-l-o-y-m-e-n-t_-n-a-m-e.html">DEPLOYMENT_NAME</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-201074691%2FProperties%2F-757297100" anchor-label="DEPLOYMENT_STATUS" id="-201074691%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-d-e-p-l-o-y-m-e-n-t_-s-t-a-t-u-s.html"><span>DEPLOYMENT_</span><wbr><span>STATUS</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-201074691%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-d-e-p-l-o-y-m-e-n-t_-s-t-a-t-u-s.html">DEPLOYMENT_STATUS</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1488924634%2FProperties%2F-757297100" anchor-label="EXCEPTION" id="1488924634%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-e-x-c-e-p-t-i-o-n.html"><span><span>EXCEPTION</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1488924634%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-e-x-c-e-p-t-i-o-n.html">EXCEPTION</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-971210570%2FProperties%2F-757297100" anchor-label="EXCEPTION_ESCAPED" id="-971210570%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-e-x-c-e-p-t-i-o-n_-e-s-c-a-p-e-d.html"><span>EXCEPTION_</span><wbr><span>ESCAPED</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-971210570%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-e-x-c-e-p-t-i-o-n_-e-s-c-a-p-e-d.html">EXCEPTION_ESCAPED</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="763911474%2FProperties%2F-757297100" anchor-label="EXCEPTION_MESSAGE" id="763911474%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-e-x-c-e-p-t-i-o-n_-m-e-s-s-a-g-e.html"><span>EXCEPTION_</span><wbr><span>MESSAGE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="763911474%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-e-x-c-e-p-t-i-o-n_-m-e-s-s-a-g-e.html">EXCEPTION_MESSAGE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1174408612%2FProperties%2F-757297100" anchor-label="EXCEPTION_STACKTRACE" id="1174408612%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-e-x-c-e-p-t-i-o-n_-s-t-a-c-k-t-r-a-c-e.html"><span>EXCEPTION_</span><wbr><span>STACKTRACE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1174408612%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-e-x-c-e-p-t-i-o-n_-s-t-a-c-k-t-r-a-c-e.html">EXCEPTION_STACKTRACE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1423769657%2FProperties%2F-757297100" anchor-label="EXCEPTION_TYPE" id="-1423769657%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-e-x-c-e-p-t-i-o-n_-t-y-p-e.html"><span>EXCEPTION_</span><wbr><span>TYPE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1423769657%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-e-x-c-e-p-t-i-o-n_-t-y-p-e.html">EXCEPTION_TYPE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="366295356%2FProperties%2F-757297100" anchor-label="HOST_ARCH" id="366295356%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-h-o-s-t_-a-r-c-h.html"><span>HOST_</span><wbr><span>ARCH</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="366295356%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-h-o-s-t_-a-r-c-h.html">HOST_ARCH</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1182544215%2FProperties%2F-757297100" anchor-label="HOST_ID" id="1182544215%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-h-o-s-t_-i-d.html"><span>HOST_</span><wbr><span>ID</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1182544215%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-h-o-s-t_-i-d.html">HOST_ID</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2067854483%2FProperties%2F-757297100" anchor-label="HOST_IMAGE_ID" id="2067854483%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-h-o-s-t_-i-m-a-g-e_-i-d.html"><span>HOST_</span><wbr><span>IMAGE_</span><wbr><span>ID</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2067854483%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-h-o-s-t_-i-m-a-g-e_-i-d.html">HOST_IMAGE_ID</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2135025891%2FProperties%2F-757297100" anchor-label="HOST_IMAGE_NAME" id="2135025891%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-h-o-s-t_-i-m-a-g-e_-n-a-m-e.html"><span>HOST_</span><wbr><span>IMAGE_</span><wbr><span>NAME</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2135025891%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-h-o-s-t_-i-m-a-g-e_-n-a-m-e.html">HOST_IMAGE_NAME</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="978720532%2FProperties%2F-757297100" anchor-label="HOST_IMAGE_VERSION" id="978720532%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-h-o-s-t_-i-m-a-g-e_-v-e-r-s-i-o-n.html"><span>HOST_</span><wbr><span>IMAGE_</span><wbr><span>VERSION</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="978720532%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-h-o-s-t_-i-m-a-g-e_-v-e-r-s-i-o-n.html">HOST_IMAGE_VERSION</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1554781899%2FProperties%2F-757297100" anchor-label="HOST_IP" id="1554781899%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-h-o-s-t_-i-p.html"><span>HOST_</span><wbr><span>IP</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1554781899%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-h-o-s-t_-i-p.html">HOST_IP</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1527351879%2FProperties%2F-757297100" anchor-label="HOST_MAC" id="-1527351879%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-h-o-s-t_-m-a-c.html"><span>HOST_</span><wbr><span>MAC</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1527351879%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-h-o-s-t_-m-a-c.html">HOST_MAC</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1755382951%2FProperties%2F-757297100" anchor-label="HOST_NAME" id="1755382951%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-h-o-s-t_-n-a-m-e.html"><span>HOST_</span><wbr><span>NAME</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1755382951%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-h-o-s-t_-n-a-m-e.html">HOST_NAME</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1609809192%2FProperties%2F-757297100" anchor-label="HOST_TYPE" id="-1609809192%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-h-o-s-t_-t-y-p-e.html"><span>HOST_</span><wbr><span>TYPE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1609809192%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-h-o-s-t_-t-y-p-e.html">HOST_TYPE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1592585978%2FProperties%2F-757297100" anchor-label="HTTP_REQUEST_BODY_SIZE" id="1592585978%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-h-t-t-p_-r-e-q-u-e-s-t_-b-o-d-y_-s-i-z-e.html"><span>HTTP_</span><wbr><span>REQUEST_</span><wbr><span>BODY_</span><wbr><span>SIZE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1592585978%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-h-t-t-p_-r-e-q-u-e-s-t_-b-o-d-y_-s-i-z-e.html">HTTP_REQUEST_BODY_SIZE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-164056607%2FProperties%2F-757297100" anchor-label="HTTP_REQUEST_METHOD" id="-164056607%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-h-t-t-p_-r-e-q-u-e-s-t_-m-e-t-h-o-d.html"><span>HTTP_</span><wbr><span>REQUEST_</span><wbr><span>METHOD</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-164056607%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-h-t-t-p_-r-e-q-u-e-s-t_-m-e-t-h-o-d.html">HTTP_REQUEST_METHOD</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="348293353%2FProperties%2F-757297100" anchor-label="HTTP_REQUEST_METHOD_ORIGINAL" id="348293353%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-h-t-t-p_-r-e-q-u-e-s-t_-m-e-t-h-o-d_-o-r-i-g-i-n-a-l.html"><span>HTTP_</span><wbr><span>REQUEST_</span><wbr><span>METHOD_</span><wbr><span>ORIGINAL</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="348293353%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-h-t-t-p_-r-e-q-u-e-s-t_-m-e-t-h-o-d_-o-r-i-g-i-n-a-l.html">HTTP_REQUEST_METHOD_ORIGINAL</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-302878121%2FProperties%2F-757297100" anchor-label="HTTP_REQUEST_RESEND_COUNT" id="-302878121%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-h-t-t-p_-r-e-q-u-e-s-t_-r-e-s-e-n-d_-c-o-u-n-t.html"><span>HTTP_</span><wbr><span>REQUEST_</span><wbr><span>RESEND_</span><wbr><span>COUNT</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-302878121%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-h-t-t-p_-r-e-q-u-e-s-t_-r-e-s-e-n-d_-c-o-u-n-t.html">HTTP_REQUEST_RESEND_COUNT</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1547003662%2FProperties%2F-757297100" anchor-label="HTTP_RESPONSE_BODY_SIZE" id="-1547003662%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-h-t-t-p_-r-e-s-p-o-n-s-e_-b-o-d-y_-s-i-z-e.html"><span>HTTP_</span><wbr><span>RESPONSE_</span><wbr><span>BODY_</span><wbr><span>SIZE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1547003662%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-h-t-t-p_-r-e-s-p-o-n-s-e_-b-o-d-y_-s-i-z-e.html">HTTP_RESPONSE_BODY_SIZE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1463320042%2FProperties%2F-757297100" anchor-label="HTTP_RESPONSE_STATUS_CODE" id="-1463320042%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-h-t-t-p_-r-e-s-p-o-n-s-e_-s-t-a-t-u-s_-c-o-d-e.html"><span>HTTP_</span><wbr><span>RESPONSE_</span><wbr><span>STATUS_</span><wbr><span>CODE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1463320042%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-h-t-t-p_-r-e-s-p-o-n-s-e_-s-t-a-t-u-s_-c-o-d-e.html">HTTP_RESPONSE_STATUS_CODE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1776073823%2FProperties%2F-757297100" anchor-label="HTTP_ROUTE" id="1776073823%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-h-t-t-p_-r-o-u-t-e.html"><span>HTTP_</span><wbr><span>ROUTE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1776073823%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-h-t-t-p_-r-o-u-t-e.html">HTTP_ROUTE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1315013067%2FProperties%2F-757297100" anchor-label="MESSAGING_CLIENT_ID" id="-1315013067%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-m-e-s-s-a-g-i-n-g_-c-l-i-e-n-t_-i-d.html"><span>MESSAGING_</span><wbr><span>CLIENT_</span><wbr><span>ID</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1315013067%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-m-e-s-s-a-g-i-n-g_-c-l-i-e-n-t_-i-d.html">MESSAGING_CLIENT_ID</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="477332346%2FProperties%2F-757297100" anchor-label="MESSAGING_DESTINATION_NAME" id="477332346%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-m-e-s-s-a-g-i-n-g_-d-e-s-t-i-n-a-t-i-o-n_-n-a-m-e.html"><span>MESSAGING_</span><wbr><span>DESTINATION_</span><wbr><span>NAME</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="477332346%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-m-e-s-s-a-g-i-n-g_-d-e-s-t-i-n-a-t-i-o-n_-n-a-m-e.html">MESSAGING_DESTINATION_NAME</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="71083774%2FProperties%2F-757297100" anchor-label="MESSAGING_MESSAGE_BODY_SIZE" id="71083774%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-m-e-s-s-a-g-i-n-g_-m-e-s-s-a-g-e_-b-o-d-y_-s-i-z-e.html"><span>MESSAGING_</span><wbr><span>MESSAGE_</span><wbr><span>BODY_</span><wbr><span>SIZE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="71083774%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-m-e-s-s-a-g-i-n-g_-m-e-s-s-a-g-e_-b-o-d-y_-s-i-z-e.html">MESSAGING_MESSAGE_BODY_SIZE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1004011037%2FProperties%2F-757297100" anchor-label="MESSAGING_MESSAGE_ID" id="-1004011037%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-m-e-s-s-a-g-i-n-g_-m-e-s-s-a-g-e_-i-d.html"><span>MESSAGING_</span><wbr><span>MESSAGE_</span><wbr><span>ID</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1004011037%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-m-e-s-s-a-g-i-n-g_-m-e-s-s-a-g-e_-i-d.html">MESSAGING_MESSAGE_ID</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="102512979%2FProperties%2F-757297100" anchor-label="MESSAGING_OPERATION_NAME" id="102512979%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-m-e-s-s-a-g-i-n-g_-o-p-e-r-a-t-i-o-n_-n-a-m-e.html"><span>MESSAGING_</span><wbr><span>OPERATION_</span><wbr><span>NAME</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="102512979%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-m-e-s-s-a-g-i-n-g_-o-p-e-r-a-t-i-o-n_-n-a-m-e.html">MESSAGING_OPERATION_NAME</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1032288132%2FProperties%2F-757297100" anchor-label="MESSAGING_OPERATION_TYPE" id="1032288132%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-m-e-s-s-a-g-i-n-g_-o-p-e-r-a-t-i-o-n_-t-y-p-e.html"><span>MESSAGING_</span><wbr><span>OPERATION_</span><wbr><span>TYPE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1032288132%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-m-e-s-s-a-g-i-n-g_-o-p-e-r-a-t-i-o-n_-t-y-p-e.html">MESSAGING_OPERATION_TYPE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="512053287%2FProperties%2F-757297100" anchor-label="MESSAGING_SYSTEM" id="512053287%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-m-e-s-s-a-g-i-n-g_-s-y-s-t-e-m.html"><span>MESSAGING_</span><wbr><span>SYSTEM</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="512053287%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-m-e-s-s-a-g-i-n-g_-s-y-s-t-e-m.html">MESSAGING_SYSTEM</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="466723886%2FProperties%2F-757297100" anchor-label="SERVICE_INSTANCE_ID" id="466723886%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-s-e-r-v-i-c-e_-i-n-s-t-a-n-c-e_-i-d.html"><span>SERVICE_</span><wbr><span>INSTANCE_</span><wbr><span>ID</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="466723886%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-s-e-r-v-i-c-e_-i-n-s-t-a-n-c-e_-i-d.html">SERVICE_INSTANCE_ID</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1834814852%2FProperties%2F-757297100" anchor-label="SERVICE_NAME" id="-1834814852%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-s-e-r-v-i-c-e_-n-a-m-e.html"><span>SERVICE_</span><wbr><span>NAME</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1834814852%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-s-e-r-v-i-c-e_-n-a-m-e.html">SERVICE_NAME</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="497773112%2FProperties%2F-757297100" anchor-label="SERVICE_NAMESPACE" id="497773112%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-s-e-r-v-i-c-e_-n-a-m-e-s-p-a-c-e.html"><span>SERVICE_</span><wbr><span>NAMESPACE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="497773112%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-s-e-r-v-i-c-e_-n-a-m-e-s-p-a-c-e.html">SERVICE_NAMESPACE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1672608475%2FProperties%2F-757297100" anchor-label="SERVICE_VERSION" id="1672608475%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-s-e-r-v-i-c-e_-v-e-r-s-i-o-n.html"><span>SERVICE_</span><wbr><span>VERSION</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1672608475%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-s-e-r-v-i-c-e_-v-e-r-s-i-o-n.html">SERVICE_VERSION</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1401397453%2FProperties%2F-757297100" anchor-label="SESSION_ID" id="1401397453%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-s-e-s-s-i-o-n_-i-d.html"><span>SESSION_</span><wbr><span>ID</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1401397453%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-s-e-s-s-i-o-n_-i-d.html">SESSION_ID</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1284877383%2FProperties%2F-757297100" anchor-label="THREAD_ID" id="-1284877383%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-t-h-r-e-a-d_-i-d.html"><span>THREAD_</span><wbr><span>ID</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1284877383%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-t-h-r-e-a-d_-i-d.html">THREAD_ID</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1385174665%2FProperties%2F-757297100" anchor-label="THREAD_NAME" id="1385174665%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-t-h-r-e-a-d_-n-a-m-e.html"><span>THREAD_</span><wbr><span>NAME</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1385174665%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-t-h-r-e-a-d_-n-a-m-e.html">THREAD_NAME</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1968538781%2FProperties%2F-757297100" anchor-label="URL_DOMAIN" id="1968538781%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-u-r-l_-d-o-m-a-i-n.html"><span>URL_</span><wbr><span>DOMAIN</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1968538781%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-u-r-l_-d-o-m-a-i-n.html">URL_DOMAIN</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="467878106%2FProperties%2F-757297100" anchor-label="URL_EXTENSION" id="467878106%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-u-r-l_-e-x-t-e-n-s-i-o-n.html"><span>URL_</span><wbr><span>EXTENSION</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="467878106%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-u-r-l_-e-x-t-e-n-s-i-o-n.html">URL_EXTENSION</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1789679505%2FProperties%2F-757297100" anchor-label="URL_FRAGMENT" id="1789679505%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-u-r-l_-f-r-a-g-m-e-n-t.html"><span>URL_</span><wbr><span>FRAGMENT</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1789679505%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-u-r-l_-f-r-a-g-m-e-n-t.html">URL_FRAGMENT</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="459552306%2FProperties%2F-757297100" anchor-label="URL_FULL" id="459552306%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-u-r-l_-f-u-l-l.html"><span>URL_</span><wbr><span>FULL</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="459552306%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-u-r-l_-f-u-l-l.html">URL_FULL</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1488548656%2FProperties%2F-757297100" anchor-label="URL_ORIGINAL" id="1488548656%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-u-r-l_-o-r-i-g-i-n-a-l.html"><span>URL_</span><wbr><span>ORIGINAL</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1488548656%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-u-r-l_-o-r-i-g-i-n-a-l.html">URL_ORIGINAL</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1420703396%2FProperties%2F-757297100" anchor-label="URL_PATH" id="-1420703396%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-u-r-l_-p-a-t-h.html"><span>URL_</span><wbr><span>PATH</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1420703396%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-u-r-l_-p-a-t-h.html">URL_PATH</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2051929216%2FProperties%2F-757297100" anchor-label="URL_PORT" id="2051929216%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-u-r-l_-p-o-r-t.html"><span>URL_</span><wbr><span>PORT</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2051929216%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-u-r-l_-p-o-r-t.html">URL_PORT</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1208342129%2FProperties%2F-757297100" anchor-label="URL_QUERY" id="1208342129%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-u-r-l_-q-u-e-r-y.html"><span>URL_</span><wbr><span>QUERY</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1208342129%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-u-r-l_-q-u-e-r-y.html">URL_QUERY</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1192373736%2FProperties%2F-757297100" anchor-label="URL_REGISTERED_DOMAIN" id="-1192373736%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-u-r-l_-r-e-g-i-s-t-e-r-e-d_-d-o-m-a-i-n.html"><span>URL_</span><wbr><span>REGISTERED_</span><wbr><span>DOMAIN</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1192373736%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-u-r-l_-r-e-g-i-s-t-e-r-e-d_-d-o-m-a-i-n.html">URL_REGISTERED_DOMAIN</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1882600156%2FProperties%2F-757297100" anchor-label="URL_SCHEME" id="1882600156%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-u-r-l_-s-c-h-e-m-e.html"><span>URL_</span><wbr><span>SCHEME</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1882600156%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-u-r-l_-s-c-h-e-m-e.html">URL_SCHEME</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2083140021%2FProperties%2F-757297100" anchor-label="URL_SUBDOMAIN" id="2083140021%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-u-r-l_-s-u-b-d-o-m-a-i-n.html"><span>URL_</span><wbr><span>SUBDOMAIN</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2083140021%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-u-r-l_-s-u-b-d-o-m-a-i-n.html">URL_SUBDOMAIN</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1298706265%2FProperties%2F-757297100" anchor-label="URL_TEMPLATE" id="-1298706265%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-u-r-l_-t-e-m-p-l-a-t-e.html"><span>URL_</span><wbr><span>TEMPLATE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1298706265%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-u-r-l_-t-e-m-p-l-a-t-e.html">URL_TEMPLATE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1022231352%2FProperties%2F-757297100" anchor-label="URL_TOP_LEVEL_DOMAIN" id="1022231352%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-u-r-l_-t-o-p_-l-e-v-e-l_-d-o-m-a-i-n.html"><span>URL_</span><wbr><span>TOP_</span><wbr><span>LEVEL_</span><wbr><span>DOMAIN</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1022231352%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-u-r-l_-t-o-p_-l-e-v-e-l_-d-o-m-a-i-n.html">URL_TOP_LEVEL_DOMAIN</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2127058231%2FProperties%2F-757297100" anchor-label="USER_EMAIL" id="-2127058231%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-u-s-e-r_-e-m-a-i-l.html"><span>USER_</span><wbr><span>EMAIL</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2127058231%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-u-s-e-r_-e-m-a-i-l.html">USER_EMAIL</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-27218710%2FProperties%2F-757297100" anchor-label="USER_FULL_NAME" id="-27218710%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-u-s-e-r_-f-u-l-l_-n-a-m-e.html"><span>USER_</span><wbr><span>FULL_</span><wbr><span>NAME</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-27218710%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-u-s-e-r_-f-u-l-l_-n-a-m-e.html">USER_FULL_NAME</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1136320103%2FProperties%2F-757297100" anchor-label="USER_HASH" id="1136320103%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-u-s-e-r_-h-a-s-h.html"><span>USER_</span><wbr><span>HASH</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1136320103%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-u-s-e-r_-h-a-s-h.html">USER_HASH</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="679568634%2FProperties%2F-757297100" anchor-label="USER_ID" id="679568634%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-u-s-e-r_-i-d.html"><span>USER_</span><wbr><span>ID</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="679568634%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-u-s-e-r_-i-d.html">USER_ID</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-567813238%2FProperties%2F-757297100" anchor-label="USER_NAME" id="-567813238%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-u-s-e-r_-n-a-m-e.html"><span>USER_</span><wbr><span>NAME</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-567813238%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-u-s-e-r_-n-a-m-e.html">USER_NAME</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1564769992%2FProperties%2F-757297100" anchor-label="USER_ROLES" id="1564769992%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-u-s-e-r_-r-o-l-e-s.html"><span>USER_</span><wbr><span>ROLES</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1564769992%2FProperties%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-u-s-e-r_-r-o-l-e-s.html">USER_ROLES</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2025 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

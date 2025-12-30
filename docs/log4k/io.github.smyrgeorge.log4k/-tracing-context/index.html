@@ -39,7 +39,7 @@
             </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
         </button>
         <div class="navigation-controls--break ui-kit_mobile-only"></div>
-        <div class="library-version" id="library-version">1.2.2
+        <div class="library-version" id="library-version">1.2.3
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
@@ -94,30 +94,11 @@
   <div class="breadcrumbs"><a href="../../index.html">log4k</a><span class="delimiter">/</span><a href="../index.html">io.github.smyrgeorge.log4k</a><span class="delimiter">/</span><span class="current">TracingContext</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Tracing</span><wbr><span><span>Context</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="index.html">TracingContext</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>tracer<span class="token operator">: </span><a href="../-tracer/index.html">Tracer</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>parent<span class="token operator">: </span><a href="../-tracing-event/-span/index.html">TracingEvent.Span</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span> : <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.coroutines/-coroutine-context/-element/index.html">CoroutineContext.Element</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/smyrgeorge/log4k/tree/main/log4k/src/commonMain/kotlin/io/github/smyrgeorge/log4k/TracingContext.kt#L17">source</a>)</span></span></div><p class="paragraph">The <code class="lang-kotlin">LoggingContext</code> class represents an element in the coroutine context that holds tracing and tagging information. It provides mechanisms for managing and tracking spans in a tracing context and supports execution within the scope of a specific tracing span.</p></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">TracingContext</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/smyrgeorge/log4k/tree/main/log4k/src/commonMain/kotlin/io/github/smyrgeorge/log4k/TracingContext.kt#L8">source</a>)</span></span></div><h4 class="tableheader">Inheritors</h4><div class="table"><div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../../io.github.smyrgeorge.log4k.impl/-coroutines-tracing-context/index.html">CoroutinesTracingContext</a></div></span></div><div></div></div></div></div></div></div>
   </div>
   <div class="tabbedcontent">
-    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button><button class="section-tab" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION,EXTENSION_PROPERTY,EXTENSION_FUNCTION">Members &amp; Extensions</button></div>
     <div class="tabs-section-body">
-      <div data-togglable="CONSTRUCTOR">
-        <h2 class="tableheader">Constructors</h2>
-        <div class="table"><a data-name="-1086752947%2FConstructors%2F-757297100" anchor-label="TracingContext" id="-1086752947%2FConstructors%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
-          <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="-tracing-context.html"><span>Tracing</span><wbr><span><span>Context</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1086752947%2FConstructors%2F-757297100"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">tracer<span class="token operator">: </span><a href="../-tracer/index.html">Tracer</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">parent<span class="token operator">: </span><a href="../-tracing-event/-span/index.html">TracingEvent.Span</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
       <div data-togglable="TYPE">
         <h2 class="tableheader">Types</h2>
         <div class="table"><a data-name="1396837546%2FClasslikes%2F-757297100" anchor-label="Builder" id="1396837546%2FClasslikes%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
@@ -145,7 +126,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-companion/index.html">Companion</a> : <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.coroutines/-coroutine-context/-key/index.html">CoroutineContext.Key</a><span class="token operator">&lt;</span><a href="index.html">TracingContext</a><span class="token operator">&gt; </span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-companion/index.html">Companion</a></div></div></div>
                 </div>
               </div>
             </div>
@@ -169,22 +150,7 @@
       </div>
       <div data-togglable="PROPERTY">
         <h2 class="tableheader">Properties</h2>
-        <div class="table"><a data-name="-30746029%2FProperties%2F-757297100" anchor-label="key" id="-30746029%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="key.html"><span><span>key</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-30746029%2FProperties%2F-757297100"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="key.html">key</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.coroutines/-coroutine-context/-key/index.html">CoroutineContext.Key</a><span class="token operator">&lt;</span><a href="index.html">TracingContext</a><span class="token operator">&gt;</span></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-<a data-name="-672817634%2FProperties%2F-757297100" anchor-label="parent" id="-672817634%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+        <div class="table"><a data-name="-672817634%2FProperties%2F-757297100" anchor-label="parent" id="-672817634%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
@@ -194,7 +160,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="parent.html">parent</a><span class="token operator">: </span><a href="../-tracing-event/-span/index.html">TracingEvent.Span</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">The parent span of the current context, or <code class="lang-kotlin">null</code> if no parent exists.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">val </span><a href="parent.html">parent</a><span class="token operator">: </span><a href="../-tracing-event/-span/index.html">TracingEvent.Span</a><span class="token operator">?</span></div></div></div>
                 </div>
               </div>
             </div>
@@ -209,7 +175,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="spans.html">spans</a><span class="token operator">: </span><a href="-span-stack/index.html">TracingContext.SpanStack</a></div><div class="brief "><p class="paragraph">A stack structure to manage the active spans in this context.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">val </span><a href="spans.html">spans</a><span class="token operator">: </span><a href="-span-stack/index.html">TracingContext.SpanStack</a></div></div></div>
                 </div>
               </div>
             </div>
@@ -224,7 +190,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="tracer.html">tracer</a><span class="token operator">: </span><a href="../-tracer/index.html">Tracer</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">The tracer instance used to create and manage spans, if available.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">val </span><a href="tracer.html">tracer</a><span class="token operator">: </span><a href="../-tracer/index.html">Tracer</a><span class="token operator">?</span></div></div></div>
                 </div>
               </div>
             </div>
@@ -243,7 +209,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="current.html"><span class="token function">current</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-tracing-event/-span/index.html">TracingEvent.Span</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="current.html"><span class="token function">current</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-tracing-event/-span/index.html">TracingEvent.Span</a></div></div></div>
                 </div>
               </div>
             </div>
@@ -258,97 +224,22 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="current-or-null.html"><span class="token function">currentOrNull</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-tracing-event/-span/index.html">TracingEvent.Span</a><span class="token operator">?</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="current-or-null.html"><span class="token function">currentOrNull</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-tracing-event/-span/index.html">TracingEvent.Span</a><span class="token operator">?</span></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="466442070%2FFunctions%2F-757297100" anchor-label="fold" id="466442070%2FFunctions%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+<a data-name="149367598%2FFunctions%2F-757297100" anchor-label="span" id="149367598%2FFunctions%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="index.html#466442070%2FFunctions%2F-757297100"><span><span>fold</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="466442070%2FFunctions%2F-757297100"></span>
+                  <div><a href="-companion/span.html"><span><span>span</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="149367598%2FFunctions%2F-757297100"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="index.html#466442070%2FFunctions%2F-757297100">R</a><span class="token operator">&gt; </span><a href="index.html#466442070%2FFunctions%2F-757297100"><span class="token function">fold</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">initial<span class="token operator">: </span><a href="index.html#466442070%2FFunctions%2F-757297100">R</a><span class="token punctuation">, </span></span><span class="parameter ">operation<span class="token operator">: </span><span class="token punctuation">(</span><a href="index.html#466442070%2FFunctions%2F-757297100">R</a><span class="token punctuation">, </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.coroutines/-coroutine-context/-element/index.html">CoroutineContext.Element</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="index.html#466442070%2FFunctions%2F-757297100">R</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html#466442070%2FFunctions%2F-757297100">R</a></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-<a data-name="232613081%2FFunctions%2F-757297100" anchor-label="get" id="232613081%2FFunctions%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="index.html#232613081%2FFunctions%2F-757297100"><span><span>get</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="232613081%2FFunctions%2F-757297100"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">operator override </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="index.html#232613081%2FFunctions%2F-757297100">E</a><span class="token operator"> : </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.coroutines/-coroutine-context/-element/index.html">CoroutineContext.Element</a><span class="token operator">&gt; </span><a href="index.html#232613081%2FFunctions%2F-757297100"><span class="token function">get</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">key<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.coroutines/-coroutine-context/-key/index.html">CoroutineContext.Key</a><span class="token operator">&lt;</span><a href="index.html#232613081%2FFunctions%2F-757297100">E</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html#232613081%2FFunctions%2F-757297100">E</a><span class="token operator">?</span></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-<a data-name="-1830620809%2FFunctions%2F-757297100" anchor-label="minusKey" id="-1830620809%2FFunctions%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="index.html#-1830620809%2FFunctions%2F-757297100"><span>minus</span><wbr><span><span>Key</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1830620809%2FFunctions%2F-757297100"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="index.html#-1830620809%2FFunctions%2F-757297100"><span class="token function">minusKey</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">key<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.coroutines/-coroutine-context/-key/index.html">CoroutineContext.Key</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.coroutines/-coroutine-context/index.html">CoroutineContext</a></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-<a data-name="1141296693%2FFunctions%2F-757297100" anchor-label="plus" id="1141296693%2FFunctions%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="index.html#1141296693%2FFunctions%2F-757297100"><span><span>plus</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1141296693%2FFunctions%2F-757297100"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">operator </span><span class="token keyword">fun </span><a href="index.html#1141296693%2FFunctions%2F-757297100"><span class="token function">plus</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">context<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.coroutines/-coroutine-context/index.html">CoroutineContext</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.coroutines/-coroutine-context/index.html">CoroutineContext</a></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-<a data-name="518508340%2FFunctions%2F-757297100" anchor-label="span" id="518508340%2FFunctions%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="span.html"><span><span>span</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="518508340%2FFunctions%2F-757297100"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">inline </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="span.html">T</a><span class="token operator">&gt; </span><a href="span.html"><span class="token function">span</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">name<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">f<span class="token operator">: </span><a href="../-tracing-event/-span/-local/index.html">TracingEvent.Span.Local</a><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="span.html">T</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="span.html">T</a></div><div class="symbol monospace"><span class="token keyword">inline </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="span.html">T</a><span class="token operator">&gt; </span><a href="span.html"><span class="token function">span</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">name<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">tags<span class="token operator">: </span><a href="../../io.github.smyrgeorge.log4k.impl/-tags/index.html">Tags</a><span class="token operator"> = </span>emptyMap()<span class="token punctuation">, </span></span><span class="parameter ">f<span class="token operator">: </span><a href="../-tracing-event/-span/-local/index.html">TracingEvent.Span.Local</a><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="span.html">T</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="span.html">T</a></div><div class="brief "><p class="paragraph">Executes a function within the scope of a tracing span.</p></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-<a data-name="600484828%2FFunctions%2F-757297100" anchor-label="toString" id="600484828%2FFunctions%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
-          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="to-string.html"><span>to</span><wbr><span><span>String</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="600484828%2FFunctions%2F-757297100"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="to-string.html"><span class="token function">toString</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">inline </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="-companion/span.html">T</a><span class="token operator">&gt; </span><a href="index.html">TracingContext</a><span class="token punctuation">.</span><a href="-companion/span.html"><span class="token function">span</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">name<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">f<span class="token operator">: </span><a href="../-tracing-event/-span/-local/index.html">TracingEvent.Span.Local</a><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="-companion/span.html">T</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-companion/span.html">T</a></div><div class="brief "><p class="paragraph">Creates a new tracing span within the current tracing context, executing the given function within the scope of the new span.</p></div><div class="symbol monospace"><span class="token keyword">inline </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="-companion/span.html">T</a><span class="token operator">&gt; </span><a href="index.html">TracingContext</a><span class="token punctuation">.</span><a href="-companion/span.html"><span class="token function">span</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">name<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">tags<span class="token operator">: </span><a href="../../io.github.smyrgeorge.log4k.impl/-tags/index.html">Tags</a><span class="token operator"> = </span>emptyMap()<span class="token punctuation">, </span></span><span class="parameter ">f<span class="token operator">: </span><a href="../-tracing-event/-span/-local/index.html">TracingEvent.Span.Local</a><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="-companion/span.html">T</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-companion/span.html">T</a></div><div class="brief "><p class="paragraph">Creates a new span with the specified name and tags, executes the given block of code within the context of the span, and automatically handles starting, ending, and exception management for the span.</p></div></div></div>
                 </div>
               </div>
             </div>
