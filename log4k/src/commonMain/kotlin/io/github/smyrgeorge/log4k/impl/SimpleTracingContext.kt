@@ -15,7 +15,7 @@ import kotlin.coroutines.CoroutineContext
  * @property parent The parent span of the current context, or `null` if no parent exists.
  * @property spans A stack structure to manage the active spans in this context.
  */
-data class CoroutinesTracingContext(
+data class SimpleTracingContext(
     override val tracer: Tracer? = null,
     override val parent: Span? = null,
 ) : TracingContext, CoroutineContext.Element {
@@ -26,22 +26,20 @@ data class CoroutinesTracingContext(
     }
 
     override fun toString(): String {
-        return "LoggingContext(spans=$spans)"
+        return "TracingContext(spans=$spans)"
     }
 
-    override val key: CoroutineContext.Key<CoroutinesTracingContext>
-        get() = CoroutinesTracingContext
+    override val key: CoroutineContext.Key<SimpleTracingContext>
+        get() = SimpleTracingContext
 
-    companion object : CoroutineContext.Key<CoroutinesTracingContext> {
-        fun builder(): TracingContext.Builder = TracingContext.Builder()
-
+    companion object : CoroutineContext.Key<SimpleTracingContext> {
         /**
          * Retrieves the current tracing context from the coroutine context.
          *
-         * @return The current [CoroutinesTracingContext] available in the coroutine context.
+         * @return The current [SimpleTracingContext] available in the coroutine context.
          * @throws IllegalStateException if no tracing context is found in the coroutine context.
          */
-        suspend fun current(): CoroutinesTracingContext =
-            currentCoroutineContext()[CoroutinesTracingContext] ?: error("No tracing context found.")
+        suspend fun current(): SimpleTracingContext =
+            currentCoroutineContext()[SimpleTracingContext] ?: error("No tracing context found.")
     }
 }

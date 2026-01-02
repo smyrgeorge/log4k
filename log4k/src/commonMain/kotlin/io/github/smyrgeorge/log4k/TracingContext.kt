@@ -1,7 +1,7 @@
 package io.github.smyrgeorge.log4k
 
 import io.github.smyrgeorge.log4k.TracingEvent.Span
-import io.github.smyrgeorge.log4k.impl.CoroutinesTracingContext
+import io.github.smyrgeorge.log4k.impl.SimpleTracingContext
 import io.github.smyrgeorge.log4k.impl.Tags
 import kotlinx.coroutines.currentCoroutineContext
 
@@ -28,26 +28,26 @@ interface TracingContext {
     }
 
     /**
-     * A builder class used to construct instances of `LoggingContext`.
-     * It allows for the incremental configuration of a `LoggingContext`'s properties,
+     * A builder class used to construct instances of `SimpleTracingContext`.
+     * It allows for the incremental configuration of a `SimpleTracingContext`'s properties,
      * such as a parent span and a tracer.
      *
      * The main purpose of this class is to provide a fluent interface for customizing
-     * and building a specific `LoggingContext` instance.
+     * and building a specific `SimpleTracingContext` instance.
      */
     class Builder {
         private var tracer: Tracer? = null
         private var parent: Span? = null
         fun with(parent: Span): Builder = apply { this.parent = parent }
-        fun with(tracer: Tracer): Builder = apply { this.tracer = tracer }
-        fun build(): CoroutinesTracingContext = CoroutinesTracingContext(tracer, parent)
+        fun with(tracer: Tracer?): Builder = apply { this.tracer = tracer }
+        fun build(): SimpleTracingContext = SimpleTracingContext(tracer, parent)
     }
 
     companion object {
         /**
-         * Creates and returns a new instance of `Builder` to construct and configure a `LoggingContext`.
+         * Creates and returns a new instance of `Builder` to construct and configure a `SimpleTracingContext`.
          *
-         * The `Builder` provides a fluent interface for setting up the properties of `LoggingContext`,
+         * The `Builder` provides a fluent interface for setting up the properties of `SimpleTracingContext`,
          * such as the parent span and tracer, before building the final instance.
          *
          * @return a new instance of `Builder` for constructing a `LoggingContext`.
@@ -84,7 +84,7 @@ interface TracingContext {
                     span.end()
                 }
             } catch (e: Throwable) {
-                span.exception(e, true)
+                span.exception(e)
                 span.end(e)
                 throw e
             } finally {
@@ -95,10 +95,10 @@ interface TracingContext {
         /**
          * Retrieves the current tracing context from the coroutine context.
          *
-         * @return The current [CoroutinesTracingContext] available in the coroutine context.
+         * @return The current [SimpleTracingContext] available in the coroutine context.
          * @throws IllegalStateException if no tracing context is found in the coroutine context.
          */
-        suspend fun current(): CoroutinesTracingContext =
-            currentCoroutineContext()[CoroutinesTracingContext] ?: error("No tracing context found.")
+        suspend fun current(): SimpleTracingContext =
+            currentCoroutineContext()[SimpleTracingContext] ?: error("No tracing context found.")
     }
 }

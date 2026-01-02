@@ -160,9 +160,33 @@ sealed interface TracingEvent {
              * Records an exception event with the given tags.
              *
              * @param error The throwable error to be recorded.
+             * @param tags A map of additional tags to associate with the exception event.
+             */
+            fun exception(error: Throwable, tags: Tags = emptyMap()) {
+                val event = Event(
+                    name = OpenTelemetryAttributes.EXCEPTION,
+                    timestamp = Clock.System.now(),
+                    tags = tags + mapOf(
+                        OpenTelemetryAttributes.EXCEPTION_TYPE to error::class.toName(),
+                        OpenTelemetryAttributes.EXCEPTION_MESSAGE to (error.message ?: ""),
+                        OpenTelemetryAttributes.EXCEPTION_STACKTRACE to error.stackTraceToString(),
+                    )
+                )
+                events.add(event)
+            }
+
+            /**
+             * https://opentelemetry.io/docs/specs/otel/trace/exceptions/
+             * Records an exception event with the given tags.
+             *
+             * @param error The throwable error to be recorded.
              * @param escaped A boolean indicating if the exception was propagated.
              * @param tags A map of additional tags to associate with the exception event.
              */
+            @Deprecated(
+                "Attribute 'exception.escaped' is deprecated in OpenTelemetry specification.",
+                ReplaceWith("exception(error, tags)")
+            )
             fun exception(error: Throwable, escaped: Boolean, tags: Tags = emptyMap()) {
                 val event = Event(
                     name = OpenTelemetryAttributes.EXCEPTION,
@@ -181,13 +205,12 @@ sealed interface TracingEvent {
              * Records an exception event with the given tags.
              *
              * @param error The throwable error to be recorded.
-             * @param escaped Boolean indicating if the exception was propagated.
              * @param f Function to populate a mutable map of additional tags to associate with the exception event.
              */
-            fun exception(error: Throwable, escaped: Boolean, f: (MutableTags) -> Unit) {
+            fun exception(error: Throwable, f: (MutableTags) -> Unit) {
                 mutableMapOf<String, Any>().also {
                     f(it)
-                    exception(error, escaped, it)
+                    exception(error, it)
                 }
             }
 

@@ -7,6 +7,8 @@ package io.github.smyrgeorge.log4k.impl
  * various parts of an application or system. These constants represent standard attributes
  * that can be used to describe exceptions, HTTP requests and responses, database operations,
  * and thread states.
+ *
+ * https://opentelemetry.io/docs/specs/semconv/registry/attributes/
  */
 object OpenTelemetryAttributes {
     //@formatter:off
@@ -15,6 +17,7 @@ object OpenTelemetryAttributes {
     const val EXCEPTION_MESSAGE = "exception.message"                   // The exception message or error message
     const val EXCEPTION_STACKTRACE = "exception.stacktrace"             // Full stack trace of the exception
     const val EXCEPTION_TYPE = "exception.type"                         // Type or class of the exception (e.g., IOException, NullPointerException)
+    @Deprecated("Deprecated in OpenTelemetry specification.")
     const val EXCEPTION_ESCAPED = "exception.escaped"                   // Indicates if the exception was caught (false) or escaped the span (true)
 
     // HTTP Attributes – Stable (OpenTelemetry)

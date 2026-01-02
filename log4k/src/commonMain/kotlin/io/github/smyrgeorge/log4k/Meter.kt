@@ -308,7 +308,5 @@ abstract class Meter(
         var factory: MeterFactory = SimpleMeterFactory()
         fun of(name: String): Meter = factory.get(name)
         fun of(clazz: KClass<*>): Meter = factory.get(clazz)
-        inline fun <reified T : Meter> ofType(name: String): T = factory.get(name) as T
-        inline fun <reified T : Meter> ofType(clazz: KClass<*>): T = factory.get(clazz) as T
     }
 }

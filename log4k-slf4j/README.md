@@ -30,14 +30,8 @@ This project also tries to be fully compatible with `OpenTelemetry` standard.
 ## Usage
 
 ```kotlin
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    // https://central.sonatype.com/artifact/io.github.smyrgeorge/log4k-slf4j
-    implementation("io.github.smyrgeorge:log4k-slf4j:x.y.z")
-}
+// https://central.sonatype.com/artifact/io.github.smyrgeorge/log4k-slf4j
+implementation("io.github.smyrgeorge:log4k-slf4j:x.y.z")
 ```
 
 ### Spring Boot

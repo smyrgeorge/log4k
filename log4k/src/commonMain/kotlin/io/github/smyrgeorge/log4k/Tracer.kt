@@ -71,7 +71,7 @@ abstract class Tracer(
         return try {
             f(span).also { span.end() }
         } catch (e: Throwable) {
-            span.exception(e, true)
+            span.exception(e)
             span.end(e)
             throw e
         }
@@ -106,7 +106,5 @@ abstract class Tracer(
         var factory: TracerFactory = SimpleTracerFactory()
         fun of(name: String): Tracer = factory.get(name)
         fun of(clazz: KClass<*>): Tracer = factory.get(clazz)
-        inline fun <reified T : Tracer> ofType(name: String): T = factory.get(name) as T
-        inline fun <reified T : Tracer> ofType(clazz: KClass<*>): T = factory.get(clazz) as T
     }
 }

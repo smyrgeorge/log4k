@@ -33,14 +33,8 @@ This project also tries to be fully compatible with `OpenTelemetry` standard.
 ## Usage
 
 ```kotlin
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    // https://central.sonatype.com/artifact/io.github.smyrgeorge/log4k
-    implementation("io.github.smyrgeorge:log4k:x.y.z")
-}
+// https://central.sonatype.com/artifact/io.github.smyrgeorge/log4k
+implementation("io.github.smyrgeorge:log4k:x.y.z")
 ```
 
 ## Architecture
@@ -159,14 +153,8 @@ multiplatform capabilities while maintaining compatibility with other SLF4J-comp
 To enable SLF4J integration, simply add the following dependency to your project:
 
 ```kotlin
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    // https://central.sonatype.com/artifact/io.github.smyrgeorge/log4k-slf4j
-    implementation("io.github.smyrgeorge:log4k-slf4j:x.y.z")
-}
+// https://central.sonatype.com/artifact/io.github.smyrgeorge/log4k-slf4j
+implementation("io.github.smyrgeorge:log4k-slf4j:x.y.z")
 ```
 
 For detailed setup instructions and usage, see the project’s [README.md](./log4k-slf4j/README.md)
