@@ -39,7 +39,7 @@ data class SimpleCoroutinesTracingContext(
     class Builder {
         private var tracer: Tracer? = null
         private var parent: Span? = null
-        fun with(parent: Span): Builder = apply { this.parent = parent }
+        fun with(parent: Span?): Builder = apply { this.parent = parent }
         fun with(tracer: Tracer?): Builder = apply { this.tracer = tracer }
         fun build(): SimpleCoroutinesTracingContext = SimpleCoroutinesTracingContext(tracer, parent)
     }
