@@ -46,19 +46,23 @@ sealed interface TracingEvent {
          * Creates and returns a new local span with the given name associated with the current context.
          *
          * @param name The name of the new span.
+         * @param tags Optional tags to associate with the span.
          * @return A new instance of `Local`.
          */
-        fun span(name: String): Local = context.tracer.span(name, this)
+        fun span(name: String, tags: Tags = emptyMap()): Local =
+            context.tracer.span(name, tags, this)
 
         /**
          * Executes a function within the scope of a tracing span.
          *
          * @param T The type of the result produced by the function.
          * @param name The name of the span.
+         * @param tags Optional tags to associate with the span.
          * @param f A function to be executed within the local span context.
          * @return The result produced by the function `f`.
          */
-        inline fun <T> span(name: String, f: Local.() -> T): T = context.tracer.span(name, this, f)
+        inline fun <T> span(name: String, tags: Tags = emptyMap(), f: Local.() -> T): T =
+            context.tracer.span(name, tags, this, f)
 
         /**
          * Represents a local span in a tracing system. A span is a unit of work within a trace and can
@@ -168,32 +172,6 @@ sealed interface TracingEvent {
                     timestamp = Clock.System.now(),
                     tags = tags + mapOf(
                         OpenTelemetryAttributes.EXCEPTION_TYPE to error::class.toName(),
-                        OpenTelemetryAttributes.EXCEPTION_MESSAGE to (error.message ?: ""),
-                        OpenTelemetryAttributes.EXCEPTION_STACKTRACE to error.stackTraceToString(),
-                    )
-                )
-                events.add(event)
-            }
-
-            /**
-             * https://opentelemetry.io/docs/specs/otel/trace/exceptions/
-             * Records an exception event with the given tags.
-             *
-             * @param error The throwable error to be recorded.
-             * @param escaped A boolean indicating if the exception was propagated.
-             * @param tags A map of additional tags to associate with the exception event.
-             */
-            @Deprecated(
-                "Attribute 'exception.escaped' is deprecated in OpenTelemetry specification.",
-                ReplaceWith("exception(error, tags)")
-            )
-            fun exception(error: Throwable, escaped: Boolean, tags: Tags = emptyMap()) {
-                val event = Event(
-                    name = OpenTelemetryAttributes.EXCEPTION,
-                    timestamp = Clock.System.now(),
-                    tags = tags + mapOf(
-                        OpenTelemetryAttributes.EXCEPTION_TYPE to error::class.toName(),
-                        OpenTelemetryAttributes.EXCEPTION_ESCAPED to escaped,
                         OpenTelemetryAttributes.EXCEPTION_MESSAGE to (error.message ?: ""),
                         OpenTelemetryAttributes.EXCEPTION_STACKTRACE to error.stackTraceToString(),
                     )

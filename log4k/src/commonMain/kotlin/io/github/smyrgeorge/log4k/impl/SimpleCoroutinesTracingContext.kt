@@ -15,7 +15,7 @@ import kotlin.coroutines.CoroutineContext
  * @property parent The parent span of the current context, or `null` if no parent exists.
  * @property spans A stack structure to manage the active spans in this context.
  */
-data class SimpleTracingContext(
+data class SimpleCoroutinesTracingContext(
     override val tracer: Tracer? = null,
     override val parent: Span? = null,
 ) : TracingContext, CoroutineContext.Element {
@@ -29,17 +29,33 @@ data class SimpleTracingContext(
         return "TracingContext(spans=$spans)"
     }
 
-    override val key: CoroutineContext.Key<SimpleTracingContext>
-        get() = SimpleTracingContext
+    override val key: CoroutineContext.Key<SimpleCoroutinesTracingContext>
+        get() = SimpleCoroutinesTracingContext
 
-    companion object : CoroutineContext.Key<SimpleTracingContext> {
+    /**
+     * A builder class used to construct instances of `SimpleTracingContext`.
+     * It allows for the incremental configuration of a `SimpleTracingContext`'s properties,
+     * such as a parent span and a tracer.
+     *
+     * The main purpose of this class is to provide a fluent interface for customizing
+     * and building a specific `SimpleTracingContext` instance.
+     */
+    class Builder {
+        private var tracer: Tracer? = null
+        private var parent: Span? = null
+        fun with(parent: Span): Builder = apply { this.parent = parent }
+        fun with(tracer: Tracer?): Builder = apply { this.tracer = tracer }
+        fun build(): SimpleCoroutinesTracingContext = SimpleCoroutinesTracingContext(tracer, parent)
+    }
+
+    companion object : CoroutineContext.Key<SimpleCoroutinesTracingContext> {
         /**
          * Retrieves the current tracing context from the coroutine context.
          *
-         * @return The current [SimpleTracingContext] available in the coroutine context.
+         * @return The current [SimpleCoroutinesTracingContext] available in the coroutine context.
          * @throws IllegalStateException if no tracing context is found in the coroutine context.
          */
-        suspend fun current(): SimpleTracingContext =
-            currentCoroutineContext()[SimpleTracingContext] ?: error("No tracing context found.")
+        suspend fun current(): SimpleCoroutinesTracingContext =
+            currentCoroutineContext()[SimpleCoroutinesTracingContext] ?: error("No tracing context found.")
     }
 }

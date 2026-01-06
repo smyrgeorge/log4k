@@ -28,19 +28,25 @@ abstract class Tracer(
      * @param parent The parent span, if any. Default is `null`.
      * @return A new instance of `TracingEvent.Span.Local`.
      */
-    fun span(name: String, parent: TracingEvent.Span? = null): TracingEvent.Span.Local =
-        TracingEvent.Span.Local(id = spanId(), level = level, tracer = this, name = name, parent = parent)
+    fun span(
+        name: String,
+        parent: TracingEvent.Span? = null
+    ): TracingEvent.Span.Local = span(name, emptyMap(), parent)
 
     /**
      * Creates and returns a new local span with the given name, tags, and optional parent span.
      *
      * @param name The name of the new span.
-     * @param parent The parent span, if any. Default is `null`.
      * @param tags The key-value pairs associated with the span.
+     * @param parent The parent span, if any. Default is `null`.
      * @return A new instance of `TracingEvent.Span.Local`.
      */
-    fun span(name: String, tags: Tags, parent: TracingEvent.Span? = null): TracingEvent.Span.Local =
-        TracingEvent.Span.Local(id = spanId(), level = level, tracer = this, name = name, parent = parent, tags = tags)
+    fun span(
+        name: String,
+        tags: Tags = emptyMap(),
+        parent: TracingEvent.Span? = null
+    ): TracingEvent.Span.Local =
+        TracingEvent.Span.Local(id = spanId(), name = name, level = level, tracer = this, parent = parent, tags = tags)
 
     /**
      * Creates and returns a new remote span with the given id, trace ID, and an optional name.
@@ -51,7 +57,7 @@ abstract class Tracer(
      * @return a new instance of `TracingEvent.Span.Remote`.
      */
     fun span(id: String, traceId: String, name: String = "remote-$id"): TracingEvent.Span.Remote =
-        TracingEvent.Span.Remote(id = id, level = level, tracer = this, name = name, traceId = traceId)
+        TracingEvent.Span.Remote(id = id, traceId = traceId, name = name, level = level, tracer = this)
 
     /**
      * Executes a function within the scope of a tracing span.
@@ -66,8 +72,25 @@ abstract class Tracer(
         name: String,
         parent: TracingEvent.Span? = null,
         f: TracingEvent.Span.Local.() -> T
+    ): T = span(name, emptyMap(), parent, f)
+
+    /**
+     * Executes a function within the scope of a tracing span.
+     *
+     * @param T The type of the result produced by the function.
+     * @param name The name of the span.
+     * @param tags Optional tags to associate with the span.
+     * @param parent The parent span, if any. Default is `null`.
+     * @param f A function to be executed within the span context.
+     * @return The result produced by the function `f`.
+     */
+    inline fun <T> span(
+        name: String,
+        tags: Tags = emptyMap(),
+        parent: TracingEvent.Span? = null,
+        f: TracingEvent.Span.Local.() -> T
     ): T {
-        val span = span(name, parent).start()
+        val span = span(name, tags, parent).start()
         return try {
             f(span).also { span.end() }
         } catch (e: Throwable) {

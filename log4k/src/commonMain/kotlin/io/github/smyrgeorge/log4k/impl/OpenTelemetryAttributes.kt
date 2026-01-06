@@ -17,8 +17,6 @@ object OpenTelemetryAttributes {
     const val EXCEPTION_MESSAGE = "exception.message"                   // The exception message or error message
     const val EXCEPTION_STACKTRACE = "exception.stacktrace"             // Full stack trace of the exception
     const val EXCEPTION_TYPE = "exception.type"                         // Type or class of the exception (e.g., IOException, NullPointerException)
-    @Deprecated("Deprecated in OpenTelemetry specification.")
-    const val EXCEPTION_ESCAPED = "exception.escaped"                   // Indicates if the exception was caught (false) or escaped the span (true)
 
     // HTTP Attributes – Stable (OpenTelemetry)
     const val HTTP_REQUEST_METHOD = "http.request.method"               // HTTP request method (GET, POST, etc.) :contentReference[oaicite:0]{index=0}
