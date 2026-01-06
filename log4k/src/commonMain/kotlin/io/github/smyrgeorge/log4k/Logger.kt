@@ -85,16 +85,16 @@ abstract class Logger(
     context(c: TracingContext) inline fun error(f: () -> String?): Unit = if (ERROR.shouldLog()) error(f()) else Unit
     context(c: TracingContext) inline fun error(t: Throwable, f: () -> String?): Unit = if (ERROR.shouldLog()) error(f(), t) else Unit
 
-    context(c: TracingContext) fun trace(msg: String, vararg args: Any?): Unit = log(TRACE, c.spans.current(), msg, args, null)
-    context(c: TracingContext) fun trace(msg: String, t: Throwable, vararg args: Any?): Unit = log(TRACE, c.spans.current(), msg, args, t)
-    context(c: TracingContext) fun debug(msg: String, vararg args: Any?): Unit = log(DEBUG, c.spans.current(), msg, args, null)
-    context(c: TracingContext) fun debug(msg: String, t: Throwable, vararg args: Any?): Unit = log(DEBUG, c.spans.current(), msg, args, t)
-    context(c: TracingContext) fun info(msg: String, vararg args: Any?): Unit = log(INFO, c.spans.current(), msg, args, null)
-    context(c: TracingContext) fun info(msg: String, t: Throwable, vararg args: Any?): Unit = log(INFO, c.spans.current(), msg, args, t)
-    context(c: TracingContext) fun warn(msg: String, vararg args: Any?): Unit = log(WARN, c.spans.current(), msg, args, null)
-    context(c: TracingContext) fun warn(msg: String, t: Throwable, vararg args: Any?): Unit = log(WARN, c.spans.current(), msg, args, t)
-    context(c: TracingContext) fun error(msg: String?, vararg args: Any?): Unit = log(ERROR, c.spans.current(), msg ?: "", args, null)
-    context(c: TracingContext) fun error(msg: String?, t: Throwable, vararg args: Any?): Unit = log(ERROR, c.spans.current(), msg ?: "", args, t)
+    context(c: TracingContext) fun trace(msg: String, vararg args: Any?): Unit = log(TRACE, c.current(), msg, args, null)
+    context(c: TracingContext) fun trace(msg: String, t: Throwable, vararg args: Any?): Unit = log(TRACE, c.current(), msg, args, t)
+    context(c: TracingContext) fun debug(msg: String, vararg args: Any?): Unit = log(DEBUG, c.current(), msg, args, null)
+    context(c: TracingContext) fun debug(msg: String, t: Throwable, vararg args: Any?): Unit = log(DEBUG, c.current(), msg, args, t)
+    context(c: TracingContext) fun info(msg: String, vararg args: Any?): Unit = log(INFO, c.current(), msg, args, null)
+    context(c: TracingContext) fun info(msg: String, t: Throwable, vararg args: Any?): Unit = log(INFO, c.current(), msg, args, t)
+    context(c: TracingContext) fun warn(msg: String, vararg args: Any?): Unit = log(WARN, c.current(), msg, args, null)
+    context(c: TracingContext) fun warn(msg: String, t: Throwable, vararg args: Any?): Unit = log(WARN, c.current(), msg, args, t)
+    context(c: TracingContext) fun error(msg: String?, vararg args: Any?): Unit = log(ERROR, c.current(), msg ?: "", args, null)
+    context(c: TracingContext) fun error(msg: String?, t: Throwable, vararg args: Any?): Unit = log(ERROR, c.current(), msg ?: "", args, t)
 
     inline fun trace(f: () -> String): Unit = if (TRACE.shouldLog()) trace(f()) else Unit
     inline fun trace(t: Throwable, f: () -> String): Unit = if (TRACE.shouldLog()) trace(f(), t) else Unit

@@ -26,11 +26,11 @@ class Coroutines {
             log.info("1. Hello from coroutines logger with context=$ctx!")
 
             ctx.span("span-1") {
-                log.info("2. Hello from span '${ctx.spans.peek()?.name}'!")
+                log.info("2. Hello from span '${ctx.currentOrNull()?.name}'!")
                 ctx.span("span-2") {
-                    log.info("3. Hello from span '${ctx.spans.peek()?.name}'!")
+                    log.info("3. Hello from span '${ctx.currentOrNull()?.name}'!")
                     ctx.span("span-3") {
-                        log.info("4. Hello from span '${ctx.spans.peek()?.name}'!")
+                        log.info("4. Hello from span '${ctx.currentOrNull()?.name}'!")
                     }
                 }
             }

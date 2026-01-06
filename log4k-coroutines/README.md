@@ -44,18 +44,18 @@ val log = Logger.of(this::class)
 log.info("Hello from coroutines logger!")
 
 val parent: TracingEvent.Span.Remote = trace.span(id = "ID_EXAMPLE", traceId = "TRACE_ID_EXAMPLE")
-val ctx = LoggingContext.builder().with(parent).build()
+val ctx = TracingContext.builder().with(parent).build()
 
 withContext(ctx) {
-    val ctx = LoggingContext.current()
+    val ctx = TracingContext.current()
     log.info("Hello from coroutines logger with context=$ctx!")
 
     ctx.span("span-1") {
-        log.info("Hello from span '${ctx.spans.peek()?.name}'!")
+        log.info("Hello from span '${ctx.currentOrNull()?.name}'!")
         ctx.span("span-2") {
-            log.info("Hello from span '${ctx.spans.peek()?.name}'!")
+            log.info("Hello from span '${ctx.currentOrNull()?.name}'!")
             ctx.span("span-3") {
-                log.info("Hello from span '${ctx.spans.peek()?.name}'!")
+                log.info("Hello from span '${ctx.currentOrNull()?.name}'!")
             }
         }
     }

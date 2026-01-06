@@ -204,9 +204,8 @@ sealed interface TracingEvent {
             fun warn(name: String, tags: Tags = emptyMap()) = event(name, Level.WARN, tags)
             fun error(name: String, tags: Tags = emptyMap()) = event(name, Level.ERROR, tags)
 
-            fun event(name: String, f: (MutableTags) -> Unit) = event(name, level, f)
             fun event(name: String, tags: Tags = emptyMap()) = event(name, level, tags)
-
+            inline fun event(name: String, f: (MutableTags) -> Unit) = event(name, level, f)
             inline fun event(name: String, level: Level, f: (MutableTags) -> Unit) {
                 mutableMapOf<String, Any>().also {
                     f(it)

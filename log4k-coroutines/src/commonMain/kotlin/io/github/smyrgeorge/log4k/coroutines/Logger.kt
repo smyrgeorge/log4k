@@ -37,7 +37,7 @@ abstract class Logger(
         throwable: Throwable?
     ) {
         if (!level.shouldLog()) return
-        val event = toLoggingEvent(level, ctx().spans.peek(), message, arguments, throwable)
+        val event = toLoggingEvent(level, ctx().current(), message, arguments, throwable)
         RootLogger.log(event)
     }
 

@@ -8,24 +8,10 @@ import kotlinx.coroutines.currentCoroutineContext
 interface TracingContext {
     val tracer: Tracer?
     val parent: Span?
-    val spans: SpanStack
 
-    fun currentOrNull(): Span? = spans.current()
+    var current: Span?
+    fun currentOrNull(): Span? = current
     fun current(): Span = currentOrNull() ?: error("No span found in current context.")
-
-    /**
-     * A simple stack data structure to manage `Span` objects, allowing push, pop, and peek operations.
-     * Provides functionalities to add a new span to the stack, remove the most recently added span,
-     * or view it without removing.
-     */
-    class SpanStack {
-        private val stack = mutableListOf<Span>()
-        fun push(span: Span) = stack.add(span)
-        fun pop(): Span? = stack.removeLastOrNull()
-        fun peek(): Span? = stack.lastOrNull()
-        fun current(): Span? = peek()
-        override fun toString(): String = stack.joinToString(separator = ", ", prefix = "[", postfix = "]") { it.name }
-    }
 
     companion object {
         /**
@@ -59,10 +45,10 @@ interface TracingContext {
          * @return The result of the block execution.
          */
         inline fun <T> TracingContext.span(name: String, tags: Tags = emptyMap(), f: Span.Local.() -> T): T {
-            val parent: Span? = spans.peek()
+            val parent: Span? = currentOrNull()
             val tracer = parent?.context?.tracer ?: tracer ?: error("No tracer found for current span.")
             val span = tracer.span(name, tags, parent).start().also {
-                spans.push(it)
+                current = it
             }
             return try {
                 f(span).also {
@@ -73,7 +59,7 @@ interface TracingContext {
                 span.end(e)
                 throw e
             } finally {
-                spans.pop()
+                current = parent
             }
         }
 

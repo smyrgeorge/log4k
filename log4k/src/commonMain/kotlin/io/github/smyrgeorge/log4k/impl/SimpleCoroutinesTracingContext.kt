@@ -13,32 +13,28 @@ import kotlin.coroutines.CoroutineContext
  *
  * @property tracer The tracer instance used to create and manage spans, if available.
  * @property parent The parent span of the current context, or `null` if no parent exists.
- * @property spans A stack structure to manage the active spans in this context.
+ * @property current The current span in the context, or `null` if no span is active.
  */
 data class SimpleCoroutinesTracingContext(
     override val tracer: Tracer? = null,
     override val parent: Span? = null,
 ) : TracingContext, CoroutineContext.Element {
-    override val spans: TracingContext.SpanStack = TracingContext.SpanStack()
-
-    init {
-        parent?.let { spans.push(it) }
-    }
+    override var current: Span? = parent
 
     override fun toString(): String {
-        return "TracingContext(spans=$spans)"
+        return "TracingContext(current=$current), parent=$parent)"
     }
 
     override val key: CoroutineContext.Key<SimpleCoroutinesTracingContext>
         get() = SimpleCoroutinesTracingContext
 
     /**
-     * A builder class used to construct instances of `SimpleTracingContext`.
-     * It allows for the incremental configuration of a `SimpleTracingContext`'s properties,
+     * A builder class used to construct instances of `SimpleCoroutinesTracingContext`.
+     * It allows for the incremental configuration of a `SimpleCoroutinesTracingContext`'s properties,
      * such as a parent span and a tracer.
      *
      * The main purpose of this class is to provide a fluent interface for customizing
-     * and building a specific `SimpleTracingContext` instance.
+     * and building a specific `SimpleCoroutinesTracingContext` instance.
      */
     class Builder {
         private var tracer: Tracer? = null
