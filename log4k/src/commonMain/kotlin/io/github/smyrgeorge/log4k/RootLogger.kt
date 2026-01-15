@@ -8,6 +8,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
+import kotlin.concurrent.atomics.AtomicLong
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlin.concurrent.atomics.incrementAndFetch
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -16,7 +19,7 @@ import kotlin.coroutines.EmptyCoroutineContext
  * It facilitates logging, tracing, and metering by providing an integrated framework for handling these activities.
  *
  * Properties:
- * - level: Represents the logging level for the logger. Default is INFO.
+ * - level: Represents the logging level for the logger. The default is INFO.
  *
  * Initialization:
  * Upon initialization, the RootLogger registers a default logging appender and starts consuming both
@@ -45,7 +48,6 @@ object RootLogger {
         RootLoggerScope.launch(dispatcher) {
             logs.consumeEach { event ->
                 runCatching {
-                    event.id = Logging.id()
                     Logging.appenders.all().forEach { it.append(event) }
                 }
             }
@@ -64,7 +66,6 @@ object RootLogger {
         RootLoggerScope.launch(dispatcher) {
             meters.consumeEach { event ->
                 runCatching {
-                    event.id = Logging.id()
                     Metering.appenders.all().forEach { it.append(event) }
                 }
             }
@@ -77,7 +78,7 @@ object RootLogger {
      * @param event The logging event to be recorded.
      * @return Unit This function does not return a value.
      */
-    fun log(event: LoggingEvent): Unit = send(RootLoggerScope) { logs.send(event) }
+    fun log(event: LoggingEvent): Unit = logs.trySend(event).getOrThrow()
 
     /**
      * Sends a tracing event through the tracer scope.
@@ -85,7 +86,7 @@ object RootLogger {
      * @param event The tracing event to be sent.
      * @return Unit.
      */
-    fun trace(event: TracingEvent): Unit = send(RootLoggerScope) { traces.send(event) }
+    fun trace(event: TracingEvent): Unit = traces.trySend(event).getOrThrow()
 
     /**
      * Meters a given metering event and sends it using the provided metering infrastructure.
@@ -93,7 +94,7 @@ object RootLogger {
      * @param event The metering event to be measured and sent.
      * @return Unit
      */
-    fun meter(event: MeteringEvent): Unit = send(RootLoggerScope) { meters.send(event) }
+    fun meter(event: MeteringEvent): Unit = meters.trySend(event).getOrThrow()
 
     /**
      * Provides logging functionality with various configurable logging levels.
@@ -104,8 +105,12 @@ object RootLogger {
      */
     object Logging {
         var level: Level = Level.INFO
-        private var idx: Long = 0
-        fun id(): Long = ++idx
+
+        @OptIn(ExperimentalAtomicApi::class)
+        private val idx: AtomicLong = AtomicLong(0)
+
+        @OptIn(ExperimentalAtomicApi::class)
+        fun id(): Long = idx.incrementAndFetch()
         val appenders = AppenderRegistry<LoggingEvent>()
     }
 
@@ -130,13 +135,13 @@ object RootLogger {
      */
     object Metering {
         var level: Level = Level.INFO
-        private var idx: Long = 0
-        fun id(): Long = ++idx
-        val appenders = AppenderRegistry<MeteringEvent>()
-    }
 
-    private inline fun send(scope: CoroutineScope, crossinline f: suspend () -> Unit) {
-        scope.launch { f() }
+        @OptIn(ExperimentalAtomicApi::class)
+        private val idx: AtomicLong = AtomicLong(0)
+
+        @OptIn(ExperimentalAtomicApi::class)
+        fun id(): Long = idx.incrementAndFetch()
+        val appenders = AppenderRegistry<MeteringEvent>()
     }
 
     private object RootLoggerScope : CoroutineScope {

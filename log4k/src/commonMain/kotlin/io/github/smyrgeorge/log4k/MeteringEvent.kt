@@ -11,14 +11,14 @@ import kotlin.time.Instant
  * be extended by different types of metering events.
  */
 sealed interface MeteringEvent {
-    var id: Long
+    val id: Long
     val name: String
     val timestamp: Instant
 
     fun key(): Int
 
     data class CreateInstrument(
-        override var id: Long = 0L,
+        override val id: Long,
         override val name: String,
         val kind: Kind,
         val unit: String?,
@@ -35,7 +35,7 @@ sealed interface MeteringEvent {
     }
 
     data class Set(
-        override var id: Long = 0L,
+        override val id: Long,
         override val name: String,
         override val tags: Tags,
         override val timestamp: Instant = Clock.System.now(),
@@ -43,7 +43,7 @@ sealed interface MeteringEvent {
     ) : ValueEvent
 
     data class Increment(
-        override var id: Long = 0L,
+        override val id: Long,
         override val name: String,
         override val tags: Tags,
         override val timestamp: Instant = Clock.System.now(),
@@ -51,7 +51,7 @@ sealed interface MeteringEvent {
     ) : ValueEvent
 
     data class Decrement(
-        override var id: Long = 0L,
+        override val id: Long,
         override val name: String,
         override val tags: Tags,
         override val timestamp: Instant = Clock.System.now(),
@@ -59,7 +59,7 @@ sealed interface MeteringEvent {
     ) : ValueEvent
 
     data class Record(
-        override var id: Long = 0L,
+        override val id: Long,
         override val name: String,
         override val tags: Tags,
         override val timestamp: Instant = Clock.System.now(),

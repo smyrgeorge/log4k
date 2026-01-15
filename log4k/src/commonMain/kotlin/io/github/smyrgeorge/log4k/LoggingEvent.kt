@@ -16,7 +16,7 @@ import kotlin.time.Instant
  * @property throwable An optional throwable associated with the logging event, capturing any exceptions or errors.
  */
 class LoggingEvent(
-    var id: Long = 0,
+    val id: Long,
     val level: Level,
     val span: TracingEvent.Span?,
     val timestamp: Instant,
