@@ -2,6 +2,7 @@ package io.github.smyrgeorge.log4k.publish
 
 import com.vanniktech.maven.publish.KotlinMultiplatform
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
+import com.vanniktech.maven.publish.SourcesJar
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
@@ -22,7 +23,7 @@ class PublishConventions : Plugin<Project> {
             configure(
                 KotlinMultiplatform(
                     // whether to publish a sources jar
-                    sourcesJar = true,
+                    sourcesJar = SourcesJar.Sources()
                 )
             )
             coordinates(

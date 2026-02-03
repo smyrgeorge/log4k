@@ -3,6 +3,7 @@ package io.github.smyrgeorge.log4k.coroutines
 import io.github.smyrgeorge.log4k.impl.extensions.toName
 import kotlin.reflect.KClass
 
+@Deprecated("Use TracingContext with context parameters instead.")
 abstract class CoroutinesLoggerFactory {
     abstract fun create(name: String): Logger
     fun get(clazz: KClass<*>): Logger = get(clazz.toName())

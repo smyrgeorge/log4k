@@ -34,6 +34,7 @@ public class Log4kSLF4JServiceProvider : SLF4JServiceProvider {
     override fun getRequestedApiVersion(): String = REQUESTED_API_VERSION
 
     override fun initialize() {
-        // No-op
+        // NO-OP
     }
 }
+

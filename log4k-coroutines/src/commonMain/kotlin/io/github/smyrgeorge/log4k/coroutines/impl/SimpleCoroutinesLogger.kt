@@ -8,6 +8,7 @@ import io.github.smyrgeorge.log4k.coroutines.Logger
 import io.github.smyrgeorge.log4k.impl.extensions.thread
 import kotlin.time.Clock
 
+@Deprecated("Use TracingContext with context parameters instead.")
 class SimpleCoroutinesLogger(name: String, level: Level) : Logger(name, level) {
     override fun toLoggingEvent(
         level: Level,

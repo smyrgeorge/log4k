@@ -16,6 +16,7 @@ import io.github.smyrgeorge.log4k.impl.registry.CollectorRegistry
 import kotlin.reflect.KClass
 
 @Suppress("unused")
+@Deprecated("Use TracingContext with context parameters instead.")
 abstract class Logger(
     final override val name: String,
     final override var level: Level

@@ -104,7 +104,7 @@ logs while dropping less important ones during high-traffic periods. Batching or
 processing, ensuring important logs are preserved without overwhelming the system. This reduces costs and maintains log
 integrity.
 
-## Coroutines
+## Coroutines (Deprecated)
 
 For detailed setup instructions and usage, see the project’s [README.md](./log4k-coroutines/README.md)
 
@@ -134,6 +134,43 @@ log.debug { "ignore + ${5}" } // Will be evaluated only if DEBUG logs are enable
 log.error { e.message }
 log.error(e) { e.message } // e: Throwable
 ```
+
+### Context Parameters Support
+
+The logging API supports Kotlin's context receivers for automatic span propagation. When logging within a
+`TracingContext`,
+the current span is automatically attached to log events without explicitly passing it:
+
+```kotlin
+trace.span("my-operation") {
+    // Inside this block, TracingContext is available as a context receiver.
+    // Log statements automatically include the current span information.
+    log.info { "Processing started" }  // Span context automatically attached
+    log.debug { "Details: $data" }
+    log.error(exception) { "Operation failed" }
+}
+```
+
+This eliminates the need to manually pass the span to each log call:
+
+```kotlin
+// Without context receivers (explicit span passing):
+trace.span("my-operation") {
+    log.info(this, "Processing started")
+}
+
+// With context receivers (automatic span propagation):
+trace.span("my-operation") {
+    log.info { "Processing started" }  // Span is automatically included
+}
+```
+
+All log levels (`trace`, `debug`, `info`, `warn`, `error`) support context receivers, both with message strings
+and with lambdas for lazy evaluation.
+
+See the [Logger](./log4k/src/commonMain/kotlin/io/github/smyrgeorge/log4k/Logger.kt)
+and [TracingContext](./log4k/src/commonMain/kotlin/io/github/smyrgeorge/log4k/TracingContext.kt) classes for more
+details.
 
 ### Json Appender
 

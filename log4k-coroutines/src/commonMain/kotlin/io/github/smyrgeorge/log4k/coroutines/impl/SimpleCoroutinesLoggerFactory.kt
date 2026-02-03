@@ -4,6 +4,7 @@ import io.github.smyrgeorge.log4k.RootLogger
 import io.github.smyrgeorge.log4k.coroutines.CoroutinesLoggerFactory
 import io.github.smyrgeorge.log4k.coroutines.Logger
 
+@Deprecated("Use TracingContext with context parameters instead.")
 class SimpleCoroutinesLoggerFactory : CoroutinesLoggerFactory() {
     override fun create(name: String): Logger = SimpleCoroutinesLogger(name, RootLogger.Logging.level)
 }

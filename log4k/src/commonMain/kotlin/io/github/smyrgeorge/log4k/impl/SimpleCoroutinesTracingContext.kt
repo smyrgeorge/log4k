@@ -7,7 +7,7 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlin.coroutines.CoroutineContext
 
 /**
- * The `LoggingContext` class represents an element in the coroutine context that holds tracing
+ * The `TracingContext` class represents an element in the coroutine context that holds tracing
  * and tagging information. It provides mechanisms for managing and tracking spans in a tracing
  * context and supports execution within the scope of a specific tracing span.
  *
