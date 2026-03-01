@@ -2,6 +2,7 @@ rootProject.name = "log4k"
 
 pluginManagement {
     repositories {
+        google()
         mavenCentral()
         gradlePluginPortal()
     }

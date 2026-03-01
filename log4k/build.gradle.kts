@@ -1,10 +1,16 @@
 plugins {
     id("io.github.smyrgeorge.log4k.multiplatform")
+    alias(libs.plugins.android)
     id("io.github.smyrgeorge.log4k.publish")
     id("io.github.smyrgeorge.log4k.dokka")
 }
 
 kotlin {
+    android {
+        namespace = "io.github.smyrgeorge.log4k"
+        compileSdk = 36
+        minSdk = 26
+    }
     sourceSets {
         all {
             languageSettings.enableLanguageFeature("ContextParameters")

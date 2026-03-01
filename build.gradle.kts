@@ -3,6 +3,7 @@ version = "1.3.2"
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform) apply false
+    alias(libs.plugins.android) apply false
     alias(libs.plugins.pubhish) apply false
     alias(libs.plugins.dokka) apply false
 }
@@ -16,6 +17,7 @@ subprojects {
     version = rootProject.version
 
     repositories {
+        google()
         mavenCentral()
         // IMPORTANT: must be last.
         mavenLocal()
