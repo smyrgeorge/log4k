@@ -4,7 +4,6 @@ plugins {
 
 dependencies {
     dokka(project(":log4k"))
-    dokka(project(":log4k-coroutines"))
     dokka(project(":log4k-slf4j"))
 }
 

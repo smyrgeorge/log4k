@@ -104,10 +104,6 @@ logs while dropping less important ones during high-traffic periods. Batching or
 processing, ensuring important logs are preserved without overwhelming the system. This reduces costs and maintains log
 integrity.
 
-## Coroutines (Deprecated)
-
-For detailed setup instructions and usage, see the project’s [README.md](./log4k-coroutines/README.md)
-
 ## Logging API
 
 By default, the `SimpleConsoleLoggingAppender` is automatically registered.
