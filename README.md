@@ -54,55 +54,11 @@ batching—such as sending batched log or trace events over the network or appen
 `FlowAppender` leverages `kotlinx.coroutines.flow.Flow` to process incoming events efficiently.
 
 On the other hand, some appenders can be simpler and do not require a `Channel` for event processing. For example, the
-`ConsoleAppender` directly prints each incoming event to the console without queuing, offering a straightforward logging
+`SimpleConsoleLoggingAppender` directly prints each incoming event to the console without queuing, offering a
+straightforward logging
 solution.
 
 The tracing module shares exactly the same principals.
-
-### Prevent log/trace flooding.
-
-_Log rate spikes are common and often go unnoticed. They could be an indication that something went terribly wrong or
-that a high-traffic system was unintentionally configured with verbose logging._
-
-At times, it's crucial to reduce the volume of logs and traces to prevent unnecessary costs. In our solution, we can
-leverage Kotlin's Flow to manage log streams efficiently by dropping excess log messages when needed. For example, the
-`FlowFloodProtectedAppender` is designed specifically for this scenario. It not only limits the flood of log messages
-but also reports the number of dropped messages, giving you visibility into how much data is being filtered out.
-
-```kotlin
-class SimpleFloodProtectedAppender(
-    requestPerSecond: Int,
-    burstDurationMillis: Int
-) : FlowFloodProtectedAppender<LoggingEvent>(requestPerSecond, burstDurationMillis) {
-    override suspend fun handle(event: LoggingEvent) = event.print()
-}
-
-RootLogger.Logging.appenders.unregisterAll()
-RootLogger.Logging.appenders.register(
-    SimpleFloodProtectedAppender(requestPerSecond = 50, burstDurationMillis = 100)
-)
-
-repeat(1_000_000) {
-    log.info("$it")
-}
-
-// The above will produce the following output:
-// 115 2024-10-24T07:19:34.707789Z [native-1] - INFO  Main - 0
-// 116 2024-10-24T07:19:34.707869Z [native-1] - INFO  Main - 1
-// 117 2024-10-24T07:19:34.707884Z [native-1] - INFO  Main - 2
-// 118 2024-10-24T07:19:34.707899Z [native-1] - INFO  Main - 3
-// # ...
-// # After some ~4k logs starts to drop.
-// 991339 2024-10-24T07:19:38.294933Z [native-1] - INFO  Main - 991224
-// 2024-10-24T07:19:38.295050Z [native-13] - WARN  FlowFloodProtectedAppender - Dropped 6556 log messages due to flooding (total dropped: 987299).
-// 995897 2024-10-24T07:19:38.314454Z [native-1] - INFO  Main - 995782
-// 2024-10-24T07:19:38.315134Z [native-19] - WARN  FlowFloodProtectedAppender - Dropped 4557 log messages due to flooding (total dropped: 991856).
-```
-
-To tackle similar issues, we can apply dynamic rate-limiting based on system load or log severity, prioritizing critical
-logs while dropping less important ones during high-traffic periods. Batching or buffering logs can also help optimize
-processing, ensuring important logs are preserved without overwhelming the system. This reduces costs and maintains log
-integrity.
 
 ## Logging API
 
@@ -168,13 +124,6 @@ See the [Logger](./log4k/src/commonMain/kotlin/io/github/smyrgeorge/log4k/Logger
 and [TracingContext](./log4k/src/commonMain/kotlin/io/github/smyrgeorge/log4k/TracingContext.kt) classes for more
 details.
 
-### Json Appender
-
-```kotlin
-// You can register the `SimpleJsonConsoleLoggingAppender` for json logs in the console.
-RootLogger.Logging.appenders.register(SimpleJsonConsoleLoggingAppender())
-```
-
 ### Full SLF4J Integration Supported
 
 We’ve ensured complete compatibility with SLF4J, allowing seamless integration into projects that already use SLF4J as a
@@ -191,6 +140,13 @@ implementation("io.github.smyrgeorge:log4k-slf4j:x.y.z")
 ```
 
 For detailed setup instructions and usage, see the project’s [README.md](./log4k-slf4j/README.md)
+
+### Json Appender
+
+```kotlin
+// You can register the `SimpleJsonConsoleLoggingAppender` for json logs in the console.
+RootLogger.Logging.appenders.register(SimpleJsonConsoleLoggingAppender())
+```
 
 ## Tracing API
 
@@ -295,7 +251,8 @@ g1.record(6, "pool" to "pool-b")
 ```
 
 Each time an operation is performed (i.e., a measurement is taken with a meter), an event is triggered and propagated to
-all registered appenders. For instance, we can register the `SimpleMeteringCollectorAppender` appender:
+all registered appenders. For quick debugging you can register the `SimpleConsoleMeteringAppender`, which prints each
+metric event directly to stdout. For aggregation and export, use the `SimpleMeteringCollectorAppender`:
 
 ```kotlin
 val collector = SimpleMeteringCollectorAppender()
@@ -340,6 +297,86 @@ meter.gauge<Int>("thread-pool-size").poll(every = 10.seconds) {
 
 Using this method, values are automatically recorded at regular intervals, making it ideal for tracking metrics in
 dynamic environments.
+
+## Appenders
+
+### Logging
+
+| Appender                           | Platform    | Description                                             |
+|------------------------------------|-------------|---------------------------------------------------------|
+| `SimpleConsoleLoggingAppender`     | All         | Default. Prints color-coded log events to stdout.       |
+| `SimpleJsonConsoleLoggingAppender` | All         | Prints log events as JSON to stdout.                    |
+| `AndroidLoggingAppender`           | Android     | Routes events to Android Logcat via `android.util.Log`. |
+| `AppleLoggingAppender`             | iOS / macOS | Routes events to Apple's Unified Logging via `NSLog`.   |
+
+### Tracing
+
+| Appender                       | Platform | Description                    |
+|--------------------------------|----------|--------------------------------|
+| `SimpleConsoleTracingAppender` | All      | Prints trace events to stdout. |
+
+### Metering
+
+| Appender                          | Platform | Description                                                   |
+|-----------------------------------|----------|---------------------------------------------------------------|
+| `SimpleConsoleMeteringAppender`   | All      | Prints metric events to stdout.                               |
+| `SimpleMeteringCollectorAppender` | All      | Collects metrics and exposes them in OpenMetrics line format. |
+
+### Flow-based base appenders
+
+Abstract classes for building custom appenders with async, coroutine-backed processing.
+
+| Appender                     | Description                                                                            |
+|------------------------------|----------------------------------------------------------------------------------------|
+| `FlowAppender`               | Base class. Processes events asynchronously via a Kotlin Flow.                         |
+| `FlowBufferedAppender`       | Extends `FlowAppender` with configurable buffering and overflow strategy.              |
+| `FlowFloodProtectedAppender` | Extends `FlowAppender` with rate-limiting to drop excess events and prevent flooding.  |
+| `BatchAppender`              | Extends `FlowAppender` to accumulate events into fixed-size batches before processing. |
+
+### Prevent log/trace flooding.
+
+_Log rate spikes are common and often go unnoticed. They could be an indication that something went terribly wrong or
+that a high-traffic system was unintentionally configured with verbose logging._
+
+At times, it's crucial to reduce the volume of logs and traces to prevent unnecessary costs. In our solution, we can
+leverage Kotlin's Flow to manage log streams efficiently by dropping excess log messages when needed. For example, the
+`FlowFloodProtectedAppender` is designed specifically for this scenario. It not only limits the flood of log messages
+but also reports the number of dropped messages, giving you visibility into how much data is being filtered out.
+
+```kotlin
+class SimpleFloodProtectedAppender(
+    requestPerSecond: Int,
+    burstDurationMillis: Int
+) : FlowFloodProtectedAppender<LoggingEvent>(requestPerSecond, burstDurationMillis) {
+    override suspend fun handle(event: LoggingEvent) = event.print()
+}
+
+RootLogger.Logging.appenders.unregisterAll()
+RootLogger.Logging.appenders.register(
+    SimpleFloodProtectedAppender(requestPerSecond = 50, burstDurationMillis = 100)
+)
+
+repeat(1_000_000) {
+    log.info("$it")
+}
+
+// The above will produce the following output:
+// 115 2024-10-24T07:19:34.707789Z [native-1] - INFO  Main - 0
+// 116 2024-10-24T07:19:34.707869Z [native-1] - INFO  Main - 1
+// 117 2024-10-24T07:19:34.707884Z [native-1] - INFO  Main - 2
+// 118 2024-10-24T07:19:34.707899Z [native-1] - INFO  Main - 3
+// # ...
+// # After some ~4k logs starts to drop.
+// 991339 2024-10-24T07:19:38.294933Z [native-1] - INFO  Main - 991224
+// 2024-10-24T07:19:38.295050Z [native-13] - WARN  FlowFloodProtectedAppender - Dropped 6556 log messages due to flooding (total dropped: 987299).
+// 995897 2024-10-24T07:19:38.314454Z [native-1] - INFO  Main - 995782
+// 2024-10-24T07:19:38.315134Z [native-19] - WARN  FlowFloodProtectedAppender - Dropped 4557 log messages due to flooding (total dropped: 991856).
+```
+
+To tackle similar issues, we can apply dynamic rate-limiting based on system load or log severity, prioritizing critical
+logs while dropping less important ones during high-traffic periods. Batching or buffering logs can also help optimize
+processing, ensuring important logs are preserved without overwhelming the system. This reduces costs and maintains log
+integrity.
 
 ## Examples
 
