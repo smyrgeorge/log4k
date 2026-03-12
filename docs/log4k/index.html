@@ -39,16 +39,19 @@
             </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
         </button>
         <div class="navigation-controls--break ui-kit_mobile-only"></div>
-        <div class="library-version" id="library-version">1.4.0
+        <div class="library-version" id="library-version">1.4.1
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
                 <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":log4k/androidMain">android</button>
-                <button class="platform-tag platform-selector native-like" data-active="" aria-pressed="true" data-filter=":log4k/appleMain">apple</button>
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":log4k/androidNativeMain">androidNative</button>
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":log4k/appleMain">apple</button>
                 <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":log4k/commonMain">common</button>
                 <button class="platform-tag platform-selector js-like" data-active="" aria-pressed="true" data-filter=":log4k/jsMain">js</button>
                 <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":log4k/jvmMain">jvm</button>
-                <button class="platform-tag platform-selector native-like" data-active="" aria-pressed="true" data-filter=":log4k/nativeMain">native</button>
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":log4k/linuxMain">linux</button>
+                <button class="platform-tag platform-selector native-like" data-active="" aria-pressed="true" data-filter=":log4k/mingwMain">mingw</button>
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":log4k/nativeMain">native</button>
                 <button class="platform-tag platform-selector wasm-like" data-active="" aria-pressed="true" data-filter=":log4k/wasmJsMain">wasmJs</button>
                 <button class="platform-tag platform-selector wasm-like" data-active="" aria-pressed="true" data-filter=":log4k/wasmWasiMain">wasmWasi</button>
             <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
@@ -66,7 +69,14 @@
                                 android
                             </label>
                         </li>
-                        <li role="option" class="dropdown--option platform-selector-option native-like" tabindex="0">
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":log4k/androidNativeMain" data-filter=":log4k/androidNativeMain">
+                                <span class="checkbox--icon"></span>
+                                androidNative
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
                             <label class="checkbox">
                                 <input type="checkbox" class="checkbox--input" id=":log4k/appleMain" data-filter=":log4k/appleMain">
                                 <span class="checkbox--icon"></span>
@@ -94,7 +104,21 @@
                                 jvm
                             </label>
                         </li>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":log4k/linuxMain" data-filter=":log4k/linuxMain">
+                                <span class="checkbox--icon"></span>
+                                linux
+                            </label>
+                        </li>
                         <li role="option" class="dropdown--option platform-selector-option native-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":log4k/mingwMain" data-filter=":log4k/mingwMain">
+                                <span class="checkbox--icon"></span>
+                                mingw
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
                             <label class="checkbox">
                                 <input type="checkbox" class="checkbox--input" id=":log4k/nativeMain" data-filter=":log4k/nativeMain">
                                 <span class="checkbox--icon"></span>
@@ -146,7 +170,7 @@
         </nav>
         <div id="resizer" class="resizer" data-item-type="BAR"></div>
         <div id="main" data-item-type="SECTION" role="main">
-<div class="main-content" id="content" pageids="log4k::////PointingToDeclaration//-749841460">
+<div class="main-content" id="content" pageids="log4k::////PointingToDeclaration//-286109910">
   <div class="breadcrumbs"></div>
   <div class="cover ">
     <h1 class="cover"><span><span>log4k</span></span></h1>
@@ -188,37 +212,44 @@
         <div></div>
       </div>
     </div>
-<a data-name="-1466516724%2FPackages%2F-757297100" anchor-label="io.github.smyrgeorge.log4k.impl.appenders" id="-1466516724%2FPackages%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
-    <div class="table-row table-row_platform-tagged" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+<a data-name="-1466516724%2FPackages%2F-1314457258" anchor-label="io.github.smyrgeorge.log4k.impl.appenders" id="-1466516724%2FPackages%2F-1314457258" data-filterable-set=":log4k/commonMain,:log4k/androidMain,:log4k/androidNativeMain,:log4k/appleMain,:log4k/jsMain,:log4k/jvmMain,:log4k/linuxMain,:log4k/mingwMain,:log4k/wasmJsMain,:log4k/wasmWasiMain"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":log4k/commonMain,:log4k/androidMain,:log4k/androidNativeMain,:log4k/appleMain,:log4k/jsMain,:log4k/jvmMain,:log4k/linuxMain,:log4k/mingwMain,:log4k/wasmJsMain,:log4k/wasmWasiMain" data-filterable-set=":log4k/commonMain,:log4k/androidMain,:log4k/androidNativeMain,:log4k/appleMain,:log4k/jsMain,:log4k/jvmMain,:log4k/linuxMain,:log4k/mingwMain,:log4k/wasmJsMain,:log4k/wasmWasiMain">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.github.smyrgeorge.log4k.impl.appenders/index.html">io.github.smyrgeorge.log4k.impl.appenders</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1466516724%2FPackages%2F-757297100"></span>
-                <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-              </span></span></div>
-          <div class="pull-right platform-tags--wrapper">
-            <div class="platform-tags no-gutters">
-              <div class="platform-tag common-like">common</div>
-            </div>
-          </div>
-        </div>
-        <div></div>
-      </div>
-    </div>
-<a data-name="549450456%2FPackages%2F218377680" anchor-label="io.github.smyrgeorge.log4k.impl.appenders.simple" id="549450456%2FPackages%2F218377680" data-filterable-set=":log4k/androidMain,:log4k/appleMain,:log4k/commonMain"></a>
-    <div class="table-row table-row_platform-tagged" data-filterable-current=":log4k/androidMain,:log4k/appleMain,:log4k/commonMain" data-filterable-set=":log4k/androidMain,:log4k/appleMain,:log4k/commonMain">
-      <div>
-        <div class="main-subrow ">
-          <div class=""><span class="inline-flex">
-              <div><a href="io.github.smyrgeorge.log4k.impl.appenders.simple/index.html">io.github.smyrgeorge.log4k.impl.appenders.simple</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="549450456%2FPackages%2F218377680"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1466516724%2FPackages%2F-1314457258"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
           <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">android</div>
-              <div class="platform-tag native-like">apple</div>
+              <div class="platform-tag common-like">androidNative</div>
+              <div class="platform-tag common-like">apple</div>
+              <div class="platform-tag common-like">common</div>
+              <div class="platform-tag js-like">js</div>
+              <div class="platform-tag jvm-like">jvm</div>
+              <div class="platform-tag common-like">linux</div>
+              <div class="platform-tag native-like">mingw</div>
+              <div class="platform-tag wasm-like">wasmJs</div>
+              <div class="platform-tag wasm-like">wasmWasi</div>
+            </div>
+          </div>
+        </div>
+        <div></div>
+      </div>
+    </div>
+<a data-name="549450456%2FPackages%2F-757297100" anchor-label="io.github.smyrgeorge.log4k.impl.appenders.simple" id="549450456%2FPackages%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+      <div>
+        <div class="main-subrow ">
+          <div class=""><span class="inline-flex">
+              <div><a href="io.github.smyrgeorge.log4k.impl.appenders.simple/index.html">io.github.smyrgeorge.log4k.impl.appenders.simple</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="549450456%2FPackages%2F-757297100"></span>
+                <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+              </span></span></div>
+          <div class="pull-right platform-tags--wrapper">
+            <div class="platform-tags no-gutters">
               <div class="platform-tag common-like">common</div>
             </div>
           </div>
@@ -226,13 +257,13 @@
         <div></div>
       </div>
     </div>
-<a data-name="701287064%2FPackages%2F241246166" anchor-label="io.github.smyrgeorge.log4k.impl.extensions" id="701287064%2FPackages%2F241246166" data-filterable-set=":log4k/commonMain,:log4k/androidMain,:log4k/jsMain,:log4k/jvmMain,:log4k/nativeMain,:log4k/wasmJsMain,:log4k/wasmWasiMain"></a>
+<a data-name="701287064%2FPackages%2F880686466" anchor-label="io.github.smyrgeorge.log4k.impl.extensions" id="701287064%2FPackages%2F880686466" data-filterable-set=":log4k/commonMain,:log4k/androidMain,:log4k/jsMain,:log4k/jvmMain,:log4k/nativeMain,:log4k/wasmJsMain,:log4k/wasmWasiMain"></a>
     <div class="table-row table-row_platform-tagged" data-filterable-current=":log4k/commonMain,:log4k/androidMain,:log4k/jsMain,:log4k/jvmMain,:log4k/nativeMain,:log4k/wasmJsMain,:log4k/wasmWasiMain" data-filterable-set=":log4k/commonMain,:log4k/androidMain,:log4k/jsMain,:log4k/jvmMain,:log4k/nativeMain,:log4k/wasmJsMain,:log4k/wasmWasiMain">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.github.smyrgeorge.log4k.impl.extensions/index.html">io.github.smyrgeorge.log4k.impl.extensions</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="701287064%2FPackages%2F241246166"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="701287064%2FPackages%2F880686466"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
           <div class="pull-right platform-tags--wrapper">
@@ -241,7 +272,7 @@
               <div class="platform-tag common-like">common</div>
               <div class="platform-tag js-like">js</div>
               <div class="platform-tag jvm-like">jvm</div>
-              <div class="platform-tag native-like">native</div>
+              <div class="platform-tag common-like">native</div>
               <div class="platform-tag wasm-like">wasmJs</div>
               <div class="platform-tag wasm-like">wasmWasi</div>
             </div>

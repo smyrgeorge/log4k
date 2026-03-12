@@ -39,11 +39,20 @@
             </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
         </button>
         <div class="navigation-controls--break ui-kit_mobile-only"></div>
-        <div class="library-version" id="library-version">1.4.0
+        <div class="library-version" id="library-version">1.4.1
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":log4k/androidMain">android</button>
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":log4k/androidNativeMain">androidNative</button>
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":log4k/appleMain">apple</button>
                 <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":log4k/commonMain">common</button>
+                <button class="platform-tag platform-selector js-like" data-active="" aria-pressed="true" data-filter=":log4k/jsMain">js</button>
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":log4k/jvmMain">jvm</button>
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":log4k/linuxMain">linux</button>
+                <button class="platform-tag platform-selector native-like" data-active="" aria-pressed="true" data-filter=":log4k/mingwMain">mingw</button>
+                <button class="platform-tag platform-selector wasm-like" data-active="" aria-pressed="true" data-filter=":log4k/wasmJsMain">wasmJs</button>
+                <button class="platform-tag platform-selector wasm-like" data-active="" aria-pressed="true" data-filter=":log4k/wasmWasiMain">wasmWasi</button>
             <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
                 <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
                 <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
@@ -52,11 +61,74 @@
                             <i class="ui-kit-icon ui-kit-icon_cross"></i>
                         </button>
                     </div>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":log4k/androidMain" data-filter=":log4k/androidMain">
+                                <span class="checkbox--icon"></span>
+                                android
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":log4k/androidNativeMain" data-filter=":log4k/androidNativeMain">
+                                <span class="checkbox--icon"></span>
+                                androidNative
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":log4k/appleMain" data-filter=":log4k/appleMain">
+                                <span class="checkbox--icon"></span>
+                                apple
+                            </label>
+                        </li>
                         <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
                             <label class="checkbox">
                                 <input type="checkbox" class="checkbox--input" id=":log4k/commonMain" data-filter=":log4k/commonMain">
                                 <span class="checkbox--icon"></span>
                                 common
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option js-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":log4k/jsMain" data-filter=":log4k/jsMain">
+                                <span class="checkbox--icon"></span>
+                                js
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":log4k/jvmMain" data-filter=":log4k/jvmMain">
+                                <span class="checkbox--icon"></span>
+                                jvm
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":log4k/linuxMain" data-filter=":log4k/linuxMain">
+                                <span class="checkbox--icon"></span>
+                                linux
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option native-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":log4k/mingwMain" data-filter=":log4k/mingwMain">
+                                <span class="checkbox--icon"></span>
+                                mingw
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option wasm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":log4k/wasmJsMain" data-filter=":log4k/wasmJsMain">
+                                <span class="checkbox--icon"></span>
+                                wasmJs
+                            </label>
+                        </li>
+                        <li role="option" class="dropdown--option platform-selector-option wasm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":log4k/wasmWasiMain" data-filter=":log4k/wasmWasiMain">
+                                <span class="checkbox--icon"></span>
+                                wasmWasi
                             </label>
                         </li>
                 </ul>
@@ -90,17 +162,51 @@
         </nav>
         <div id="resizer" class="resizer" data-item-type="BAR"></div>
         <div id="main" data-item-type="SECTION" role="main">
-<div class="main-content" data-page-type="package" id="content" pageids="log4k::io.github.smyrgeorge.log4k.impl.appenders////PointingToDeclaration//-757297100">
+<div class="main-content" data-page-type="package" id="content" pageids="log4k::io.github.smyrgeorge.log4k.impl.appenders////PointingToDeclaration//-1314457258">
   <div class="breadcrumbs"><a href="../index.html">log4k</a><span class="delimiter">/</span><span class="current">io.github.smyrgeorge.log4k.impl.appenders</span></div>
   <div class="cover ">
     <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
   </div>
   <div class="tabbedcontent">
-    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="TYPE">Types</button></div>
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="TYPE">Types</button><button class="section-tab" data-togglable="FUNCTION,EXTENSION_FUNCTION">Functions</button></div>
     <div class="tabs-section-body">
       <div data-togglable="TYPE">
         <h2 class="tableheader">Types</h2>
-        <div class="table"><a data-name="-736722475%2FClasslikes%2F-757297100" anchor-label="BatchAppender" id="-736722475%2FClasslikes%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+        <div class="table"><a data-name="-800335563%2FClasslikes%2F-1121780954" anchor-label="AndroidLoggingAppender" id="-800335563%2FClasslikes%2F-1121780954" data-filterable-set=":log4k/androidMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/androidMain" data-filterable-set=":log4k/androidMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-android-logging-appender/index.html"><span>Android</span><wbr><span>Logging</span><wbr><span><span>Appender</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-800335563%2FClasslikes%2F-1121780954"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":log4k/androidMain" data-filterable-set=":log4k/androidMain" data-active="" data-toggle=":log4k/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/androidMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-android-logging-appender/index.html">AndroidLoggingAppender</a> : <a href="../io.github.smyrgeorge.log4k/-appender/index.html">Appender</a><span class="token operator">&lt;</span><a href="../io.github.smyrgeorge.log4k/-logging-event/index.html">LoggingEvent</a><span class="token operator">&gt; </span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1385955808%2FClasslikes%2F-305659402" anchor-label="AppleLoggingAppender" id="1385955808%2FClasslikes%2F-305659402" data-filterable-set=":log4k/appleMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/appleMain" data-filterable-set=":log4k/appleMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-apple-logging-appender/index.html"><span>Apple</span><wbr><span>Logging</span><wbr><span><span>Appender</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1385955808%2FClasslikes%2F-305659402"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":log4k/appleMain" data-filterable-set=":log4k/appleMain" data-active="" data-toggle=":log4k/appleMain">apple</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/appleMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-apple-logging-appender/index.html">AppleLoggingAppender</a> : <a href="../../log4k/io.github.smyrgeorge.log4k/-appender/index.html">Appender</a><span class="token operator">&lt;</span><a href="../io.github.smyrgeorge.log4k/-logging-event/index.html#-559700439%2FMain%2F-305659402">LoggingEvent</a><span class="token operator">&gt; </span></div></div>                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-736722475%2FClasslikes%2F-757297100" anchor-label="BatchAppender" id="-736722475%2FClasslikes%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
@@ -156,6 +262,27 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">class </span><a href="-flow-flood-protected-appender/index.html">FlowFloodProtectedAppender</a><span class="token operator">&lt;</span><a href="-flow-flood-protected-appender/index.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">requestPerSecond<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">burstDurationMillis<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">burstResetPeriodMillis<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">5000</span></span></span><span class="token punctuation">)</span> : <a href="-flow-appender/index.html">FlowAppender</a><span class="token operator">&lt;</span><a href="-flow-flood-protected-appender/index.html">T</a><span class="token punctuation">, </span><a href="-flow-flood-protected-appender/index.html">T</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">A specialized implementation of <code class="lang-kotlin">FlowAppender</code> designed for protective flooding control. This abstract class manages events with a mechanism to prevent flooding and allow burst handling.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="-192990798%2FFunctions%2F-1314457258" anchor-label="platformDefaultAppender" id="-192990798%2FFunctions%2F-1314457258" data-filterable-set=":log4k/commonMain,:log4k/androidMain,:log4k/androidNativeMain,:log4k/appleMain,:log4k/jsMain,:log4k/jvmMain,:log4k/linuxMain,:log4k/mingwMain,:log4k/wasmJsMain,:log4k/wasmWasiMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain,:log4k/androidMain,:log4k/androidNativeMain,:log4k/appleMain,:log4k/jsMain,:log4k/jvmMain,:log4k/linuxMain,:log4k/mingwMain,:log4k/wasmJsMain,:log4k/wasmWasiMain" data-filterable-set=":log4k/commonMain,:log4k/androidMain,:log4k/androidNativeMain,:log4k/appleMain,:log4k/jsMain,:log4k/jvmMain,:log4k/linuxMain,:log4k/mingwMain,:log4k/wasmJsMain,:log4k/wasmWasiMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="platform-default-appender.html"><span>platform</span><wbr><span>Default</span><wbr><span><span>Appender</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-192990798%2FFunctions%2F-1314457258"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":log4k/androidMain" data-filterable-set=":log4k/androidMain" data-active="" data-toggle=":log4k/androidMain">android</button><button class="platform-bookmark" data-filterable-current=":log4k/androidNativeMain" data-filterable-set=":log4k/androidNativeMain" data-toggle=":log4k/androidNativeMain">androidNative</button><button class="platform-bookmark" data-filterable-current=":log4k/appleMain" data-filterable-set=":log4k/appleMain" data-toggle=":log4k/appleMain">apple</button><button class="platform-bookmark" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain" data-toggle=":log4k/commonMain">common</button><button class="platform-bookmark" data-filterable-current=":log4k/jsMain" data-filterable-set=":log4k/jsMain" data-toggle=":log4k/jsMain">js</button><button class="platform-bookmark" data-filterable-current=":log4k/jvmMain" data-filterable-set=":log4k/jvmMain" data-toggle=":log4k/jvmMain">jvm</button><button class="platform-bookmark" data-filterable-current=":log4k/linuxMain" data-filterable-set=":log4k/linuxMain" data-toggle=":log4k/linuxMain">linux</button><button class="platform-bookmark" data-filterable-current=":log4k/mingwMain" data-filterable-set=":log4k/mingwMain" data-toggle=":log4k/mingwMain">mingw</button><button class="platform-bookmark" data-filterable-current=":log4k/wasmJsMain" data-filterable-set=":log4k/wasmJsMain" data-toggle=":log4k/wasmJsMain">wasmJs</button><button class="platform-bookmark" data-filterable-current=":log4k/wasmWasiMain" data-filterable-set=":log4k/wasmWasiMain" data-toggle=":log4k/wasmWasiMain">wasmWasi</button></div>
+<div class="content sourceset-dependent-content" data-togglable=":log4k/androidMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="platform-default-appender.html"><span class="token function">platformDefaultAppender</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../io.github.smyrgeorge.log4k/-appender/index.html">Appender</a><span class="token operator">&lt;</span><a href="../io.github.smyrgeorge.log4k/-logging-event/index.html">LoggingEvent</a><span class="token operator">&gt;</span></div></div><div class="content sourceset-dependent-content" data-togglable=":log4k/androidNativeMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="platform-default-appender.html"><span class="token function">platformDefaultAppender</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../log4k/io.github.smyrgeorge.log4k/-appender/index.html">Appender</a><span class="token operator">&lt;</span><a href="../../log4k/io.github.smyrgeorge.log4k/-logging-event/index.html">LoggingEvent</a><span class="token operator">&gt;</span></div></div><div class="content sourceset-dependent-content" data-togglable=":log4k/appleMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="platform-default-appender.html"><span class="token function">platformDefaultAppender</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../log4k/io.github.smyrgeorge.log4k/-appender/index.html">Appender</a><span class="token operator">&lt;</span><a href="../io.github.smyrgeorge.log4k/-logging-event/index.html#-559700439%2FMain%2F-305659402">LoggingEvent</a><span class="token operator">&gt;</span></div></div><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">fun </span><a href="platform-default-appender.html"><span class="token function">platformDefaultAppender</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../io.github.smyrgeorge.log4k/-appender/index.html">Appender</a><span class="token operator">&lt;</span><a href="../io.github.smyrgeorge.log4k/-logging-event/index.html">LoggingEvent</a><span class="token operator">&gt;</span></div></div><div class="content sourceset-dependent-content" data-togglable=":log4k/jsMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="platform-default-appender.html"><span class="token function">platformDefaultAppender</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../log4k/io.github.smyrgeorge.log4k/-appender/index.html">Appender</a><span class="token operator">&lt;</span><a href="../../log4k/io.github.smyrgeorge.log4k/-logging-event/index.html">LoggingEvent</a><span class="token operator">&gt;</span></div></div><div class="content sourceset-dependent-content" data-togglable=":log4k/jvmMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="platform-default-appender.html"><span class="token function">platformDefaultAppender</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../io.github.smyrgeorge.log4k/-appender/index.html">Appender</a><span class="token operator">&lt;</span><a href="../io.github.smyrgeorge.log4k/-logging-event/index.html">LoggingEvent</a><span class="token operator">&gt;</span></div></div><div class="content sourceset-dependent-content" data-togglable=":log4k/linuxMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="platform-default-appender.html"><span class="token function">platformDefaultAppender</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../log4k/io.github.smyrgeorge.log4k/-appender/index.html">Appender</a><span class="token operator">&lt;</span><a href="../../log4k/io.github.smyrgeorge.log4k/-logging-event/index.html">LoggingEvent</a><span class="token operator">&gt;</span></div></div><div class="content sourceset-dependent-content" data-togglable=":log4k/mingwMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="platform-default-appender.html"><span class="token function">platformDefaultAppender</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../log4k/io.github.smyrgeorge.log4k/-appender/index.html">Appender</a><span class="token operator">&lt;</span><a href="../../log4k/io.github.smyrgeorge.log4k/-logging-event/index.html">LoggingEvent</a><span class="token operator">&gt;</span></div></div><div class="content sourceset-dependent-content" data-togglable=":log4k/wasmJsMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="platform-default-appender.html"><span class="token function">platformDefaultAppender</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../log4k/io.github.smyrgeorge.log4k/-appender/index.html">Appender</a><span class="token operator">&lt;</span><a href="../../log4k/io.github.smyrgeorge.log4k/-logging-event/index.html">LoggingEvent</a><span class="token operator">&gt;</span></div></div><div class="content sourceset-dependent-content" data-togglable=":log4k/wasmWasiMain"><div class="symbol monospace"><span class="token keyword">actual </span><span class="token keyword">fun </span><a href="platform-default-appender.html"><span class="token function">platformDefaultAppender</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../io.github.smyrgeorge.log4k/-appender/index.html">Appender</a><span class="token operator">&lt;</span><a href="../io.github.smyrgeorge.log4k/-logging-event/index.html">LoggingEvent</a><span class="token operator">&gt;</span></div></div>                  </div>
                 </div>
               </div>
             </div>
