@@ -62,11 +62,22 @@ The tracing module shares exactly the same principals.
 
 ## Logging API
 
-By default, the `SimpleConsoleLoggingAppender` is automatically registered.
-You can change the behaviour by executing, early in your program, the following:
+By default, a platform-specific appender is automatically registered:
+
+- **Android**: `AndroidLoggingAppender` (routes to Android Logcat)
+- **iOS/macOS**: `AppleLoggingAppender` (routes to Apple's Unified Logging)
+- **All other platforms**: `SimpleConsoleLoggingAppender` (color-coded console output)
+
+You can change the default behavior by unregistering all appenders early in your program:
 
 ```kotlin
-RootLogger.Logging.appenders.unregister(SimpleConsoleLoggingAppender::class)
+RootLogger.Logging.appenders.unregisterAll()
+```
+
+After unregistering, you can register any appender you want like this:
+
+```kotlin
+RootLogger.Logging.appenders.register(SimpleJsonConsoleLoggingAppender())
 ```
 
 ```kotlin

@@ -1,6 +1,6 @@
 package io.github.smyrgeorge.log4k
 
-import io.github.smyrgeorge.log4k.impl.appenders.simple.SimpleConsoleLoggingAppender
+import io.github.smyrgeorge.log4k.impl.appenders.platformDefaultAppender
 import io.github.smyrgeorge.log4k.impl.extensions.dispatcher
 import io.github.smyrgeorge.log4k.impl.registry.AppenderRegistry
 import kotlinx.coroutines.CoroutineDispatcher
@@ -42,7 +42,8 @@ object RootLogger {
     private val meters: Channel<MeteringEvent> = Channel(capacity = Channel.UNLIMITED)
 
     init {
-        Logging.appenders.register(SimpleConsoleLoggingAppender())
+        val default: Appender<LoggingEvent> = platformDefaultAppender()
+        Logging.appenders.register(default)
 
         // Start consuming the Logging queue.
         RootLoggerScope.launch(dispatcher) {

@@ -8,8 +8,6 @@ plugins {
     kotlin("multiplatform")
 }
 
-val enabledTargets = Utils.targetsOf(project)
-
 kotlin {
     val availableTargets = mapOf(
         "iosArm64" to { iosArm64() },
@@ -48,7 +46,7 @@ kotlin {
         },
     )
 
-    enabledTargets.forEach {
+    Utils.allTargets.forEach {
         println("Enabling target $it")
         availableTargets[it]?.invoke()
     }

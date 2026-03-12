@@ -1,4 +1,4 @@
-package io.github.smyrgeorge.log4k.impl.appenders.simple
+package io.github.smyrgeorge.log4k.impl.appenders
 
 import android.util.Log
 import io.github.smyrgeorge.log4k.Appender
