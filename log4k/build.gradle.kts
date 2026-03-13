@@ -9,7 +9,7 @@ kotlin {
     android {
         namespace = "io.github.smyrgeorge.log4k"
         compileSdk = 36
-        minSdk = 26
+        minSdk = 24
     }
     sourceSets {
         all {
