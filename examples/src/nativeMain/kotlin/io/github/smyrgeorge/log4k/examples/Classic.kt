@@ -23,6 +23,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.measureTime
 
@@ -49,7 +50,7 @@ class Classic {
 
         log.info { "this is a test" }
 
-        delay(1000)
+        delay(1000.milliseconds)
 
         RootLogger.Metering.appenders.register(SimpleConsoleMeteringAppender())
         RootLogger.Metering.appenders.register(SimpleMeteringCollectorAppender())
@@ -59,7 +60,7 @@ class Classic {
         val c2 = meter.upDownCounter<Double>("event-b")
         val g1 = meter.gauge<Int>("thread-pool-size", "a-unit", "a-description")
 
-        delay(1000)
+        delay(1000.milliseconds)
 
         c1.increment(1, "label" to "pool-a")
         c1.increment(1, "label" to "pool-a")
@@ -76,10 +77,10 @@ class Classic {
             record(6, "pool" to "pool-b")
         }
 
-        delay(2000)
+        delay(2000.milliseconds)
         val prometheus = collector.toOpenMetricsLineFormatString()
         print(prometheus)
-        delay(2000)
+        delay(2000.milliseconds)
 
         log.debug("ignore")
         log.debug { "ignore + ${5}" } // Will be evaluated only if DEBUG logs are enabled.
@@ -92,11 +93,11 @@ class Classic {
         try {
             error("An error occurred!")
         } catch (e: Exception) {
-            log.error(e) { e.message }
+            log.error(e) { e.message ?: "Unknown error" }
         }
 
 
-        delay(5000)
+        delay(5000.milliseconds)
 
         suspend fun <A> Iterable<A>.forEachParallel(
             context: CoroutineContext = Dispatchers.IO,
@@ -109,11 +110,11 @@ class Classic {
         (0..10).forEachParallel {
             repeat(10) {
                 log.info("$it")
-                delay(500)
+                delay(500.milliseconds)
             }
         }
 
-        delay(2000)
+        delay(2000.milliseconds)
 
         RootLogger.Tracing.appenders.register(SimpleConsoleTracingAppender())
         // Create the parent span.
@@ -144,12 +145,12 @@ class Classic {
 
         // Create the span and then start it.
         val span: TracingEvent.Span.Local = trace.span("test").start()
-        delay(100)
+        delay(100.milliseconds)
         span.event("this is a test event")
         // Close the span manually.
         span.end()
 
-        delay(2000)
+        delay(2000.milliseconds)
 
         RootLogger.Logging.appenders.unregisterAll()
         RootLogger.Logging.appenders.register(SimpleJsonConsoleLoggingAppender())
@@ -157,24 +158,24 @@ class Classic {
         try {
             error("An error occurred!")
         } catch (e: Exception) {
-            log.error(e) { e.message }
+            log.error(e) { e.message ?: "Unknown error" }
         }
 
-        delay(2000)
+        delay(2000.milliseconds)
 
         RootLogger.Logging.appenders.unregisterAll()
         RootLogger.Logging.appenders.register(
             SimpleFloodProtectedAppender(requestPerSecond = 50, burstDurationMillis = 100)
         )
 
-        delay(2000)
+        delay(2000.milliseconds)
 
         var time = measureTime {
             repeat(1_000_000) {
                 log.info("$it")
             }
         }
-        delay(2000)
+        delay(2000.milliseconds)
         println("Finished in $time")
 
         time = measureTime {
@@ -182,7 +183,7 @@ class Classic {
                 log.info("$it")
             }
         }
-        delay(2000)
+        delay(2000.milliseconds)
         println("Finished in $time")
     }
 }

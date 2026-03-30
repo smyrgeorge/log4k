@@ -20,14 +20,14 @@ class MainTests {
         try {
             error("An error occurred!")
         } catch (e: Exception) {
-            log.error(e) { e.message }
+            log.error(e) { e.message ?: "Unknown error" }
         }
 
         RootLogger.Tracing.appenders.register(SimpleConsoleTracingAppender())
         // Create the parent span.
         // NOTICE: we do not start it, since it's already started.
         val parent: TracingEvent.Span = trace.span(id = "ID_EXAMPLE", traceId = "TRACE_ID_EXAMPLE", name = "parent")
-        // Starts immediately the span.
+        // Immediately starts the span.
         trace.span("test", parent) {
             log.info(this, "this is a test with span") // The log will contain the span id.
             // Set span tags.
@@ -40,7 +40,7 @@ class MainTests {
             event(name = "event-2") { tags ->
                 tags["key"] = "value"
             }
-            // Automatically closes at the end of te scope.
+            // Automatically closes at the end of the scope.
         }
 
         // Create the span and then start it.
