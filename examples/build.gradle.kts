@@ -9,7 +9,7 @@ kotlin {
         }
         commonMain {
             dependencies {
-                implementation(project(":log4k"))
+                implementation(project(":log4k-classic"))
             }
         }
     }

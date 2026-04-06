@@ -17,13 +17,13 @@ kotlin {
         }
         commonMain {
             dependencies {
+                api(project(":log4k"))
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.serialisation.json)
             }
         }
         commonTest {
             dependencies {
-                implementation(project(":log4k-classic"))
                 implementation(libs.kotlin.test)
                 implementation(libs.assertk)
             }

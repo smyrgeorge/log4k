@@ -8,6 +8,8 @@ plugins {
 
 val descriptions = mapOf(
     "log4k" to "A Comprehensive Logging and Tracing Solution for Kotlin Multiplatform.",
+    "log4k-classic" to "A Comprehensive Logging and Tracing Solution for Kotlin Multiplatform.",
+    "log4k-context" to "A Comprehensive Logging and Tracing Solution for Kotlin Multiplatform.",
     "log4k-slf4j" to "A Comprehensive Logging and Tracing Solution for Kotlin Multiplatform.",
 )
 

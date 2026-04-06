@@ -7,6 +7,9 @@ import io.github.smyrgeorge.log4k.Meter
 import io.github.smyrgeorge.log4k.RootLogger
 import io.github.smyrgeorge.log4k.Tracer
 import io.github.smyrgeorge.log4k.TracingEvent
+import io.github.smyrgeorge.log4k.classic.debug
+import io.github.smyrgeorge.log4k.classic.error
+import io.github.smyrgeorge.log4k.classic.info
 import io.github.smyrgeorge.log4k.impl.SimpleLoggerFactory
 import io.github.smyrgeorge.log4k.impl.appenders.BatchAppender
 import io.github.smyrgeorge.log4k.impl.appenders.FlowFloodProtectedAppender
@@ -95,7 +98,6 @@ class Classic {
         } catch (e: Exception) {
             log.error(e) { e.message ?: "Unknown error" }
         }
-
 
         delay(5000.milliseconds)
 

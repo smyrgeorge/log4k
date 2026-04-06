@@ -1,5 +1,8 @@
 package io.github.smyrgeorge.log4k
 
+import io.github.smyrgeorge.log4k.classic.debug
+import io.github.smyrgeorge.log4k.classic.error
+import io.github.smyrgeorge.log4k.classic.info
 import io.github.smyrgeorge.log4k.impl.appenders.simple.SimpleConsoleTracingAppender
 import kotlin.test.Test
 
