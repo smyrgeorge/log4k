@@ -11,27 +11,27 @@ import io.github.smyrgeorge.log4k.Logger
 import io.github.smyrgeorge.log4k.TracingEvent.Span
 
 //@formatter:off
-inline fun Logger.trace(f: () -> String): Unit = trace(f())
-inline fun Logger.trace(t: Throwable, f: () -> String): Unit = trace(f(), t)
-inline fun Logger.debug(f: () -> String): Unit = debug(f())
-inline fun Logger.debug(t: Throwable, f: () -> String): Unit = debug(f(), t)
-inline fun Logger.info(f: () -> String): Unit = info(f())
-inline fun Logger.info(t: Throwable, f: () -> String): Unit = info(f(), t)
-inline fun Logger.warn(f: () -> String): Unit = warn(f())
-inline fun Logger.warn(t: Throwable, f: () -> String): Unit = warn(f(), t)
-inline fun Logger.error(f: () -> String): Unit = error(f())
-inline fun Logger.error(t: Throwable, f: () -> String): Unit = error(f(), t)
+inline fun Logger.trace(f: () -> String): Unit = if (TRACE.shouldLog()) trace(f()) else Unit
+inline fun Logger.trace(t: Throwable, f: () -> String): Unit = if (TRACE.shouldLog()) trace(f(), t) else Unit
+inline fun Logger.debug(f: () -> String): Unit = if (DEBUG.shouldLog()) debug(f()) else Unit
+inline fun Logger.debug(t: Throwable, f: () -> String): Unit = if (DEBUG.shouldLog()) debug(f(), t) else Unit
+inline fun Logger.info(f: () -> String): Unit = if (INFO.shouldLog()) info(f()) else Unit
+inline fun Logger.info(t: Throwable, f: () -> String): Unit = if (INFO.shouldLog()) info(f(), t) else Unit
+inline fun Logger.warn(f: () -> String): Unit = if (WARN.shouldLog()) warn(f()) else Unit
+inline fun Logger.warn(t: Throwable, f: () -> String): Unit = if (WARN.shouldLog()) warn(f(), t) else Unit
+inline fun Logger.error(f: () -> String): Unit = if (ERROR.shouldLog()) error(f()) else Unit
+inline fun Logger.error(t: Throwable, f: () -> String): Unit = if (ERROR.shouldLog()) error(f(), t) else Unit
 
-inline fun Logger.trace(span: Span, f: () -> String): Unit = trace(span, f())
-inline fun Logger.trace(span: Span, t: Throwable, f: () -> String): Unit = trace(span, f(), t)
-inline fun Logger.debug(span: Span, f: () -> String): Unit = debug(span, f())
-inline fun Logger.debug(span: Span, t: Throwable, f: () -> String): Unit = debug(span, f(), t)
-inline fun Logger.info(span: Span, f: () -> String): Unit = info(span, f())
-inline fun Logger.info(span: Span, t: Throwable, f: () -> String): Unit = info(span, f(), t)
-inline fun Logger.warn(span: Span, f: () -> String): Unit = warn(span, f())
-inline fun Logger.warn(span: Span, t: Throwable, f: () -> String): Unit = warn(span, f(), t)
-inline fun Logger.error(span: Span, f: () -> String): Unit = error(span, f())
-inline fun Logger.error(span: Span, t: Throwable, f: () -> String): Unit = error(span, f(), t)
+inline fun Logger.trace(span: Span, f: () -> String): Unit = if (TRACE.shouldLog()) trace(span, f()) else Unit
+inline fun Logger.trace(span: Span, t: Throwable, f: () -> String): Unit = if (TRACE.shouldLog()) trace(span, f(), t) else Unit
+inline fun Logger.debug(span: Span, f: () -> String): Unit = if (DEBUG.shouldLog()) debug(span, f()) else Unit
+inline fun Logger.debug(span: Span, t: Throwable, f: () -> String): Unit = if (DEBUG.shouldLog()) debug(span, f(), t) else Unit
+inline fun Logger.info(span: Span, f: () -> String): Unit = if (INFO.shouldLog()) info(span, f()) else Unit
+inline fun Logger.info(span: Span, t: Throwable, f: () -> String): Unit = if (INFO.shouldLog()) info(span, f(), t) else Unit
+inline fun Logger.warn(span: Span, f: () -> String): Unit = if (WARN.shouldLog()) warn(span, f()) else Unit
+inline fun Logger.warn(span: Span, t: Throwable, f: () -> String): Unit = if (WARN.shouldLog()) warn(span, f(), t) else Unit
+inline fun Logger.error(span: Span, f: () -> String): Unit = if (ERROR.shouldLog()) error(span, f()) else Unit
+inline fun Logger.error(span: Span, t: Throwable, f: () -> String): Unit = if (ERROR.shouldLog()) error(span, f(), t) else Unit
 
 fun Logger.trace(msg: String, vararg args: Any?): Unit = log(TRACE, null, msg, args, null)
 fun Logger.trace(msg: String, t: Throwable, vararg args: Any?): Unit = log(TRACE, null, msg, args, t)
