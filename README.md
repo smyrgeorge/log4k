@@ -37,6 +37,42 @@ This project also tries to be fully compatible with `OpenTelemetry` standard.
 implementation("io.github.smyrgeorge:log4k:x.y.z")
 ```
 
+### Extension Modules
+
+Starting with Kotlin 2.3.20, what was previously a call-ambiguity warning between context-aware and non-context
+extension functions became a compilation error. To resolve this, the lambda-based extension functions have been
+split into two separate modules:
+
+**`log4k-classic`** — Lambda extensions **without** context receivers (standard usage):
+
+```kotlin
+// https://central.sonatype.com/artifact/io.github.smyrgeorge/log4k-classic
+implementation("io.github.smyrgeorge:log4k-classic:x.y.z")
+```
+
+```kotlin
+log.debug { "ignore" }
+log.debug { "ignore + ${5}" } // Will be evaluated only if DEBUG logs are enabled.
+log.error(e) { e.message }
+```
+
+**`log4k-context`** — Lambda extensions **with** context receivers (`TracingContext`) for automatic span propagation:
+
+```kotlin
+// https://central.sonatype.com/artifact/io.github.smyrgeorge/log4k-context
+implementation("io.github.smyrgeorge:log4k-context:x.y.z")
+```
+
+```kotlin
+trace.span("my-operation") {
+    // TracingContext is in scope — span is automatically attached to log events.
+    log.info { "Processing started" }
+    log.error(exception) { "Operation failed" }
+}
+```
+
+You can depend on both modules simultaneously if you need both styles in the same source set.
+
 ## Architecture
 
 <!--suppress HtmlDeprecatedAttribute -->
