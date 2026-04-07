@@ -12,43 +12,44 @@ import io.github.smyrgeorge.log4k.TracingContext
 
 //@formatter:off
 context(c: TracingContext) inline fun Logger.trace(f: () -> String): Unit =
-    if (TRACE.shouldLog()) log(TRACE, c.currentOrNull(), f(), emptyArray(), null) else Unit
-context(c: TracingContext)
-inline fun Logger.trace(t: Throwable, f: () -> String): Unit =
-    if (TRACE.shouldLog()) log(TRACE, c.currentOrNull(), f(), emptyArray(), t) else Unit
-context(c: TracingContext)
-inline fun Logger.debug(f: () -> String): Unit =
-    if (DEBUG.shouldLog()) log(DEBUG, c.currentOrNull(), f(), emptyArray(), null) else Unit
-context(c: TracingContext)
-inline fun Logger.debug(t: Throwable, f: () -> String): Unit =
-    if (DEBUG.shouldLog()) log(DEBUG, c.currentOrNull(), f(), emptyArray(), t) else Unit
-context(c: TracingContext)
-inline fun Logger.info(f: () -> String): Unit =
-    if (INFO.shouldLog()) log(INFO, c.currentOrNull(), f(), emptyArray(), null) else Unit
-context(c: TracingContext)
-inline fun Logger.info(t: Throwable, f: () -> String): Unit =
-    if (INFO.shouldLog()) log(INFO, c.currentOrNull(), f(), emptyArray(), t) else Unit
-context(c: TracingContext)
-inline fun Logger.warn(f: () -> String): Unit =
-    if (WARN.shouldLog()) log(WARN, c.currentOrNull(), f(), emptyArray(), null) else Unit
-context(c: TracingContext)
-inline fun Logger.warn(t: Throwable, f: () -> String): Unit =
-    if (WARN.shouldLog()) log(WARN, c.currentOrNull(), f(), emptyArray(), t) else Unit
-context(c: TracingContext)
-inline fun Logger.error(f: () -> String): Unit =
-    if (ERROR.shouldLog()) log(ERROR, c.currentOrNull(), f(), emptyArray(), null) else Unit
-context(c: TracingContext)
-inline fun Logger.error(t: Throwable, f: () -> String): Unit =
-    if (ERROR.shouldLog()) log(ERROR, c.currentOrNull(), f(), emptyArray(), t) else Unit
+    if (TRACE.isEnabled()) log(TRACE, c.currentOrNull(), f(), emptyArray(), null) else Unit
+context(c: TracingContext) inline fun Logger.trace(t: Throwable, f: () -> String): Unit =
+    if (TRACE.isEnabled()) log(TRACE, c.currentOrNull(), f(), emptyArray(), t) else Unit
+context(c: TracingContext) inline fun Logger.debug(f: () -> String): Unit =
+    if (DEBUG.isEnabled()) log(DEBUG, c.currentOrNull(), f(), emptyArray(), null) else Unit
+context(c: TracingContext) inline fun Logger.debug(t: Throwable, f: () -> String): Unit =
+    if (DEBUG.isEnabled()) log(DEBUG, c.currentOrNull(), f(), emptyArray(), t) else Unit
+context(c: TracingContext) inline fun Logger.info(f: () -> String): Unit =
+    if (INFO.isEnabled()) log(INFO, c.currentOrNull(), f(), emptyArray(), null) else Unit
+context(c: TracingContext) inline fun Logger.info(t: Throwable, f: () -> String): Unit =
+    if (INFO.isEnabled()) log(INFO, c.currentOrNull(), f(), emptyArray(), t) else Unit
+context(c: TracingContext) inline fun Logger.warn(f: () -> String): Unit =
+    if (WARN.isEnabled()) log(WARN, c.currentOrNull(), f(), emptyArray(), null) else Unit
+context(c: TracingContext) inline fun Logger.warn(t: Throwable, f: () -> String): Unit =
+    if (WARN.isEnabled()) log(WARN, c.currentOrNull(), f(), emptyArray(), t) else Unit
+context(c: TracingContext) inline fun Logger.error(f: () -> String): Unit =
+    if (ERROR.isEnabled()) log(ERROR, c.currentOrNull(), f(), emptyArray(), null) else Unit
+context(c: TracingContext) inline fun Logger.error(t: Throwable, f: () -> String): Unit =
+    if (ERROR.isEnabled()) log(ERROR, c.currentOrNull(), f(), emptyArray(), t) else Unit
 
-context(c: TracingContext) fun Logger.trace(msg: String, vararg args: Any?): Unit = log(TRACE, c.currentOrNull(), msg, args, null)
-context(c: TracingContext) fun Logger.trace(msg: String, t: Throwable, vararg args: Any?): Unit = log(TRACE, c.currentOrNull(), msg, args, t)
-context(c: TracingContext) fun Logger.debug(msg: String, vararg args: Any?): Unit = log(DEBUG, c.currentOrNull(), msg, args, null)
-context(c: TracingContext) fun Logger.debug(msg: String, t: Throwable, vararg args: Any?): Unit = log(DEBUG, c.currentOrNull(), msg, args, t)
-context(c: TracingContext) fun Logger.info(msg: String, vararg args: Any?): Unit = log(INFO, c.currentOrNull(), msg, args, null)
-context(c: TracingContext) fun Logger.info(msg: String, t: Throwable, vararg args: Any?): Unit = log(INFO, c.currentOrNull(), msg, args, t)
-context(c: TracingContext) fun Logger.warn(msg: String, vararg args: Any?): Unit = log(WARN, c.currentOrNull(), msg, args, null)
-context(c: TracingContext) fun Logger.warn(msg: String, t: Throwable, vararg args: Any?): Unit = log(WARN, c.currentOrNull(), msg, args, t)
-context(c: TracingContext) fun Logger.error(msg: String, vararg args: Any?): Unit = log(ERROR, c.currentOrNull(), msg, args, null)
-context(c: TracingContext) fun Logger.error(msg: String, t: Throwable, vararg args: Any?): Unit = log(ERROR, c.currentOrNull(), msg, args, t)
+context(c: TracingContext) fun Logger.trace(msg: String, vararg args: Any?): Unit =
+    log(TRACE, c.currentOrNull(), msg, args, null)
+context(c: TracingContext) fun Logger.trace(msg: String, t: Throwable, vararg args: Any?): Unit =
+    log(TRACE, c.currentOrNull(), msg, args, t)
+context(c: TracingContext) fun Logger.debug(msg: String, vararg args: Any?): Unit =
+    log(DEBUG, c.currentOrNull(), msg, args, null)
+context(c: TracingContext) fun Logger.debug(msg: String, t: Throwable, vararg args: Any?): Unit =
+    log(DEBUG, c.currentOrNull(), msg, args, t)
+context(c: TracingContext) fun Logger.info(msg: String, vararg args: Any?): Unit =
+    log(INFO, c.currentOrNull(), msg, args, null)
+context(c: TracingContext) fun Logger.info(msg: String, t: Throwable, vararg args: Any?): Unit =
+    log(INFO, c.currentOrNull(), msg, args, t)
+context(c: TracingContext) fun Logger.warn(msg: String, vararg args: Any?): Unit =
+    log(WARN, c.currentOrNull(), msg, args, null)
+context(c: TracingContext) fun Logger.warn(msg: String, t: Throwable, vararg args: Any?): Unit =
+    log(WARN, c.currentOrNull(), msg, args, t)
+context(c: TracingContext) fun Logger.error(msg: String, vararg args: Any?): Unit =
+    log(ERROR, c.currentOrNull(), msg, args, null)
+context(c: TracingContext) fun Logger.error(msg: String, t: Throwable, vararg args: Any?): Unit =
+    log(ERROR, c.currentOrNull(), msg, args, t)
 //@formatter:on
