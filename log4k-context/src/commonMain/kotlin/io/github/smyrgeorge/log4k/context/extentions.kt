@@ -12,25 +12,25 @@ import io.github.smyrgeorge.log4k.TracingContext
 
 //@formatter:off
 context(c: TracingContext) inline fun Logger.trace(f: () -> String): Unit =
-    if (TRACE.isEnabled()) log(TRACE, c.currentOrNull(), f(), emptyArray(), null) else Unit
+    if (TRACE.enabled()) log(TRACE, c.currentOrNull(), f(), emptyArray(), null) else Unit
 context(c: TracingContext) inline fun Logger.trace(t: Throwable, f: () -> String): Unit =
-    if (TRACE.isEnabled()) log(TRACE, c.currentOrNull(), f(), emptyArray(), t) else Unit
+    if (TRACE.enabled()) log(TRACE, c.currentOrNull(), f(), emptyArray(), t) else Unit
 context(c: TracingContext) inline fun Logger.debug(f: () -> String): Unit =
-    if (DEBUG.isEnabled()) log(DEBUG, c.currentOrNull(), f(), emptyArray(), null) else Unit
+    if (DEBUG.enabled()) log(DEBUG, c.currentOrNull(), f(), emptyArray(), null) else Unit
 context(c: TracingContext) inline fun Logger.debug(t: Throwable, f: () -> String): Unit =
-    if (DEBUG.isEnabled()) log(DEBUG, c.currentOrNull(), f(), emptyArray(), t) else Unit
+    if (DEBUG.enabled()) log(DEBUG, c.currentOrNull(), f(), emptyArray(), t) else Unit
 context(c: TracingContext) inline fun Logger.info(f: () -> String): Unit =
-    if (INFO.isEnabled()) log(INFO, c.currentOrNull(), f(), emptyArray(), null) else Unit
+    if (INFO.enabled()) log(INFO, c.currentOrNull(), f(), emptyArray(), null) else Unit
 context(c: TracingContext) inline fun Logger.info(t: Throwable, f: () -> String): Unit =
-    if (INFO.isEnabled()) log(INFO, c.currentOrNull(), f(), emptyArray(), t) else Unit
+    if (INFO.enabled()) log(INFO, c.currentOrNull(), f(), emptyArray(), t) else Unit
 context(c: TracingContext) inline fun Logger.warn(f: () -> String): Unit =
-    if (WARN.isEnabled()) log(WARN, c.currentOrNull(), f(), emptyArray(), null) else Unit
+    if (WARN.enabled()) log(WARN, c.currentOrNull(), f(), emptyArray(), null) else Unit
 context(c: TracingContext) inline fun Logger.warn(t: Throwable, f: () -> String): Unit =
-    if (WARN.isEnabled()) log(WARN, c.currentOrNull(), f(), emptyArray(), t) else Unit
+    if (WARN.enabled()) log(WARN, c.currentOrNull(), f(), emptyArray(), t) else Unit
 context(c: TracingContext) inline fun Logger.error(f: () -> String): Unit =
-    if (ERROR.isEnabled()) log(ERROR, c.currentOrNull(), f(), emptyArray(), null) else Unit
+    if (ERROR.enabled()) log(ERROR, c.currentOrNull(), f(), emptyArray(), null) else Unit
 context(c: TracingContext) inline fun Logger.error(t: Throwable, f: () -> String): Unit =
-    if (ERROR.isEnabled()) log(ERROR, c.currentOrNull(), f(), emptyArray(), t) else Unit
+    if (ERROR.enabled()) log(ERROR, c.currentOrNull(), f(), emptyArray(), t) else Unit
 
 context(c: TracingContext) fun Logger.trace(msg: String, vararg args: Any?): Unit =
     log(TRACE, c.currentOrNull(), msg, args, null)

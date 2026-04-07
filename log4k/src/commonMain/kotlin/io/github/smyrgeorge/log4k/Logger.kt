@@ -36,7 +36,7 @@ abstract class Logger(
         arguments: Array<out Any?>,
         throwable: Throwable?
     ) {
-        if (!level.isEnabled()) return
+        if (!level.enabled()) return
         val event = toLoggingEvent(level, span, message, arguments, throwable)
         RootLogger.log(event)
     }
@@ -65,8 +65,8 @@ abstract class Logger(
      * @param level The logging level to be checked.
      * @return `true` if logging is enabled for the specified level, `false` otherwise.
      */
-    fun isEnabled(level: Level): Boolean = level.isEnabled()
-    fun Level.isEnabled(): Boolean = ordinal >= level.ordinal
+    fun isEnabled(level: Level): Boolean = level.enabled()
+    fun Level.enabled(): Boolean = ordinal >= level.ordinal
 
     companion object {
         val registry = CollectorRegistry<Logger>()
