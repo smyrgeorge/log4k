@@ -14,7 +14,7 @@ assertk = "0.28.1"
 # https://mvnrepository.com/artifact/org.slf4j/slf4j-api
 slf4j = "2.0.17"
 # https://developer.android.com/studio/releases/gradle-plugin
-android-gradle-plugin = "9.1.0"
+android-gradle-plugin = "9.1.1"
 
 [libraries]
 gradle-kotlin-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
