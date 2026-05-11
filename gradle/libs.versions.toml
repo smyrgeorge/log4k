@@ -2,7 +2,7 @@
 # https://plugins.gradle.org/plugin/org.jetbrains.kotlin.jvm
 kotlin = "2.3.21"
 # https://github.com/Kotlin/kotlinx.coroutines
-kotlinx-coroutines = "1.10.2"
+kotlinx-coroutines = "1.11.0"
 # https://github.com/Kotlin/kotlinx.serialization
 kotlinx-serialisation = "1.11.0"
 # https://github.com/vanniktech/gradle-maven-publish-plugin
