@@ -1,6 +1,12 @@
 package io.github.smyrgeorge.log4k.impl.extensions
 
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.time.Duration
@@ -39,9 +45,16 @@ fun launch(
 fun doEvery(delay: Duration, dispatcher: CoroutineDispatcher = Dispatchers.Default, f: suspend () -> Unit): Job {
     return launch(dispatcher) {
         while (true) {
-            runCatching {
-                delay(delay)
+            // `delay` is outside the catch so a CancellationException from cancelling the returned
+            // Job propagates and stops the loop. Catching it turns cancel() into a hot 100%-CPU spin,
+            // since every subsequent delay() on a cancelled job throws.
+            delay(delay)
+            try {
                 f()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Throwable) {
+                // Swallow errors from the action so the periodic loop keeps ticking.
             }
         }
     }
