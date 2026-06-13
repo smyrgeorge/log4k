@@ -7,14 +7,11 @@ plugins {
 
 kotlin {
     android {
-        namespace = "io.github.smyrgeorge.log4k"
+        namespace = "io.github.smyrgeorge.log4k.context"
         compileSdk = 36
         minSdk = 24
     }
     sourceSets {
-        all {
-            languageSettings.enableLanguageFeature("ContextParameters")
-        }
         configureEach {
             languageSettings.progressiveMode = true
         }

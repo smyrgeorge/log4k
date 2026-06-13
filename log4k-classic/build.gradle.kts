@@ -7,7 +7,7 @@ plugins {
 
 kotlin {
     android {
-        namespace = "io.github.smyrgeorge.log4k"
+        namespace = "io.github.smyrgeorge.log4k.classic"
         compileSdk = 36
         minSdk = 24
     }
