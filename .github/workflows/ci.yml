@@ -12,7 +12,7 @@ jobs:
     environment: Maven Central
     steps:
       - name: Checkout Project
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Cache Konan
         uses: actions/cache@v5
