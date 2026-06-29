@@ -27,7 +27,7 @@ private object EmptyScope : CoroutineScope {
  * @param f The suspending function to be executed within the launched coroutine.
  * @return The `Job` object representing the coroutine. This can be used to monitor or cancel the coroutine.
  */
-fun launch(
+internal fun launch(
     dispatcher: CoroutineDispatcher = Dispatchers.Default,
     f: suspend () -> Unit
 ): Job = EmptyScope.launch(dispatcher) { f() }
@@ -42,7 +42,11 @@ fun launch(
  * @param delay The duration to wait between each execution of the provided suspend function.
  * @param f The suspend function to be executed repeatedly.
  */
-fun doEvery(delay: Duration, dispatcher: CoroutineDispatcher = Dispatchers.Default, f: suspend () -> Unit): Job {
+internal fun doEvery(
+    delay: Duration,
+    dispatcher: CoroutineDispatcher = Dispatchers.Default,
+    f: suspend () -> Unit
+): Job {
     return launch(dispatcher) {
         while (true) {
             // `delay` is outside the catch so a CancellationException from cancelling the returned

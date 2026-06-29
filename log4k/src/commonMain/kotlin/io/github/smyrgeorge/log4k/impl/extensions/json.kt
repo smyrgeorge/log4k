@@ -1,13 +1,11 @@
 package io.github.smyrgeorge.log4k.impl.extensions
 
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 
-@OptIn(ExperimentalSerializationApi::class)
-fun primitive(value: Any): JsonPrimitive = when (value) {
+internal fun primitive(value: Any): JsonPrimitive = when (value) {
     is Number -> JsonPrimitive(value)
     is UByte -> JsonPrimitive(value)
     is UShort -> JsonPrimitive(value)
@@ -18,7 +16,7 @@ fun primitive(value: Any): JsonPrimitive = when (value) {
     else -> JsonPrimitive(value.toString())
 }
 
-fun List<*>.toJsonElement(): JsonElement {
+internal fun List<*>.toJsonElement(): JsonElement {
     val list: MutableList<JsonElement> = mutableListOf()
     forEach {
         val value = it ?: return@forEach
@@ -31,7 +29,7 @@ fun List<*>.toJsonElement(): JsonElement {
     return JsonArray(list)
 }
 
-fun Map<*, *>.toJsonElement(): JsonElement {
+internal fun Map<*, *>.toJsonElement(): JsonElement {
     val map: MutableMap<String, JsonElement> = mutableMapOf()
     forEach {
         val key = it.key as? String ?: return@forEach

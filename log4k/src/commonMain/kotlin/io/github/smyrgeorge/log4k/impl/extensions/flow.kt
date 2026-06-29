@@ -4,7 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.transform
 import kotlin.time.Clock
 
-inline fun <T> Flow<T>.preventFloodingWithBurst(
+internal inline fun <T> Flow<T>.preventFloodingWithBurst(
     requestsPerSecond: Int,
     burstDurationMillis: Int,
     burstResetPeriodMillis: Int,

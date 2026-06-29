@@ -10,16 +10,16 @@ import kotlin.native.concurrent.ObsoleteWorkersApi
 import kotlin.native.concurrent.Worker
 import kotlin.reflect.KClass
 
-actual fun KClass<*>.toName(): String =
+internal actual fun KClass<*>.toName(): String =
     qualifiedName ?: simpleName ?: error("Could not extract the class-name of $this")
 
-actual fun dispatcher(): CoroutineDispatcher = Dispatchers.IO
-actual fun thread(): String = "native-${threadId()}"
+internal actual fun dispatcher(): CoroutineDispatcher = Dispatchers.IO
+internal actual fun thread(): String = "native-${threadId()}"
 
 @OptIn(ObsoleteWorkersApi::class)
-actual fun threadId(): Int = Worker.current.id
+internal actual fun threadId(): Int = Worker.current.id
 
 @OptIn(ExperimentalForeignApi::class)
-actual fun platformPrintlnError(message: String) {
+internal actual fun platformPrintlnError(message: String) {
     fprintf(stderr, "%s\n", message)
 }
