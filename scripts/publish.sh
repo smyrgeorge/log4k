@@ -2,9 +2,9 @@
 
 set -e
 
-./gradlew build -Ptargets=all
+./gradlew build
 
-./gradlew :dokka:dokkaGenerate -Ptargets=all
+./gradlew :dokka:dokkaGenerate
 rm -rf ./docs/*
 cp -R ./dokka/build/dokka/html/* ./docs/
 
@@ -16,5 +16,5 @@ git push
 git tag "$version" -f
 git push --tags -f
 
-./gradlew publishAllPublicationsToMavenCentralRepository -Ptargets=all
+./gradlew publishAllPublicationsToMavenCentralRepository
 git checkout .

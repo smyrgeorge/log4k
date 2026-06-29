@@ -35,4 +35,4 @@ jobs:
         uses: gradle/actions/setup-gradle@v6
 
       - name: Gradle Build
-        run: ./gradlew build -Ptargets=all
+        run: ./gradlew build

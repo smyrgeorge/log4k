@@ -8,7 +8,6 @@ object Utils {
         "androidNativeX64",
         "androidNativeArm64",
         "macosArm64",
-        "macosX64",
         "linuxArm64",
         "linuxX64",
         "mingwX64",

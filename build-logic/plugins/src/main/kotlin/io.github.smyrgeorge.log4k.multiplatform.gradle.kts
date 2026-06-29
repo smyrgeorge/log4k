@@ -16,7 +16,6 @@ kotlin {
         "androidNativeArm64" to { androidNativeArm64() },
         "androidNativeX64" to { androidNativeX64() },
         "macosArm64" to { macosArm64() },
-        "macosX64" to { macosX64() },
         "linuxArm64" to { linuxArm64() },
         "linuxX64" to { linuxX64() },
         "mingwX64" to { mingwX64() },
