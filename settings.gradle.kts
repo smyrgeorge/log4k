@@ -12,6 +12,7 @@ pluginManagement {
 
 include("log4k")
 include("log4k-classic")
+include("log4k-compiler-plugin")
 include("log4k-context")
 include("log4k-slf4j")
 
