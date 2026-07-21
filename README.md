@@ -30,6 +30,28 @@ This project also tries to be fully compatible with `OpenTelemetry` standard.
 
 🏠 [Homepage](https://smyrgeorge.github.io/) (under construction)
 
+## Table of Contents
+
+- [Usage](#usage)
+    - [Extension Modules](#extension-modules)
+- [Architecture](#architecture)
+- [Logging API](#logging-api)
+    - [Context Parameters Support](#context-parameters-support)
+    - [Full SLF4J Integration Supported](#full-slf4j-integration-supported)
+    - [Json Appender](#json-appender)
+- [Tracing API](#tracing-api)
+- [Metering API](#metering-api)
+    - [Gauge](#gauge)
+- [Compiler Plugin](#compiler-plugin)
+    - [Tracing (`@Trace`)](#tracing-trace)
+- [Appenders](#appenders)
+    - [Logging](#logging)
+    - [Tracing](#tracing)
+    - [Metering](#metering)
+    - [Flow-based base appenders](#flow-based-base-appenders)
+    - [Prevent log/trace flooding](#prevent-logtrace-flooding)
+- [Examples](#examples)
+
 ## Usage
 
 ```kotlin
@@ -344,6 +366,37 @@ meter.gauge<Int>("thread-pool-size").poll(every = 10.seconds) {
 
 Using this method, values are automatically recorded at regular intervals, making it ideal for tracking metrics in
 dynamic environments.
+
+## Compiler Plugin
+
+The [`log4k-compiler-plugin`](./log4k-compiler-plugin) is a Kotlin IR compiler plugin that automatically instruments
+your code with tracing spans — no manual `trace.span("…") { }` blocks required. Because it operates on common IR before
+backend lowering, it works across all Kotlin Multiplatform targets.
+
+### Tracing (`@Trace`)
+
+Annotate a function with `@Trace`; as long as it declares a `TracingContext` **context parameter**, its body is wrapped
+in a new span at compile time — without a single explicit `span { }` call:
+
+```kotlin
+@Trace
+context(_: TracingContext)
+suspend fun loadUser(id: Long): User {
+    // ... runs inside a span (started, ended, and marked failed on exceptions).
+    // With no explicit name, it defaults to "ClassName.functionName".
+}
+```
+
+Both `suspend` and regular functions are supported (the wrapper reuses the `inline` `TracingContext.span` helper).
+
+- **Span name** — `@Trace(name = "…")`; when omitted it defaults to `ClassName.functionName`.
+- **Static tags** — `@Trace(tags = [Tag("component", "billing")])` attaches key/value tags to the span.
+- **Class-level** — annotate a **class** with `@Trace` to instrument every eligible public member function (those
+  declaring a `TracingContext` context parameter); class-level `tags` apply to every generated span.
+- **Opt out** — `@NoTrace` excludes a single function, or (on a class) disables tracing for the whole class.
+
+A directly `@Trace`-annotated function that lacks a `TracingContext` context parameter is a compile error; under a
+class-level `@Trace`, such functions are simply skipped.
 
 ## Appenders
 
