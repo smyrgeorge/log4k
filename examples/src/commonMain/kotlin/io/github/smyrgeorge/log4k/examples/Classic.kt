@@ -30,7 +30,7 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.measureTime
 
-class Classic {
+object Classic {
     class MyBatchAppender(size: Int) : BatchAppender<LoggingEvent>(size) {
         override suspend fun handle(event: List<LoggingEvent>) {
             // E.g., send a batch over http.
