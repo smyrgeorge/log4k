@@ -15,6 +15,18 @@ interface TracingContext {
 
     companion object {
         /**
+         * Creates a new instance of `SimpleCoroutinesTracingContext` with the specified tracer and parent span.
+         *
+         * @param tracer An optional `Tracer` instance used for managing tracing spans. Default is `null`.
+         * @param parent An optional `Span` that indicates the parent trace context. Default is `null`.
+         * @return A newly created `SimpleCoroutinesTracingContext` instance initialized with the provided tracer and parent span.
+         */
+        fun create(
+            tracer: Tracer? = null,
+            parent: Span? = null
+        ): SimpleCoroutinesTracingContext = SimpleCoroutinesTracingContext(tracer, parent)
+
+        /**
          * Creates a new instance of the `SimpleCoroutinesTracingContext.Builder` class.
          *
          * The builder provides a fluent interface for configuring and constructing
