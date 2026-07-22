@@ -442,7 +442,7 @@ Annotate a function with `@Logged` and its body is wrapped, at compile time, wit
 
 ```kotlin
 class UserService {
-    // Reused by the plugin; if omitted, `private val log = Logger.of(this::class)` is synthesized.
+    // Reused by the plugin; if omitted, `private val _log_ = Logger.of(this::class)` is synthesized.
     private val log = Logger.of(this::class)
 
     @Logged
@@ -463,8 +463,9 @@ exception is rethrown. Both `suspend` and regular functions are supported (the w
 
 - **Level** — `@Logged(level = Level.DEBUG)`; the entry/exit lines use it (default `INFO`), the failure line is always
   `ERROR`.
-- **Logger** — read from a `log: Logger` property on the enclosing class; if none exists, the plugin synthesizes
-  `private val log = Logger.of(this::class)`.
+- **Logger** — read from a `log: Logger` property on the enclosing class. If none exists — or `log` is a foreign type
+  such as `org.slf4j.Logger` — the plugin synthesizes `private val _log_ = Logger.of(this::class)` under a distinct
+  name, so it never clashes with the existing `log`.
 - **Span correlation** — when the function declares a `TracingContext` **context parameter**, the current span is
   resolved from it and attached to every emitted log line.
 - **Class-level** — annotate a **class** with `@Logged` to instrument every eligible public member function; a

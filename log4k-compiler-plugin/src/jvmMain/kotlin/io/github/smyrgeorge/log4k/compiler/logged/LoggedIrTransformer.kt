@@ -74,9 +74,10 @@ import org.jetbrains.kotlin.name.Name
  *
  * `Logger.logged` is `inline`, so both regular and `suspend` functions work: the moved body is
  * placed in an inline lambda and therefore keeps its original suspension context. If the class does
- * not declare a `log: Logger`, `private val log = Logger.of(this::class)` is synthesized. If the
- * function declares a `TracingContext` context parameter, the current span is resolved from it and
- * attached to every emitted log line.
+ * not declare a log4k `log: Logger` (or its `log` is a foreign type such as `org.slf4j.Logger`),
+ * `private val _log_ = Logger.of(this::class)` is synthesized. If the function declares a
+ * `TracingContext` context parameter, the current span is resolved from it and attached to every
+ * emitted log line.
  */
 @OptIn(UnsafeDuringIrConstructionAPI::class)
 class LoggedIrTransformer(
@@ -201,9 +202,12 @@ class LoggedIrTransformer(
     }
 
     /**
-     * Resolves the `log: Logger` for [function]: reuses a `log` property declared on the enclosing
-     * class, or synthesizes `private val log = Logger.of(this::class)`. Returns an expression that
-     * yields the logger, or `null` (after reporting an error) when it cannot be provided.
+     * Resolves the log4k `io.github.smyrgeorge.log4k.Logger` for [function]: reuses a `log: Logger`
+     * property declared on the enclosing class, otherwise synthesizes
+     * `private val _log_ = Logger.of(this::class)`. A `log` member of a foreign type (e.g.
+     * `org.slf4j.Logger`) is ignored — the synthesized field uses a distinct name so it never clashes.
+     * Returns an expression yielding the logger, or `null` (after reporting an error) when [function]
+     * has no enclosing class / dispatch receiver.
      */
     private fun findOrCreateLogger(function: IrFunction): IrExpression? {
         val loggerSymbol = loggerClassSymbol ?: return null
@@ -233,14 +237,11 @@ class LoggedIrTransformer(
             if (backing != null && backing.type.isSubtypeOfClass(loggerSymbol)) {
                 return builder.irGetField(builder.irGet(thisParam), backing)
             }
-            return messageCollector.reportError(
-                function,
-                "@Logged requires `${enclosingClass.name.asString()}.log` to be of type " +
-                        "io.github.smyrgeorge.log4k.Logger.",
-            )
+            // A `log` member exists but it is not a log4k Logger (e.g. `org.slf4j.Logger`); fall through
+            // and synthesize our own logger under a distinct, non-clashing name.
         }
 
-        // Synthesize `private val log = Logger.of(this::class)` (once per class).
+        // Synthesize `private val _log_ = Logger.of(this::class)` (once per class).
         val field = getOrCreateLoggerField(enclosingClass)
         return builder.irGetField(builder.irGet(thisParam), field)
     }
@@ -248,7 +249,7 @@ class LoggedIrTransformer(
     private fun getOrCreateLoggerField(clazz: IrClass): IrField = createdLoggerFields.getOrPut(clazz) {
         val loggerType = loggerClassSymbol!!.defaultType
         pluginContext.irFactory.buildField {
-            name = Name.identifier("log")
+            name = Name.identifier(SYNTHETIC_LOGGER_NAME)
             type = loggerType
             visibility = DescriptorVisibilities.PRIVATE
             isFinal = true
@@ -323,6 +324,9 @@ class LoggedIrTransformer(
     }
 
     companion object {
+        // Name of the synthesized logger field. Deliberately not `log`, so it never clashes with a
+        // user-declared `log` member of a foreign type (e.g. `org.slf4j.Logger`).
+        private const val SYNTHETIC_LOGGER_NAME = "_log_"
         private val LOGGED_ANNOTATION = FqName("io.github.smyrgeorge.log4k.annotation.Logged")
     }
 }

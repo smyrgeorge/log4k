@@ -18,8 +18,10 @@ import io.github.smyrgeorge.log4k.Level
  * supported.
  *
  * The [io.github.smyrgeorge.log4k.Logger] is taken from a property named `log` (of type
- * [io.github.smyrgeorge.log4k.Logger]) declared in the enclosing class. If the class does not
- * declare one, the plugin synthesizes `private val log = Logger.of(this::class)`.
+ * [io.github.smyrgeorge.log4k.Logger]) declared in the enclosing class. If the class does not declare
+ * one — or declares a `log` of a foreign type, such as `org.slf4j.Logger` — the plugin synthesizes
+ * `private val _log_ = Logger.of(this::class)` (a distinct name, so it never clashes with the
+ * foreign `log`).
  *
  * ```kotlin
  * class UserService {

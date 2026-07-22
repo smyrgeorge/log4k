@@ -16,7 +16,7 @@ import kotlin.time.Duration.Companion.seconds
 object LoggedCompilerPlugin {
 
     // Class-level @Logged: every eligible public member is instrumented with entry/exit logging.
-    // `Calculator` declares no `log`, so the plugin synthesizes `private val log = Logger.of(this::class)`.
+    // `Calculator` declares no `log`, so the plugin synthesizes `private val _log_ = Logger.of(this::class)`.
     @Logged
     class Calculator {
         fun add(a: Int, b: Int): Int = a + b // INFO (class-level default)
@@ -41,6 +41,19 @@ object LoggedCompilerPlugin {
         // Exception path: the failure is logged at ERROR (with the throwable) and rethrown.
         @Logged(level = Level.WARN)
         fun boom(): Nothing = error("kaboom")
+    }
+
+    // Stands in for a foreign logger type (e.g. org.slf4j.Logger) that happens to be named `log`.
+    class ForeignLogger
+
+    class InventoryService {
+        // A `log` member of a foreign type: the plugin ignores it (it is not a log4k Logger) and
+        // synthesizes its own `private val _log_ = Logger.of(this::class)` — no name clash, no error.
+        @Suppress("unused")
+        private val log = ForeignLogger()
+
+        @Logged
+        fun restock(sku: String): String = "restocked-$sku"
     }
 
     fun run() = runBlocking {
@@ -80,6 +93,12 @@ object LoggedCompilerPlugin {
         } catch (e: IllegalStateException) {
             println(">> caught rethrown exception: ${e.message}")
         }
+
+        delay(500.milliseconds)
+
+        // Foreign `log` member: the plugin synthesizes a separate `_log_` logger instead of erroring.
+        val inventory = InventoryService()
+        println(">> restock -> ${inventory.restock("abc")}")
 
         // Give the async logging/tracing appenders time to flush.
         delay(1.seconds)
