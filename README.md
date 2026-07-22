@@ -43,6 +43,7 @@ This project also tries to be fully compatible with `OpenTelemetry` standard.
 - [Metering API](#metering-api)
     - [Gauge](#gauge)
 - [Compiler Plugin](#compiler-plugin)
+    - [Logging (`@Logged`)](#logging-logged)
     - [Tracing (`@Trace`)](#tracing-trace)
 - [Appenders](#appenders)
     - [Logging](#logging)
@@ -370,8 +371,51 @@ dynamic environments.
 ## Compiler Plugin
 
 The [`log4k-compiler-plugin`](./log4k-compiler-plugin) is a Kotlin IR compiler plugin that automatically instruments
-your code with tracing spans — no manual `trace.span("…") { }` blocks required. Because it operates on common IR before
-backend lowering, it works across all Kotlin Multiplatform targets.
+your code — wrapping functions in tracing spans (`@Trace`) and entry/exit logging (`@Logged`) — with no manual
+`trace.span("…") { }` blocks or `log.info("…")` calls required. Because it operates on common IR before backend
+lowering, it works across all Kotlin Multiplatform targets.
+
+### Logging (`@Logged`)
+
+Annotate a function with `@Logged` and its body is wrapped, at compile time, with entry/exit logging — no explicit
+`log.info("…")` calls required:
+
+```kotlin
+class UserService {
+    // Reused by the plugin; if omitted, `private val log = Logger.of(this::class)` is synthesized.
+    private val log = Logger.of(this::class)
+
+    @Logged
+    fun compute(x: Int): Int = x * x
+}
+```
+
+Calling `compute(5)` emits (at `INFO` by default):
+
+```
+→ UserService.compute(x=5)
+← UserService.compute = 25 (12.5us)
+```
+
+If the body throws, a `✗ UserService.compute failed (…)` line is logged at `ERROR` (with the throwable attached) and the
+exception is rethrown. Both `suspend` and regular functions are supported (the wrapper reuses the `inline`
+`Logger.logged` helper, which calls `Logger.log` directly).
+
+- **Level** — `@Logged(level = Level.DEBUG)`; the entry/exit lines use it (default `INFO`), the failure line is always
+  `ERROR`.
+- **Logger** — read from a `log: Logger` property on the enclosing class; if none exists, the plugin synthesizes
+  `private val log = Logger.of(this::class)`.
+- **Span correlation** — when the function declares a `TracingContext` **context parameter**, the current span is
+  resolved from it and attached to every emitted log line.
+- **Class-level** — annotate a **class** with `@Logged` to instrument every eligible public member function; a
+  function's own `@Logged` overrides the class-level `level`.
+
+```kotlin
+@Logged(level = Level.DEBUG)
+context(_: TracingContext)
+suspend fun loadUser(id: Long): User { /* every log line carries the current span id */
+}
+```
 
 ### Tracing (`@Trace`)
 

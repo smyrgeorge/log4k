@@ -1,4 +1,4 @@
-package io.github.smyrgeorge.log4k.compiler
+package io.github.smyrgeorge.log4k.compiler.ir
 
 import org.jetbrains.kotlin.ir.IrElement
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction

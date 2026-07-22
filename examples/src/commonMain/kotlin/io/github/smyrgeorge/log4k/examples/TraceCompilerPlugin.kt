@@ -6,13 +6,14 @@ import io.github.smyrgeorge.log4k.TracingContext
 import io.github.smyrgeorge.log4k.annotation.NoTrace
 import io.github.smyrgeorge.log4k.annotation.Tag
 import io.github.smyrgeorge.log4k.annotation.Trace
+import io.github.smyrgeorge.log4k.impl.appenders.simple.SimpleConsoleLoggingAppender
 import io.github.smyrgeorge.log4k.impl.appenders.simple.SimpleConsoleTracingAppender
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
-object CompilerPlugin {
+object TraceCompilerPlugin {
 
     @NoTrace
     class DisabledService {
@@ -42,7 +43,7 @@ object CompilerPlugin {
         return n + 1
     }
 
-    @Trace // no name -> defaults to "ClassName.functionName": "CompilerPlugin.inner"
+    @Trace // no name -> defaults to "ClassName.functionName": "TraceCompilerPlugin.inner"
     context(_: TracingContext)
     suspend fun inner(): Int {
         delay(10.milliseconds)
@@ -57,7 +58,7 @@ object CompilerPlugin {
         return square(x) + 1
     }
 
-    @Trace // no name -> defaults to "ClassName.functionName": "CompilerPlugin.square"
+    @Trace // no name -> defaults to "ClassName.functionName": "TraceCompilerPlugin.square"
     context(_: TracingContext)
     fun square(x: Int): Int {
         return x * x
@@ -73,7 +74,13 @@ object CompilerPlugin {
     }
 
     fun run() = runBlocking {
+        // Start from a clean slate so each line is printed exactly once (RootLogger registers a
+        // default logging appender, and earlier examples may have registered their own).
+        RootLogger.Logging.appenders.unregisterAll()
+        RootLogger.Tracing.appenders.unregisterAll()
+        RootLogger.Logging.appenders.register(SimpleConsoleLoggingAppender())
         RootLogger.Tracing.appenders.register(SimpleConsoleTracingAppender())
+
         val tracer = Tracer.of("demo")
 
         // suspend: outer -> inner (nested spans)

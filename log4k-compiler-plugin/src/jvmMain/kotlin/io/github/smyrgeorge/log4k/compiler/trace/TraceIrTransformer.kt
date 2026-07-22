@@ -1,11 +1,15 @@
-package io.github.smyrgeorge.log4k.compiler
+package io.github.smyrgeorge.log4k.compiler.trace
 
+import io.github.smyrgeorge.log4k.compiler.ir.Log4kIrFunctionExpression
+import io.github.smyrgeorge.log4k.compiler.ir.utils.LOG4K_PACKAGE
+import io.github.smyrgeorge.log4k.compiler.ir.utils.isClassLevelEligible
+import io.github.smyrgeorge.log4k.compiler.ir.utils.moveBody
+import io.github.smyrgeorge.log4k.compiler.ir.utils.qualifiedName
+import io.github.smyrgeorge.log4k.compiler.ir.utils.reportError
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.DeclarationFinder
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
-import org.jetbrains.kotlin.cli.common.messages.CompilerMessageLocation
-import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
 import org.jetbrains.kotlin.descriptors.Modality
@@ -21,14 +25,11 @@ import org.jetbrains.kotlin.ir.builders.irString
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
 import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.IrParameterKind
-import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.ir.declarations.IrValueParameter
 import org.jetbrains.kotlin.ir.expressions.IrBlockBody
 import org.jetbrains.kotlin.ir.expressions.IrConst
 import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
-import org.jetbrains.kotlin.ir.expressions.IrExpressionBody
-import org.jetbrains.kotlin.ir.expressions.IrReturn
 import org.jetbrains.kotlin.ir.expressions.IrStatementOrigin
 import org.jetbrains.kotlin.ir.expressions.IrVararg
 import org.jetbrains.kotlin.ir.symbols.IrSimpleFunctionSymbol
@@ -38,13 +39,10 @@ import org.jetbrains.kotlin.ir.types.IrTypeProjection
 import org.jetbrains.kotlin.ir.types.classOrNull
 import org.jetbrains.kotlin.ir.types.isString
 import org.jetbrains.kotlin.ir.types.typeWith
-import org.jetbrains.kotlin.ir.util.fileOrNull
 import org.jetbrains.kotlin.ir.util.getAnnotation
 import org.jetbrains.kotlin.ir.util.hasAnnotation
 import org.jetbrains.kotlin.ir.util.isSubtypeOfClass
 import org.jetbrains.kotlin.ir.util.parentClassOrNull
-import org.jetbrains.kotlin.ir.util.patchDeclarationParents
-import org.jetbrains.kotlin.ir.visitors.IrElementTransformerVoid
 import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
@@ -126,15 +124,7 @@ class TraceIrTransformer(
         // Class-level @Trace: instrument eligible public member functions that can actually be traced
         // (functions without a TracingContext context parameter are skipped silently).
         if (enclosingClass == null || !enclosingClass.hasAnnotation(TRACE_ANNOTATION)) return false
-        return isClassLevelEligible(function) && findContextParam(function) != null
-    }
-
-    private fun isClassLevelEligible(function: IrFunction): Boolean {
-        if (function !is IrSimpleFunction) return false // exclude constructors
-        if (function.visibility != DescriptorVisibilities.PUBLIC) return false
-        if (function.isFakeOverride) return false // exclude inherited members
-        if (function.correspondingPropertySymbol != null) return false // exclude property accessors
-        return true
+        return function.isClassLevelEligible() && findContextParam(function) != null
     }
 
     private fun findContextParam(function: IrFunction): IrValueParameter? {
@@ -147,11 +137,15 @@ class TraceIrTransformer(
     private fun instrument(function: IrFunction) {
         val spanFn = spanFunction ?: return
 
-        val contextParam = findContextParam(function) ?: return reportError(
-            function,
-            "@Trace function '${function.name.asString()}' must declare a TracingContext " +
-                    "context parameter, e.g. `context(_: TracingContext)`.",
-        )
+        val contextParam = findContextParam(function)
+        if (contextParam == null) {
+            messageCollector.reportError(
+                function,
+                "@Trace function '${function.name.asString()}' must declare a TracingContext " +
+                        "context parameter, e.g. `context(_: TracingContext)`.",
+            )
+            return
+        }
 
         // Resolve the pieces of the `TracingContext.span` signature we depend on. A mismatch here
         // means the plugin is out of sync with the log4k API, so fail with a clear diagnostic
@@ -168,11 +162,12 @@ class TraceIrTransformer(
         if (dispatchParam == null || extensionParam == null || nameParam == null || fParam == null ||
             dispatchClass == null || spanLocalType == null
         ) {
-            return reportError(
+            messageCollector.reportError(
                 function,
                 "log4k-compiler-plugin: could not resolve the expected `TracingContext.span` signature — " +
                         "the plugin is incompatible with this version of log4k.",
             )
+            return
         }
 
         val spanName = resolveSpanName(function)
@@ -194,7 +189,7 @@ class TraceIrTransformer(
                 type = spanLocalType
             }
             parameters = listOf(receiver)
-            body = moveBody(function, this)
+            body = pluginContext.moveBody(function, this)
         }
 
         // 1b. Materialize `@Trace(tags = [...])` as `this.tags.put(k, v)` at the start of the lambda.
@@ -205,10 +200,11 @@ class TraceIrTransformer(
             val lambdaReceiver = lambda.parameters.firstOrNull { it.kind == IrParameterKind.ExtensionReceiver }
             val lambdaBody = lambda.body as? IrBlockBody
             if (tagsGetter == null || putFn == null || lambdaReceiver == null || lambdaBody == null) {
-                return reportError(
+                messageCollector.reportError(
                     function,
                     "log4k-compiler-plugin: could not apply @Trace tags (unresolved `Span.tags` / `MutableMap.put`).",
                 )
+                return
             }
             val tagBuilder = DeclarationIrBuilder(pluginContext, lambda.symbol)
             val tagStatements = tags.map { (key, value) ->
@@ -239,46 +235,13 @@ class TraceIrTransformer(
         function.body = builder.irBlockBody { +irReturn(call) }
     }
 
-    /**
-     * Detaches the original body from [function] and re-homes it inside [lambda], so it can
-     * be used as the inline lambda passed to `span`. All non-local `return`s that targeted
-     * [function] are retargeted to [lambda] so that `span` observes a normal return value
-     * (and therefore ends the span correctly).
-     */
-    private fun moveBody(function: IrFunction, lambda: IrFunction): IrBlockBody {
-        val block = when (val original = function.body) {
-            is IrBlockBody -> original
-            is IrExpressionBody ->
-                DeclarationIrBuilder(pluginContext, lambda.symbol).irBlockBody {
-                    +irReturn(original.expression)
-                }
-
-            else -> DeclarationIrBuilder(pluginContext, lambda.symbol).irBlockBody { }
-        }
-        block.transform(
-            object : IrElementTransformerVoid() {
-                override fun visitReturn(expression: IrReturn): IrExpression {
-                    if (expression.returnTargetSymbol == function.symbol) {
-                        expression.returnTargetSymbol = lambda.symbol
-                    }
-                    return super.visitReturn(expression)
-                }
-            },
-            null,
-        )
-        block.patchDeclarationParents(lambda)
-        return block
-    }
-
     private fun resolveSpanName(function: IrFunction): String {
         val annotation = function.getAnnotation(TRACE_ANNOTATION)
         val configured = (annotation?.arguments?.getOrNull(0) as? IrConst)?.value as? String
-        if (configured != null && configured.isNotBlank()) return configured
+        if (!configured.isNullOrBlank()) return configured
 
         // Default: "ClassName.functionName" (or just "functionName" for top-level functions).
-        val functionName = function.name.asString()
-        val className = function.parentClassOrNull?.name?.asString()
-        return if (className != null) "$className.$functionName" else functionName
+        return function.qualifiedName()
     }
 
     /** Reads the `@Trace(tags = [Tag(k, v), …])` array into (key, value) pairs. */
@@ -321,24 +284,7 @@ class TraceIrTransformer(
         }
     }
 
-    /** Reports a compilation error anchored at [function], failing the build. */
-    private fun reportError(function: IrFunction, message: String) {
-        messageCollector.report(CompilerMessageSeverity.ERROR, message, function.compilerLocation())
-    }
-
-    private fun IrFunction.compilerLocation(): CompilerMessageLocation? {
-        val entry = fileOrNull?.fileEntry ?: return null
-        // IrFileEntry line/column are 0-based; compiler messages are 1-based.
-        return CompilerMessageLocation.create(
-            entry.name,
-            entry.getLineNumber(startOffset) + 1,
-            entry.getColumnNumber(startOffset) + 1,
-            null,
-        )
-    }
-
     companion object {
-        private val LOG4K_PACKAGE = FqName("io.github.smyrgeorge.log4k")
         private val TRACE_ANNOTATION = FqName("io.github.smyrgeorge.log4k.annotation.Trace")
         private val NO_TRACE_ANNOTATION = FqName("io.github.smyrgeorge.log4k.annotation.NoTrace")
     }
