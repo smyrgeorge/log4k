@@ -9,6 +9,9 @@ import io.github.smyrgeorge.log4k.impl.extensions.toName
 import io.github.smyrgeorge.log4k.impl.registry.CollectorRegistry
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlin.concurrent.atomics.AtomicReference
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlin.concurrent.atomics.update
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.reflect.KClass
@@ -99,7 +102,9 @@ abstract class Meter(
     ): Instrument.Histogram<T> = Instrument.Histogram(name, this, unit, description)
 
     // The [Timed] bundles created by [timed], cached by name so their instruments are created once.
-    private val timers: MutableMap<String, Timed> = mutableMapOf()
+    // A copy-on-write [AtomicReference] keeps the cache lock-free and thread-safe across platforms.
+    @OptIn(ExperimentalAtomicApi::class)
+    private val timers: AtomicReference<MutableMap<String, Timed>> = AtomicReference(mutableMapOf())
 
     /**
      * Returns a [Timed] bundle — a call counter, an error counter and a duration histogram — for the
@@ -110,15 +115,27 @@ abstract class Meter(
      * `"<name>.errors"` and `"<name>.duration"` (in milliseconds) are created once and reused across
      * invocations.
      *
+     * The lookup is thread-safe. Under a race two bundles may briefly be constructed for the same
+     * [name], but only one is ever published; the discarded bundle is harmless, since the collector
+     * aggregates metric values by name (not by instrument identity).
+     *
      * @param name the base metric name; the bundle's instruments are derived from it.
      * @return the existing or newly created [Timed] bundle for [name].
      */
-    fun timed(name: String): Timed = timers.getOrPut(name) {
-        Timed(
+    @OptIn(ExperimentalAtomicApi::class)
+    fun timed(name: String): Timed {
+        timers.load()[name]?.let { return it }
+        val created = Timed(
             calls = counter("$name.calls", description = "Total number of invocations of '$name'."),
             errors = counter("$name.errors", description = "Total number of failed invocations of '$name'."),
             duration = histogram("$name.duration", unit = "ms", description = "Invocation duration of '$name'."),
         )
+        // Copy-on-write: `update`'s transform may run several times, so never mutate the published map —
+        // publish a fresh copy that adds `name` (unless another thread already added it).
+        timers.update { current ->
+            if (name in current) current else current.apply { put(name, created) }
+        }
+        return timers.load().getValue(name)
     }
 
     /**
