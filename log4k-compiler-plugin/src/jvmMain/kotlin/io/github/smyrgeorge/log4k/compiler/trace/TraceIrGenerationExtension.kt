@@ -17,5 +17,7 @@ class TraceIrGenerationExtension(
         val transformer = TraceIrTransformer(pluginContext, finder, messageCollector)
         if (!transformer.isReady) return
         moduleFragment.transform(transformer, null)
+        // Attach any synthesized `_trace_` fields now that the module traversal is complete.
+        transformer.commit()
     }
 }

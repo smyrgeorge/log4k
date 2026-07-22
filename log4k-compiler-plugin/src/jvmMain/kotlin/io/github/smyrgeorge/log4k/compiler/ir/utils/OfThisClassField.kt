@@ -13,7 +13,6 @@ import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
 import org.jetbrains.kotlin.ir.declarations.IrField
 import org.jetbrains.kotlin.ir.declarations.IrFunction
-import org.jetbrains.kotlin.ir.declarations.IrParameterKind
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.IrSimpleFunctionSymbol
@@ -39,9 +38,6 @@ import org.jetbrains.kotlin.name.Name
  *
  * Synthesized fields are collected during the module traversal and only attached to their classes by
  * [commit] afterwards, so a class's declaration list is never mutated while it is being iterated.
- *
- * Shared by [io.github.smyrgeorge.log4k.compiler.logged.LoggedIrTransformer] (`log` / `_log_`) and
- * [io.github.smyrgeorge.log4k.compiler.timed.TimedIrTransformer] (`meter` / `_meter_`).
  */
 @OptIn(UnsafeDuringIrConstructionAPI::class)
 class OfThisClassField(
@@ -66,7 +62,7 @@ class OfThisClassField(
             function,
             "$annotation function '${function.name.asString()}' must be a member of a class or object.",
         )
-        val thisParam = function.parameters.firstOrNull { it.kind == IrParameterKind.DispatchReceiver }
+        val thisParam = function.dispatchReceiverParam()
             ?: return messageCollector.reportError(
                 function,
                 "$annotation function '${function.name.asString()}' has no dispatch receiver.",
@@ -79,8 +75,7 @@ class OfThisClassField(
             val getter = existing.getter
             if (getter != null && getter.returnType.isSubtypeOfClass(typeSymbol)) {
                 return builder.irCall(getter.symbol).apply {
-                    getter.parameters.firstOrNull { it.kind == IrParameterKind.DispatchReceiver }
-                        ?.let { arguments[it] = builder.irGet(thisParam) }
+                    getter.dispatchReceiverParam()?.let { arguments[it] = builder.irGet(thisParam) }
                 }
             }
             val backing = existing.backingField
@@ -135,7 +130,7 @@ class OfThisClassField(
             val ofFunction = finder.findFunctions(
                 CallableId(ClassId(LOG4K_PACKAGE, FqName("$typeName.Companion"), false), Name.identifier("of")),
             ).firstOrNull { symbol ->
-                val regular = symbol.owner.parameters.filter { it.kind == IrParameterKind.Regular }
+                val regular = symbol.owner.regularParams()
                 regular.size == 1 && regular[0].type.classOrNull == pluginContext.irBuiltIns.kClassClass
             } ?: return null
             return OfThisClassField(

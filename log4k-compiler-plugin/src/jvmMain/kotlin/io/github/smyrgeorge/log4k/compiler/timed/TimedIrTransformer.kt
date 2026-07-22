@@ -4,8 +4,10 @@ import io.github.smyrgeorge.log4k.compiler.ir.Log4kIrFunctionExpression
 import io.github.smyrgeorge.log4k.compiler.ir.utils.LOG4K_PACKAGE
 import io.github.smyrgeorge.log4k.compiler.ir.utils.OfThisClassField
 import io.github.smyrgeorge.log4k.compiler.ir.utils.buildInlineLambda
+import io.github.smyrgeorge.log4k.compiler.ir.utils.dispatchReceiverParam
 import io.github.smyrgeorge.log4k.compiler.ir.utils.isClassLevelEligible
 import io.github.smyrgeorge.log4k.compiler.ir.utils.qualifiedName
+import io.github.smyrgeorge.log4k.compiler.ir.utils.regularParams
 import io.github.smyrgeorge.log4k.compiler.ir.utils.reportError
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.DeclarationFinder
@@ -18,7 +20,6 @@ import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.builders.irString
 import org.jetbrains.kotlin.ir.declarations.IrFunction
-import org.jetbrains.kotlin.ir.declarations.IrParameterKind
 import org.jetbrains.kotlin.ir.expressions.IrConst
 import org.jetbrains.kotlin.ir.expressions.IrStatementOrigin
 import org.jetbrains.kotlin.ir.symbols.IrSimpleFunctionSymbol
@@ -70,9 +71,7 @@ class TimedIrTransformer(
     // `Meter.timed(name): Meter.Timed` — returns the (cached) instrument bundle for a base name.
     private val meterTimedFunction: IrSimpleFunctionSymbol? = finder.findFunctions(
         CallableId(ClassId(LOG4K_PACKAGE, FqName("Meter"), false), Name.identifier("timed")),
-    ).firstOrNull { symbol ->
-        symbol.owner.parameters.count { it.kind == IrParameterKind.Regular } == 1
-    }
+    ).firstOrNull { symbol -> symbol.owner.regularParams().size == 1 }
 
     // `Meter.Timed.measure(f)` — the inline helper that records the metrics around the body.
     private val measureFunction: IrSimpleFunctionSymbol? = finder.findFunctions(
@@ -118,10 +117,8 @@ class TimedIrTransformer(
 
         // 2. `meter.timed("name").measure<returnType> { <lambda> }`.
         val timed = builder.irCall(timedFn).apply {
-            timedFn.owner.parameters.firstOrNull { it.kind == IrParameterKind.DispatchReceiver }
-                ?.let { arguments[it] = meterAccess }
-            timedFn.owner.parameters.firstOrNull { it.kind == IrParameterKind.Regular }
-                ?.let { arguments[it] = builder.irString(resolveName(function)) }
+            timedFn.owner.dispatchReceiverParam()?.let { arguments[it] = meterAccess }
+            timedFn.owner.regularParams().firstOrNull()?.let { arguments[it] = builder.irString(resolveName(function)) }
         }
 
         val functionType = pluginContext.irBuiltIns.functionN(0).symbol.typeWith(returnType)
@@ -133,9 +130,8 @@ class TimedIrTransformer(
             function = lambda,
         )
 
-        val measureParams = measureFn.owner.parameters
-        val measureDispatch = measureParams.firstOrNull { it.kind == IrParameterKind.DispatchReceiver }
-        val measureF = measureParams.firstOrNull { it.kind == IrParameterKind.Regular }
+        val measureDispatch = measureFn.owner.dispatchReceiverParam()
+        val measureF = measureFn.owner.regularParams().firstOrNull()
         if (measureDispatch == null || measureF == null) {
             messageCollector.reportError(
                 function,

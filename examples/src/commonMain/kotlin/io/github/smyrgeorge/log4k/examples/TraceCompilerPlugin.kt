@@ -3,6 +3,7 @@ package io.github.smyrgeorge.log4k.examples
 import io.github.smyrgeorge.log4k.RootLogger
 import io.github.smyrgeorge.log4k.Tracer
 import io.github.smyrgeorge.log4k.TracingContext
+import io.github.smyrgeorge.log4k.TracingEvent
 import io.github.smyrgeorge.log4k.annotation.NoTrace
 import io.github.smyrgeorge.log4k.annotation.Tag
 import io.github.smyrgeorge.log4k.annotation.Trace
@@ -25,14 +26,22 @@ object TraceCompilerPlugin {
     @Trace(tags = [Tag("layer", "service")])
     class UserService {
         context(_: TracingContext)
-        fun load(id: Long): String = "user-$id" // traced -> span "UserService.load"
+        fun load(id: Long): String = "user-$id" // traced -> span "UserService.load" (parent = ctx's current)
 
         @NoTrace
         context(_: TracingContext)
         fun secret(): String = "shh" // opted out
 
-        fun helper(): Int = 42 // no TracingContext context parameter -> skipped
+        // No TracingContext/Span in scope -> a ROOT span "UserService.helper" is created via the
+        // synthesized `private val _trace_ = Tracer.of(this::class)`.
+        fun helper(): Int = 42
     }
+
+    // --- span in scope (no TracingContext) ---
+
+    @Trace(name = "child-op")
+    context(_: TracingEvent.Span.Local)
+    fun childOp(): String = "child-done" // parent = the Span.Local in scope
 
     // --- suspend functions ---
 
@@ -104,13 +113,20 @@ object TraceCompilerPlugin {
 
         delay(1.seconds)
 
-        // class-level @Trace: only `load` is traced. Expect exactly one span below:
-        // 'UserService.load'. `secret` (@NoTrace) and `helper` (no context param) produce none.
+        // class-level @Trace: `load` (span 'UserService.load') and `helper` (root span
+        // 'UserService.helper', via the synthesized `_trace_`) are both traced; `secret` opts out.
         val service = UserService()
         with(TracingContext.create(tracer = tracer)) {
             println(">> load()   -> ${service.load(7)}   (traced -> span 'UserService.load')")
             println(">> secret() -> ${service.secret()}       (@NoTrace -> NOT traced)")
-            println(">> helper() -> ${service.helper()}          (no TracingContext -> NOT traced)")
+            println(">> helper() -> ${service.helper()}          (root span 'UserService.helper')")
+        }
+
+        delay(1.seconds)
+
+        // A span in scope (the receiver of `tracer.span { }`) is used as the parent — no TracingContext.
+        tracer.span("parent-op") {
+            println(">> childOp() -> ${childOp()}   (child span of 'parent-op')")
         }
 
         delay(1.seconds)

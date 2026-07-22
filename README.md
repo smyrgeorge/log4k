@@ -261,7 +261,7 @@ trace.span("test", parent) {
         event(name = "event-3", tags = mapOf("key" to "value"))
         log.info(this, "this is a test with span") // The log will contain the span id.
     }
-    // Automatically closes at the end of te scope.
+    // Automatically closes at the end of the scope.
 }
 ```
 
@@ -431,9 +431,9 @@ meter.histogram<Double>("request-duration").poll(every = 10.seconds) {
 ## Compiler Plugin
 
 The [`log4k-compiler-plugin`](./log4k-compiler-plugin) is a Kotlin IR compiler plugin that automatically instruments
-your code — wrapping functions in tracing spans (`@Trace`) and entry/exit logging (`@Logged`) — with no manual
-`trace.span("…") { }` blocks or `log.info("…")` calls required. Because it operates on common IR before backend
-lowering, it works across all Kotlin Multiplatform targets.
+your code — wrapping functions in tracing spans (`@Trace`), entry/exit logging (`@Logged`) and call/duration metrics
+(`@Timed`) — with no manual `trace.span("…") { }` blocks, `log.info("…")` calls or counters required. Because it
+operates on common IR before backend lowering, it works across all Kotlin Multiplatform targets.
 
 ### Logging (`@Logged`)
 
@@ -523,8 +523,8 @@ OrderService.placeOrder.duration_count{} 3 1730360802506
 
 ### Tracing (`@Trace`)
 
-Annotate a function with `@Trace`; as long as it declares a `TracingContext` **context parameter**, its body is wrapped
-in a new span at compile time — without a single explicit `span { }` call:
+Annotate a function with `@Trace` and its body is wrapped in a new span at compile time — without a single explicit
+`span { }` call:
 
 ```kotlin
 @Trace
@@ -535,16 +535,20 @@ suspend fun loadUser(id: Long): User {
 }
 ```
 
-Both `suspend` and regular functions are supported (the wrapper reuses the `inline` `TracingContext.span` helper).
+Both `suspend` and regular functions are supported (the wrapper reuses the `inline` `TracingContext.traced` helper).
+
+The new span's **parent** (and the tracer that creates it) is resolved from what is in scope, in order:
+
+1. a `TracingContext` parameter/receiver — the span nests under its current span;
+2. otherwise a `TracingEvent.Span` parameter/receiver (e.g. a `Span.Local` receiver) — used directly as the parent;
+3. otherwise a `trace: Tracer` member — reused, or synthesized as `private val _trace_ = Tracer.of(this::class)` — which
+   creates a new **root** span (mirroring how `@Logged`/`@Timed` resolve their logger/meter).
 
 - **Span name** — `@Trace(name = "…")`; when omitted it defaults to `ClassName.functionName`.
 - **Static tags** — `@Trace(tags = [Tag("component", "billing")])` attaches key/value tags to the span.
-- **Class-level** — annotate a **class** with `@Trace` to instrument every eligible public member function (those
-  declaring a `TracingContext` context parameter); class-level `tags` apply to every generated span.
+- **Class-level** — annotate a **class** with `@Trace` to instrument every eligible public member function; class-level
+  `tags` apply to every generated span.
 - **Opt out** — `@NoTrace` excludes a single function, or (on a class) disables tracing for the whole class.
-
-A directly `@Trace`-annotated function that lacks a `TracingContext` context parameter is a compile error; under a
-class-level `@Trace`, such functions are simply skipped.
 
 ## Appenders
 

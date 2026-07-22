@@ -56,22 +56,47 @@ interface TracingContext {
          * @param f The block of code to be executed within the context of the created span.
          * @return The result of the block execution.
          */
-        inline fun <T> TracingContext.span(name: String, tags: Tags = emptyMap(), f: Span.Local.() -> T): T {
-            val parent: Span? = currentOrNull()
-            val tracer = parent?.context?.tracer ?: tracer ?: error("No tracer found for current span.")
-            val span = tracer.span(name, tags, parent).start().also {
-                current = it
-            }
+        inline fun <T> TracingContext.span(name: String, tags: Tags = emptyMap(), f: Span.Local.() -> T): T =
+            traced(context = this, parent = null, tracer = null, name = name, tags = tags, f = f)
+
+        /**
+         * The runtime helper the `log4k-compiler-plugin` generates a call to for
+         * [io.github.smyrgeorge.log4k.annotation.Trace]. Executes [f] inside a new span whose parent
+         * and tracer are resolved from whichever of [context], [parent] or [tracer] is in scope (the
+         * plugin passes exactly one): the [context]'s current span, else [parent], else a new root
+         * span from [tracer]. The span is started, ended, and — if [f] throws — marked failed (the
+         * exception is recorded and rethrown).
+         *
+         * @param context a [TracingContext] in scope, if any; its current span becomes the parent and
+         *   the new span becomes its current span for the duration of [f].
+         * @param parent a [Span] in scope, if any, used as the parent when there is no [context].
+         * @param tracer used to create a root span when neither [context] nor [parent] is present.
+         * @param name the name of the span to create.
+         * @param tags optional tags to attach to the span at creation.
+         * @param f the block to execute within the new span.
+         * @return the result produced by [f].
+         */
+        inline fun <T> traced(
+            context: TracingContext?,
+            parent: Span?,
+            tracer: Tracer?,
+            name: String,
+            tags: Tags = emptyMap(),
+            f: Span.Local.() -> T
+        ): T {
+            val parentSpan: Span? = context?.currentOrNull() ?: parent
+            val effectiveTracer: Tracer = parentSpan?.context?.tracer ?: tracer ?: context?.tracer
+                ?: error("No tracer found for span '$name'.")
+            val span = effectiveTracer.span(name, tags, parentSpan).start()
+            context?.current = span
             return try {
-                f(span).also {
-                    span.end()
-                }
+                f(span).also { span.end() }
             } catch (e: Throwable) {
                 span.exception(e)
                 span.end(e)
                 throw e
             } finally {
-                current = parent
+                context?.current = parentSpan
             }
         }
 

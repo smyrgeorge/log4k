@@ -4,8 +4,11 @@ import io.github.smyrgeorge.log4k.compiler.ir.Log4kIrFunctionExpression
 import io.github.smyrgeorge.log4k.compiler.ir.utils.LOG4K_PACKAGE
 import io.github.smyrgeorge.log4k.compiler.ir.utils.OfThisClassField
 import io.github.smyrgeorge.log4k.compiler.ir.utils.buildInlineLambda
+import io.github.smyrgeorge.log4k.compiler.ir.utils.dispatchReceiverParam
 import io.github.smyrgeorge.log4k.compiler.ir.utils.isClassLevelEligible
 import io.github.smyrgeorge.log4k.compiler.ir.utils.qualifiedName
+import io.github.smyrgeorge.log4k.compiler.ir.utils.receiverOrContextOf
+import io.github.smyrgeorge.log4k.compiler.ir.utils.regularParams
 import io.github.smyrgeorge.log4k.compiler.ir.utils.reportError
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.DeclarationFinder
@@ -21,8 +24,6 @@ import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.builders.irString
 import org.jetbrains.kotlin.ir.declarations.IrEnumEntry
 import org.jetbrains.kotlin.ir.declarations.IrFunction
-import org.jetbrains.kotlin.ir.declarations.IrParameterKind
-import org.jetbrains.kotlin.ir.declarations.IrValueParameter
 import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrGetEnumValue
@@ -37,7 +38,6 @@ import org.jetbrains.kotlin.ir.types.defaultType
 import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.getAnnotation
 import org.jetbrains.kotlin.ir.util.hasAnnotation
-import org.jetbrains.kotlin.ir.util.isSubtypeOfClass
 import org.jetbrains.kotlin.ir.util.parentClassOrNull
 import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.ClassId
@@ -83,9 +83,7 @@ class LoggedIrTransformer(
     // The `inline fun <T> Logger.logged(level, span, name, args, f)` member helper.
     private val loggedFunction: IrSimpleFunctionSymbol? = finder.findFunctions(
         CallableId(ClassId(LOG4K_PACKAGE, FqName("Logger"), false), Name.identifier("logged")),
-    ).firstOrNull { symbol ->
-        symbol.owner.parameters.count { it.kind == IrParameterKind.Regular } == 5
-    }
+    ).firstOrNull { symbol -> symbol.owner.regularParams().size == 5 }
 
     // Reuses a log4k `log: Logger` member, or synthesizes `private val _log_ = Logger.of(this::class)`.
     private val loggerField: OfThisClassField? =
@@ -134,9 +132,8 @@ class LoggedIrTransformer(
     private fun instrument(function: IrFunction) {
         val loggedFn = loggedFunction ?: return
 
-        val params = loggedFn.owner.parameters
-        val dispatchParam = params.singleOrNull { it.kind == IrParameterKind.DispatchReceiver }
-        val regular = params.filter { it.kind == IrParameterKind.Regular }
+        val dispatchParam = loggedFn.owner.dispatchReceiverParam()
+        val regular = loggedFn.owner.regularParams()
         if (dispatchParam == null || regular.size != 5) {
             messageCollector.reportError(
                 function,
@@ -204,7 +201,7 @@ class LoggedIrTransformer(
 
     /** Builds the `paramName=value, …` string rendered inside the entry log's parentheses. */
     private fun buildArgs(builder: DeclarationIrBuilder, function: IrFunction): IrExpression {
-        val valueParams = function.parameters.filter { it.kind == IrParameterKind.Regular }
+        val valueParams = function.regularParams()
         if (valueParams.isEmpty()) return builder.irString("")
         val concat = IrStringConcatenationImpl(
             function.startOffset,
@@ -237,8 +234,7 @@ class LoggedIrTransformer(
             val contextParam = function.receiverOrContextOf(contextSymbol)
             if (contextParam != null) {
                 return builder.irCall(currentFn).apply {
-                    currentFn.owner.parameters.firstOrNull { it.kind == IrParameterKind.DispatchReceiver }
-                        ?.let { arguments[it] = builder.irGet(contextParam) }
+                    currentFn.owner.dispatchReceiverParam()?.let { arguments[it] = builder.irGet(contextParam) }
                 }
             }
         }
@@ -251,13 +247,6 @@ class LoggedIrTransformer(
         // 3. Nothing in scope.
         return builder.irNull(spanType)
     }
-
-    /** The first context parameter or extension receiver of [this] that is a subtype of [type]. */
-    private fun IrFunction.receiverOrContextOf(type: IrClassSymbol): IrValueParameter? =
-        parameters.firstOrNull {
-            (it.kind == IrParameterKind.Context || it.kind == IrParameterKind.ExtensionReceiver) &&
-                it.type.isSubtypeOfClass(type)
-        }
 
     companion object {
         private val LOGGED_ANNOTATION = FqName("io.github.smyrgeorge.log4k.annotation.Logged")

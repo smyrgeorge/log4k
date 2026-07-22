@@ -24,12 +24,14 @@ import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrExpressionBody
 import org.jetbrains.kotlin.ir.expressions.IrReturn
 import org.jetbrains.kotlin.ir.expressions.impl.IrGetClassImpl
+import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.IrSimpleFunctionSymbol
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.classOrNull
 import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.fileOrNull
+import org.jetbrains.kotlin.ir.util.isSubtypeOfClass
 import org.jetbrains.kotlin.ir.util.parentClassOrNull
 import org.jetbrains.kotlin.ir.util.patchDeclarationParents
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformerVoid
@@ -120,11 +122,8 @@ fun DeclarationIrBuilder.irOfThisClass(
     val kClassType = pluginContext.irBuiltIns.kClassClass.typeWith(thisReceiver.type)
     val getClass = IrGetClassImpl(thisReceiver.startOffset, thisReceiver.endOffset, kClassType, irGet(thisReceiver))
     return irCall(ofFn).apply {
-        val params = ofFn.owner.parameters
-        params.firstOrNull { it.kind == IrParameterKind.DispatchReceiver }?.let {
-            arguments[it] = irGetObjectValue(it.type, it.type.classOrNull!!)
-        }
-        params.firstOrNull { it.kind == IrParameterKind.Regular }?.let { arguments[it] = getClass }
+        ofFn.owner.dispatchReceiverParam()?.let { arguments[it] = irGetObjectValue(it.type, it.type.classOrNull!!) }
+        ofFn.owner.regularParams().firstOrNull()?.let { arguments[it] = getClass }
     }
 }
 
@@ -137,6 +136,25 @@ fun IrFunction.qualifiedName(): String {
     val className = parentClassOrNull?.name?.asString()
     return if (className != null) "$className.$functionName" else functionName
 }
+
+/** The single dispatch-receiver parameter of [this], or `null` (new-API `parameters` accessor). */
+fun IrFunction.dispatchReceiverParam(): IrValueParameter? =
+    parameters.singleOrNull { it.kind == IrParameterKind.DispatchReceiver }
+
+/** The regular (value) parameters of [this] — excluding receivers and context parameters. */
+fun IrFunction.regularParams(): List<IrValueParameter> =
+    parameters.filter { it.kind == IrParameterKind.Regular }
+
+/**
+ * The first context parameter or extension receiver of [this] function whose type is a subtype of
+ * [type] — i.e. a value of [type] "in scope" for the function. Used to pick up a `TracingContext` or
+ * `TracingEvent.Span` provided via `context(_: …)` or an extension receiver.
+ */
+fun IrFunction.receiverOrContextOf(type: IrClassSymbol): IrValueParameter? =
+    parameters.firstOrNull {
+        (it.kind == IrParameterKind.Context || it.kind == IrParameterKind.ExtensionReceiver) &&
+                it.type.isSubtypeOfClass(type)
+    }
 
 /**
  * Whether [this] function is an eligible target for **class-level** instrumentation: a public,

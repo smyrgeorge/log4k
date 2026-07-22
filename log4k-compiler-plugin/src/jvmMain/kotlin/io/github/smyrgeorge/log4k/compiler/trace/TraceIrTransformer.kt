@@ -2,9 +2,13 @@ package io.github.smyrgeorge.log4k.compiler.trace
 
 import io.github.smyrgeorge.log4k.compiler.ir.Log4kIrFunctionExpression
 import io.github.smyrgeorge.log4k.compiler.ir.utils.LOG4K_PACKAGE
+import io.github.smyrgeorge.log4k.compiler.ir.utils.OfThisClassField
 import io.github.smyrgeorge.log4k.compiler.ir.utils.buildInlineLambda
+import io.github.smyrgeorge.log4k.compiler.ir.utils.dispatchReceiverParam
 import io.github.smyrgeorge.log4k.compiler.ir.utils.isClassLevelEligible
 import io.github.smyrgeorge.log4k.compiler.ir.utils.qualifiedName
+import io.github.smyrgeorge.log4k.compiler.ir.utils.receiverOrContextOf
+import io.github.smyrgeorge.log4k.compiler.ir.utils.regularParams
 import io.github.smyrgeorge.log4k.compiler.ir.utils.reportError
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.DeclarationFinder
@@ -16,6 +20,7 @@ import org.jetbrains.kotlin.ir.builders.irBlockBody
 import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irGet
 import org.jetbrains.kotlin.ir.builders.irGetObjectValue
+import org.jetbrains.kotlin.ir.builders.irNull
 import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.builders.irString
 import org.jetbrains.kotlin.ir.declarations.IrFunction
@@ -27,16 +32,15 @@ import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrStatementOrigin
 import org.jetbrains.kotlin.ir.expressions.IrVararg
+import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.IrSimpleFunctionSymbol
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.types.IrSimpleType
 import org.jetbrains.kotlin.ir.types.IrTypeProjection
 import org.jetbrains.kotlin.ir.types.classOrNull
-import org.jetbrains.kotlin.ir.types.isString
 import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.getAnnotation
 import org.jetbrains.kotlin.ir.util.hasAnnotation
-import org.jetbrains.kotlin.ir.util.isSubtypeOfClass
 import org.jetbrains.kotlin.ir.util.parentClassOrNull
 import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.ClassId
@@ -44,26 +48,30 @@ import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 
 /**
- * Rewrites the body of every function annotated with
- * `io.github.smyrgeorge.log4k.annotation.Trace` so that it is executed inside a new
- * tracing span.
+ * Rewrites the body of every function annotated with `io.github.smyrgeorge.log4k.annotation.Trace`
+ * so that it is executed inside a new tracing span.
+ *
+ * The span's **parent** (and the tracer that creates it) is resolved from what is in scope, in order:
+ * 1. a `TracingContext` parameter/receiver — the new span nests under its current span (as before);
+ * 2. otherwise a `TracingEvent.Span` parameter/receiver — used directly as the parent;
+ * 3. otherwise a `trace: Tracer` member — reused, or synthesized as
+ *    `private val _trace_ = Tracer.of(this::class)` — which creates a new root span.
  *
  * Given:
  * ```kotlin
- * context(ctx: TracingContext)
  * @Trace(name = "load")
+ * context(_: TracingContext)
  * suspend fun load(id: Long): User { /* body */ }
  * ```
  *
  * the body is replaced with (conceptually):
  * ```kotlin
- * context(ctx: TracingContext)
- * suspend fun load(id: Long): User = ctx.span("load") { /* body */ }
+ * suspend fun load(id: Long): User =
+ *     TracingContext.traced(context = ctx, parent = null, tracer = null, "load") { /* body */ }
  * ```
  *
- * `TracingContext.span` is `inline`, so both regular and `suspend` functions work: the
- * moved body is placed in an inline lambda and therefore keeps its original suspension
- * context.
+ * `TracingContext.traced` is `inline`, so both regular and `suspend` functions work: the moved body
+ * is placed in an inline lambda and therefore keeps its original suspension context.
  */
 @OptIn(UnsafeDuringIrConstructionAPI::class)
 class TraceIrTransformer(
@@ -72,20 +80,22 @@ class TraceIrTransformer(
     private val messageCollector: MessageCollector,
 ) : IrElementTransformerVoidWithContext() {
 
-    // The `inline fun <T> TracingContext.span(name: String, f: Span.Local.() -> T): T`
-    // helper, declared inside `TracingContext.Companion`.
-    private val spanFunction: IrSimpleFunctionSymbol? = run {
-        val companion = ClassId(LOG4K_PACKAGE, FqName("TracingContext.Companion"), false)
-        finder.findFunctions(CallableId(companion, Name.identifier("span"))).firstOrNull { symbol ->
-            val regular = symbol.owner.parameters.filter { it.kind == IrParameterKind.Regular }
-            regular.size == 2 && regular.getOrNull(0)?.type?.isString() == true
-        }
-    }
+    // The `inline fun <T> traced(context, parent, tracer, name, tags, f): T` helper in `TracingContext.Companion`.
+    private val tracedFunction: IrSimpleFunctionSymbol? = finder.findFunctions(
+        CallableId(ClassId(LOG4K_PACKAGE, FqName("TracingContext.Companion"), false), Name.identifier("traced")),
+    ).firstOrNull { symbol -> symbol.owner.regularParams().size == 6 }
 
-    // `TracingContext` — the extension receiver of `span` — used to detect the context parameter.
-    private val tracingContextSymbol = spanFunction?.owner?.parameters?.firstOrNull {
-        it.kind == IrParameterKind.ExtensionReceiver
-    }?.type?.classOrNull
+    // `TracingContext` — resolved from a context parameter/receiver to nest under its current span.
+    private val tracingContextSymbol: IrClassSymbol? =
+        finder.findClass(ClassId(LOG4K_PACKAGE, Name.identifier("TracingContext")))
+
+    // `TracingEvent.Span` — a span in scope (e.g. a `Span.Local` receiver) is used as the parent.
+    private val spanClassSymbol: IrClassSymbol? =
+        finder.findClass(ClassId(LOG4K_PACKAGE, FqName("TracingEvent.Span"), false))
+
+    // Reuses a `trace: Tracer` member, or synthesizes `private val _trace_ = Tracer.of(this::class)`.
+    private val tracerField: OfThisClassField? =
+        OfThisClassField.of(pluginContext, finder, messageCollector, "Tracer", "@Trace", "trace", "_trace_")
 
     // Used to materialize @Trace(tags = [...]) as `this.tags.put(key, value)` inside the span lambda.
     private val spanTagsGetter: IrSimpleFunctionSymbol? = finder.findProperties(
@@ -97,12 +107,16 @@ class TraceIrTransformer(
     ).firstOrNull()
 
     // The log4k tracing API must be on the classpath for the plugin to do anything.
-    val isReady: Boolean = tracingContextSymbol != null && spanFunction != null
+    val isReady: Boolean =
+        tracedFunction != null && tracingContextSymbol != null && spanClassSymbol != null && tracerField != null
 
     override fun visitFunctionNew(declaration: IrFunction): IrStatement {
         if (shouldInstrument(declaration)) instrument(declaration)
         return super.visitFunctionNew(declaration)
     }
+
+    /** Attaches every synthesized `_trace_` field to its class. Must run after the module transform. */
+    fun commit() = tracerField?.commit()
 
     private fun shouldInstrument(function: IrFunction): Boolean {
         if (function.body == null) return false
@@ -113,56 +127,52 @@ class TraceIrTransformer(
         if (function.hasAnnotation(NO_TRACE_ANNOTATION)) return false
         if (enclosingClass?.hasAnnotation(NO_TRACE_ANNOTATION) == true) return false
 
-        // Explicit @Trace on the function: instrument (a missing context parameter is a hard error).
+        // Explicit @Trace on the function.
         if (function.hasAnnotation(TRACE_ANNOTATION)) return true
 
-        // Class-level @Trace: instrument eligible public member functions that can actually be traced
-        // (functions without a TracingContext context parameter are skipped silently).
+        // Class-level @Trace: instrument every eligible public member function.
         if (enclosingClass == null || !enclosingClass.hasAnnotation(TRACE_ANNOTATION)) return false
-        return function.isClassLevelEligible() && findContextParam(function) != null
-    }
-
-    private fun findContextParam(function: IrFunction): IrValueParameter? {
-        val contextSymbol = tracingContextSymbol ?: return null
-        return function.parameters.firstOrNull {
-            it.kind == IrParameterKind.Context && it.type.isSubtypeOfClass(contextSymbol)
-        }
+        return function.isClassLevelEligible()
     }
 
     private fun instrument(function: IrFunction) {
-        val spanFn = spanFunction ?: return
+        val tracedFn = tracedFunction ?: return
 
-        val contextParam = findContextParam(function)
-        if (contextParam == null) {
-            messageCollector.reportError(
-                function,
-                "@Trace function '${function.name.asString()}' must declare a TracingContext " +
-                        "context parameter, e.g. `context(_: TracingContext)`.",
-            )
-            return
-        }
-
-        // Resolve the pieces of the `TracingContext.span` signature we depend on. A mismatch here
+        // Resolve the pieces of the `TracingContext.traced` signature we depend on. A mismatch here
         // means the plugin is out of sync with the log4k API, so fail with a clear diagnostic
         // instead of crashing.
-        val spanParams = spanFn.owner.parameters
-        val dispatchParam = spanParams.singleOrNull { it.kind == IrParameterKind.DispatchReceiver }
-        val extensionParam = spanParams.singleOrNull { it.kind == IrParameterKind.ExtensionReceiver }
-        val regularParams = spanParams.filter { it.kind == IrParameterKind.Regular }
-        val nameParam = regularParams.getOrNull(0)
-        val fParam = regularParams.getOrNull(1)
+        val dispatchParam = tracedFn.owner.dispatchReceiverParam()
+        val regular = tracedFn.owner.regularParams()
         val dispatchClass = dispatchParam?.type?.classOrNull
+        val fParam = regular.getOrNull(5)
         val spanLocalType = ((fParam?.type as? IrSimpleType)?.arguments?.firstOrNull() as? IrTypeProjection)?.type
-
-        if (dispatchParam == null || extensionParam == null || nameParam == null || fParam == null ||
-            dispatchClass == null || spanLocalType == null
-        ) {
+        if (dispatchParam == null || dispatchClass == null || regular.size != 6 || spanLocalType == null) {
             messageCollector.reportError(
                 function,
-                "log4k-compiler-plugin: could not resolve the expected `TracingContext.span` signature — " +
+                "log4k-compiler-plugin: could not resolve the expected `TracingContext.traced` signature — " +
                         "the plugin is incompatible with this version of log4k.",
             )
             return
+        }
+        val contextArgParam = regular[0]
+        val parentArgParam = regular[1]
+        val tracerArgParam = regular[2]
+        val nameArgParam = regular[3]
+        // regular[4] is `tags` — left to its `emptyMap()` default; @Trace tags are materialized into
+        // `span.tags` inside the lambda below.
+
+        val builder = DeclarationIrBuilder(pluginContext, function.symbol)
+
+        // Resolve the parent source: a TracingContext, else a Span, else fall back to a Tracer.
+        val contextParam = tracingContextSymbol?.let { function.receiverOrContextOf(it) }
+        val spanParam = if (contextParam == null) spanClassSymbol?.let { function.receiverOrContextOf(it) } else null
+        val contextArg = if (contextParam != null) builder.irGet(contextParam) else builder.irNull(contextArgParam.type)
+        val parentArg = if (spanParam != null) builder.irGet(spanParam) else builder.irNull(parentArgParam.type)
+        val tracerArg = if (contextParam == null && spanParam == null) {
+            // Neither in scope -> create a root span via the class' `trace: Tracer` (errors reported inside).
+            tracerField?.access(function) ?: return
+        } else {
+            builder.irNull(tracerArgParam.type)
         }
 
         val spanName = resolveSpanName(function)
@@ -197,8 +207,7 @@ class TraceIrTransformer(
             lambdaBody.statements.addAll(0, tagStatements)
         }
 
-        // 2. `ctx.span<returnType>("name", <lambda>)`.
-        val builder = DeclarationIrBuilder(pluginContext, function.symbol)
+        // 2. `TracingContext.traced<returnType>(context, parent, tracer, "name", <lambda>)`.
         val functionType = pluginContext.irBuiltIns.functionN(1).symbol.typeWith(spanLocalType, returnType)
         val lambdaExpression = Log4kIrFunctionExpression(
             startOffset = function.startOffset,
@@ -208,14 +217,16 @@ class TraceIrTransformer(
             function = lambda,
         )
 
-        val call = builder.irCall(spanFn, returnType, listOf(returnType)).apply {
+        val call = builder.irCall(tracedFn, returnType, listOf(returnType)).apply {
             arguments[dispatchParam] = builder.irGetObjectValue(dispatchParam.type, dispatchClass)
-            arguments[extensionParam] = builder.irGet(contextParam)
-            arguments[nameParam] = builder.irString(spanName)
+            arguments[contextArgParam] = contextArg
+            arguments[parentArgParam] = parentArg
+            arguments[tracerArgParam] = tracerArg
+            arguments[nameArgParam] = builder.irString(spanName)
             arguments[fParam] = lambdaExpression
         }
 
-        // 3. Replace the original body with `return ctx.span(...) { ... }`.
+        // 3. Replace the original body with `return TracingContext.traced(...) { ... }`.
         function.body = builder.irBlockBody { +irReturn(call) }
     }
 
@@ -256,13 +267,11 @@ class TraceIrTransformer(
         value: String,
     ): IrExpression {
         val getTags = builder.irCall(tagsGetter).apply {
-            tagsGetter.owner.parameters.firstOrNull { it.kind == IrParameterKind.DispatchReceiver }
-                ?.let { arguments[it] = builder.irGet(receiver) }
+            tagsGetter.owner.dispatchReceiverParam()?.let { arguments[it] = builder.irGet(receiver) }
         }
         return builder.irCall(put).apply {
-            val params = put.owner.parameters
-            params.firstOrNull { it.kind == IrParameterKind.DispatchReceiver }?.let { arguments[it] = getTags }
-            val regular = params.filter { it.kind == IrParameterKind.Regular }
+            put.owner.dispatchReceiverParam()?.let { arguments[it] = getTags }
+            val regular = put.owner.regularParams()
             regular.getOrNull(0)?.let { arguments[it] = builder.irString(key) }
             regular.getOrNull(1)?.let { arguments[it] = builder.irString(value) }
         }
