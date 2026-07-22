@@ -133,7 +133,9 @@ abstract class Meter(
         // Copy-on-write: `update`'s transform may run several times, so never mutate the published map —
         // publish a fresh copy that adds `name` (unless another thread already added it).
         timers.update { current ->
-            if (name in current) current else current.toMutableMap().apply { put(name, created) }
+            if (name in current) current
+            // We intentionally create a new mutable map to avoid mutating the published map.
+            else current.toMutableMap().apply { put(name, created) }
         }
         return timers.load().getValue(name)
     }
