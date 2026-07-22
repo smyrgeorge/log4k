@@ -2,8 +2,8 @@ package io.github.smyrgeorge.log4k.compiler.trace
 
 import io.github.smyrgeorge.log4k.compiler.ir.Log4kIrFunctionExpression
 import io.github.smyrgeorge.log4k.compiler.ir.utils.LOG4K_PACKAGE
+import io.github.smyrgeorge.log4k.compiler.ir.utils.buildInlineLambda
 import io.github.smyrgeorge.log4k.compiler.ir.utils.isClassLevelEligible
-import io.github.smyrgeorge.log4k.compiler.ir.utils.moveBody
 import io.github.smyrgeorge.log4k.compiler.ir.utils.qualifiedName
 import io.github.smyrgeorge.log4k.compiler.ir.utils.reportError
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
@@ -11,18 +11,13 @@ import org.jetbrains.kotlin.backend.common.extensions.DeclarationFinder
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
-import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
-import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.ir.IrStatement
-import org.jetbrains.kotlin.ir.builders.declarations.buildFun
-import org.jetbrains.kotlin.ir.builders.declarations.buildValueParameter
 import org.jetbrains.kotlin.ir.builders.irBlockBody
 import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irGet
 import org.jetbrains.kotlin.ir.builders.irGetObjectValue
 import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.builders.irString
-import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
 import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.IrParameterKind
 import org.jetbrains.kotlin.ir.declarations.IrValueParameter
@@ -174,23 +169,12 @@ class TraceIrTransformer(
         val returnType = function.returnType
 
         // 1. Build the inline lambda `{ <original body> }` with receiver `Span.Local`.
-        val lambda = pluginContext.irFactory.buildFun {
-            name = Name.special("<anonymous>")
-            origin = IrDeclarationOrigin.LOCAL_FUNCTION_FOR_LAMBDA
-            visibility = DescriptorVisibilities.LOCAL
-            modality = Modality.FINAL
-            this.returnType = returnType
-            isSuspend = false
-        }.apply {
-            parent = function
-            val receiver = buildValueParameter(this) {
-                name = Name.identifier($$"$this$span")
-                kind = IrParameterKind.ExtensionReceiver
-                type = spanLocalType
-            }
-            parameters = listOf(receiver)
-            body = pluginContext.moveBody(function, this)
-        }
+        val lambda = pluginContext.buildInlineLambda(
+            enclosing = function,
+            returnType = returnType,
+            extensionReceiverType = spanLocalType,
+            extensionReceiverName = Name.identifier($$"$this$span"),
+        )
 
         // 1b. Materialize `@Trace(tags = [...])` as `this.tags.put(k, v)` at the start of the lambda.
         val tags = resolveTags(function)

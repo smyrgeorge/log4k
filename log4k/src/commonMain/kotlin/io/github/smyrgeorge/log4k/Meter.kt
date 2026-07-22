@@ -14,6 +14,8 @@ import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.reflect.KClass
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.DurationUnit
+import kotlin.time.TimeSource
 
 /**
  * The `Meter` class serves as an abstract base class for creating different types of metering instruments
@@ -95,6 +97,29 @@ abstract class Meter(
         unit: String? = null,
         description: String? = null
     ): Instrument.Histogram<T> = Instrument.Histogram(name, this, unit, description)
+
+    // The [Timed] bundles created by [timed], cached by name so their instruments are created once.
+    private val timers: MutableMap<String, Timed> = mutableMapOf()
+
+    /**
+     * Returns a [Timed] bundle — a call counter, an error counter and a duration histogram — for the
+     * given base [name], creating (and caching) it on first use.
+     *
+     * This is the runtime helper the `log4k-compiler-plugin` uses for
+     * [io.github.smyrgeorge.log4k.annotation.Timed]: instruments named `"<name>.calls"`,
+     * `"<name>.errors"` and `"<name>.duration"` (in milliseconds) are created once and reused across
+     * invocations.
+     *
+     * @param name the base metric name; the bundle's instruments are derived from it.
+     * @return the existing or newly created [Timed] bundle for [name].
+     */
+    fun timed(name: String): Timed = timers.getOrPut(name) {
+        Timed(
+            calls = counter("$name.calls", description = "Total number of invocations of '$name'."),
+            errors = counter("$name.errors", description = "Total number of failed invocations of '$name'."),
+            duration = histogram("$name.duration", unit = "ms", description = "Invocation duration of '$name'."),
+        )
+    }
 
     /**
      * Represents a base instrument used for recording various types of metric data.
@@ -360,6 +385,41 @@ abstract class Meter(
             unit: String? = null,
             description: String? = null,
         ) : AbstractRecorder<T>(name, meter, Kind.Histogram, unit, description)
+    }
+
+    /**
+     * A bundle of instruments used to time an operation: a call [Instrument.Counter], an error
+     * [Instrument.Counter], and a duration [Instrument.Histogram]. Obtain one via [Meter.timed].
+     *
+     * @property calls incremented on every [measure] invocation.
+     * @property errors incremented when the measured block throws.
+     * @property duration records the elapsed time of the measured block, in milliseconds.
+     */
+    class Timed @PublishedApi internal constructor(
+        @PublishedApi internal val calls: Instrument.Counter<Long>,
+        @PublishedApi internal val errors: Instrument.Counter<Long>,
+        @PublishedApi internal val duration: Instrument.Histogram<Double>,
+    ) {
+        /**
+         * Runs [f], recording a call, its duration (in milliseconds) and — if it throws — an error.
+         * The throwable is rethrown after being counted. Being `inline`, this works for both regular
+         * and `suspend` functions.
+         *
+         * @param T the type of the result produced by [f].
+         * @param f the block to measure.
+         * @return the result produced by [f].
+         */
+        inline fun <T> measure(f: () -> T): T {
+            calls.increment(1L)
+            val mark = TimeSource.Monotonic.markNow()
+            return try {
+                f().also { duration.record(mark.elapsedNow().toDouble(DurationUnit.MILLISECONDS)) }
+            } catch (e: Throwable) {
+                errors.increment(1L)
+                duration.record(mark.elapsedNow().toDouble(DurationUnit.MILLISECONDS))
+                throw e
+            }
+        }
     }
 
     companion object {

@@ -2,8 +2,9 @@ package io.github.smyrgeorge.log4k.compiler.logged
 
 import io.github.smyrgeorge.log4k.compiler.ir.Log4kIrFunctionExpression
 import io.github.smyrgeorge.log4k.compiler.ir.utils.LOG4K_PACKAGE
+import io.github.smyrgeorge.log4k.compiler.ir.utils.buildInlineLambda
+import io.github.smyrgeorge.log4k.compiler.ir.utils.irOfThisClass
 import io.github.smyrgeorge.log4k.compiler.ir.utils.isClassLevelEligible
-import io.github.smyrgeorge.log4k.compiler.ir.utils.moveBody
 import io.github.smyrgeorge.log4k.compiler.ir.utils.qualifiedName
 import io.github.smyrgeorge.log4k.compiler.ir.utils.reportError
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
@@ -12,15 +13,12 @@ import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
-import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.builders.declarations.buildField
-import org.jetbrains.kotlin.ir.builders.declarations.buildFun
 import org.jetbrains.kotlin.ir.builders.irBlockBody
 import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irGet
 import org.jetbrains.kotlin.ir.builders.irGetField
-import org.jetbrains.kotlin.ir.builders.irGetObjectValue
 import org.jetbrains.kotlin.ir.builders.irNull
 import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.builders.irString
@@ -34,7 +32,6 @@ import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrGetEnumValue
 import org.jetbrains.kotlin.ir.expressions.IrStatementOrigin
-import org.jetbrains.kotlin.ir.expressions.impl.IrGetClassImpl
 import org.jetbrains.kotlin.ir.expressions.impl.IrGetEnumValueImpl
 import org.jetbrains.kotlin.ir.expressions.impl.IrStringConcatenationImpl
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
@@ -178,17 +175,7 @@ class LoggedIrTransformer(
         val returnType = function.returnType
 
         // 1. Build the inline lambda `{ <original body> }` (a plain `() -> T`).
-        val lambda = pluginContext.irFactory.buildFun {
-            name = Name.special("<anonymous>")
-            origin = IrDeclarationOrigin.LOCAL_FUNCTION_FOR_LAMBDA
-            visibility = DescriptorVisibilities.LOCAL
-            modality = Modality.FINAL
-            this.returnType = returnType
-            isSuspend = false
-        }.apply {
-            parent = function
-            body = pluginContext.moveBody(function, this)
-        }
+        val lambda = pluginContext.buildInlineLambda(function, returnType)
 
         // 2. `log.logged<returnType>(level, span, "name", "args", <lambda>)`.
         val functionType = pluginContext.irBuiltIns.functionN(0).symbol.typeWith(returnType)
@@ -272,23 +259,8 @@ class LoggedIrTransformer(
             initializer = pluginContext.irFactory.createExpressionBody(
                 clazz.startOffset,
                 clazz.endOffset,
-                loggerOfThisClass(initBuilder, clazz),
+                initBuilder.irOfThisClass(pluginContext, loggerOfFunction!!, clazz.thisReceiver!!),
             )
-        }
-    }
-
-    /** Builds `Logger.of(this::class)` for use as the initializer of the synthesized `log` field. */
-    private fun loggerOfThisClass(builder: DeclarationIrBuilder, clazz: IrClass): IrExpression {
-        val ofFn = loggerOfFunction!!
-        val thisReceiver = clazz.thisReceiver!!
-        val kClassType = pluginContext.irBuiltIns.kClassClass.typeWith(clazz.symbol.defaultType)
-        val getClass = IrGetClassImpl(clazz.startOffset, clazz.endOffset, kClassType, builder.irGet(thisReceiver))
-        return builder.irCall(ofFn).apply {
-            val ofParams = ofFn.owner.parameters
-            ofParams.firstOrNull { it.kind == IrParameterKind.DispatchReceiver }?.let {
-                arguments[it] = builder.irGetObjectValue(it.type, it.type.classOrNull!!)
-            }
-            ofParams.firstOrNull { it.kind == IrParameterKind.Regular }?.let { arguments[it] = getClass }
         }
     }
 

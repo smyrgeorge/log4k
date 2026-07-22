@@ -47,6 +47,7 @@ This project also tries to be fully compatible with `OpenTelemetry` standard.
     - [Histogram](#histogram)
 - [Compiler Plugin](#compiler-plugin)
     - [Logging (`@Logged`)](#logging-logged)
+    - [Metering (`@Timed`)](#metering-timed)
     - [Tracing (`@Trace`)](#tracing-trace)
 - [Appenders](#appenders)
     - [Logging](#logging)
@@ -474,6 +475,46 @@ exception is rethrown. Both `suspend` and regular functions are supported (the w
 context(_: TracingContext)
 suspend fun loadUser(id: Long): User { /* every log line carries the current span id */
 }
+```
+
+### Metering (`@Timed`)
+
+Annotate a function with `@Timed` and every invocation is measured at compile time — no manual counter/histogram
+plumbing required:
+
+```kotlin
+class OrderService {
+    @Timed
+    suspend fun placeOrder(id: Long): Order {
+        // ... recorded under "OrderService.placeOrder.*"
+    }
+}
+```
+
+Each call records three metrics against `Meter.of(this::class)`, keyed off the metric base name:
+
+- `"<name>.calls"` — a counter incremented on every invocation.
+- `"<name>.errors"` — a counter incremented when the body throws (the exception is then rethrown).
+- `"<name>.duration"` — a histogram of the invocation duration, in milliseconds.
+
+Both `suspend` and regular functions are supported (the wrapper reuses the `inline` `Meter.Timed.measure` helper), and
+the instrument bundle is created once and cached by `Meter.timed(name)`.
+
+- **Metric name** — `@Timed(name = "…")`; when omitted it defaults to `ClassName.functionName`.
+- **Class-level** — annotate a **class** with `@Timed` to instrument every eligible public member function; a function's
+  own `@Timed` overrides the class-level defaults (e.g. its `name`).
+
+With a `SimpleMeteringCollectorAppender` registered, calling `placeOrder` a few times exposes, in OpenMetrics form:
+
+```text
+# TYPE OrderService.placeOrder.calls counter
+OrderService.placeOrder.calls{} 3 1730360802506
+
+# UNIT OrderService.placeOrder.duration ms
+# TYPE OrderService.placeOrder.duration histogram
+OrderService.placeOrder.duration_bucket{le="+Inf"} 3 1730360802506
+OrderService.placeOrder.duration_sum{} 1.732 1730360802506
+OrderService.placeOrder.duration_count{} 3 1730360802506
 ```
 
 ### Tracing (`@Trace`)

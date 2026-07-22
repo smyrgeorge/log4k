@@ -1,5 +1,3 @@
-@file:Suppress("unused")
-
 package io.github.smyrgeorge.log4k
 
 import io.github.smyrgeorge.log4k.TracingEvent.Span

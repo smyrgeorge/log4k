@@ -6,20 +6,35 @@ import org.jetbrains.kotlin.cli.common.messages.CompilerMessageLocation
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
+import org.jetbrains.kotlin.descriptors.Modality
+import org.jetbrains.kotlin.ir.builders.declarations.buildFun
+import org.jetbrains.kotlin.ir.builders.declarations.buildValueParameter
 import org.jetbrains.kotlin.ir.builders.irBlockBody
+import org.jetbrains.kotlin.ir.builders.irCall
+import org.jetbrains.kotlin.ir.builders.irGet
+import org.jetbrains.kotlin.ir.builders.irGetObjectValue
 import org.jetbrains.kotlin.ir.builders.irReturn
+import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
 import org.jetbrains.kotlin.ir.declarations.IrFunction
+import org.jetbrains.kotlin.ir.declarations.IrParameterKind
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
+import org.jetbrains.kotlin.ir.declarations.IrValueParameter
 import org.jetbrains.kotlin.ir.expressions.IrBlockBody
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrExpressionBody
 import org.jetbrains.kotlin.ir.expressions.IrReturn
+import org.jetbrains.kotlin.ir.expressions.impl.IrGetClassImpl
+import org.jetbrains.kotlin.ir.symbols.IrSimpleFunctionSymbol
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
+import org.jetbrains.kotlin.ir.types.IrType
+import org.jetbrains.kotlin.ir.types.classOrNull
+import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.fileOrNull
 import org.jetbrains.kotlin.ir.util.parentClassOrNull
 import org.jetbrains.kotlin.ir.util.patchDeclarationParents
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformerVoid
 import org.jetbrains.kotlin.name.FqName
+import org.jetbrains.kotlin.name.Name
 
 /** The root package of the log4k runtime API. */
 val LOG4K_PACKAGE = FqName("io.github.smyrgeorge.log4k")
@@ -58,6 +73,59 @@ fun IrPluginContext.moveBody(function: IrFunction, lambda: IrFunction): IrBlockB
     )
     block.patchDeclarationParents(lambda)
     return block
+}
+
+/**
+ * Builds the inline lambda that wraps [enclosing]'s original body (moved in via [moveBody]) so it can
+ * be passed to an `inline` helper such as `span { … }`, `logged { … }` or `measure { … }`.
+ *
+ * When [extensionReceiverType] is provided, the lambda gains an extension receiver of that type
+ * (e.g. `Span.Local.() -> T` for `@Trace`); otherwise it is a plain `() -> T`.
+ */
+fun IrPluginContext.buildInlineLambda(
+    enclosing: IrFunction,
+    returnType: IrType,
+    extensionReceiverType: IrType? = null,
+    extensionReceiverName: Name = Name.identifier($$"$this$lambda"),
+): IrSimpleFunction = irFactory.buildFun {
+    name = Name.special("<anonymous>")
+    origin = IrDeclarationOrigin.LOCAL_FUNCTION_FOR_LAMBDA
+    visibility = DescriptorVisibilities.LOCAL
+    modality = Modality.FINAL
+    this.returnType = returnType
+    isSuspend = false
+}.apply {
+    parent = enclosing
+    if (extensionReceiverType != null) {
+        val receiver = buildValueParameter(this) {
+            name = extensionReceiverName
+            kind = IrParameterKind.ExtensionReceiver
+            type = extensionReceiverType
+        }
+        parameters = listOf(receiver)
+    }
+    body = moveBody(enclosing, this)
+}
+
+/**
+ * Builds `<Companion>.of(this::class)` for a companion `of(KClass<*>)` factory such as
+ * `Logger.of` or `Meter.of`, using [thisReceiver] (a class or function dispatch receiver) as `this`.
+ */
+@OptIn(UnsafeDuringIrConstructionAPI::class)
+fun DeclarationIrBuilder.irOfThisClass(
+    pluginContext: IrPluginContext,
+    ofFn: IrSimpleFunctionSymbol,
+    thisReceiver: IrValueParameter,
+): IrExpression {
+    val kClassType = pluginContext.irBuiltIns.kClassClass.typeWith(thisReceiver.type)
+    val getClass = IrGetClassImpl(thisReceiver.startOffset, thisReceiver.endOffset, kClassType, irGet(thisReceiver))
+    return irCall(ofFn).apply {
+        val params = ofFn.owner.parameters
+        params.firstOrNull { it.kind == IrParameterKind.DispatchReceiver }?.let {
+            arguments[it] = irGetObjectValue(it.type, it.type.classOrNull!!)
+        }
+        params.firstOrNull { it.kind == IrParameterKind.Regular }?.let { arguments[it] = getClass }
+    }
 }
 
 /**
