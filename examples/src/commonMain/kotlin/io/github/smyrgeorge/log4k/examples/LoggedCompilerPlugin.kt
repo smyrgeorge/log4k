@@ -5,6 +5,7 @@ import io.github.smyrgeorge.log4k.Logger
 import io.github.smyrgeorge.log4k.RootLogger
 import io.github.smyrgeorge.log4k.Tracer
 import io.github.smyrgeorge.log4k.TracingContext
+import io.github.smyrgeorge.log4k.TracingEvent
 import io.github.smyrgeorge.log4k.annotation.Logged
 import io.github.smyrgeorge.log4k.impl.appenders.simple.SimpleConsoleLoggingAppender
 import io.github.smyrgeorge.log4k.impl.appenders.simple.SimpleConsoleTracingAppender
@@ -56,6 +57,17 @@ object LoggedCompilerPlugin {
         fun restock(sku: String): String = "restocked-$sku"
     }
 
+    class AuditService {
+        @Suppress("unused")
+        private val log = Logger.of(this::class)
+
+        // No TracingContext, but a `Span.Local` is in scope (context parameter) -> the plugin attaches
+        // that span directly to the log lines (no `currentOrNull()` lookup needed).
+        @Logged
+        context(_: TracingEvent.Span.Local)
+        fun record(action: String): String = "audited-$action"
+    }
+
     fun run() = runBlocking {
         RootLogger.Logging.level = Level.TRACE // so the DEBUG line from `mul` is shown too.
 
@@ -99,6 +111,18 @@ object LoggedCompilerPlugin {
         // Foreign `log` member: the plugin synthesizes a separate `_log_` logger instead of erroring.
         val inventory = InventoryService()
         println(">> restock -> ${inventory.restock("abc")}")
+
+        delay(500.milliseconds)
+
+        // Span-in-scope (no TracingContext): a `Span.Local` receiver is attached to the log line.
+        val audit = AuditService()
+        val auditSpan = tracer.span("audit").start()
+        with(auditSpan) {
+            with(audit) {
+                println(">> record -> ${record("login")}") // logs carry span '${auditSpan.context.spanId}'
+            }
+        }
+        auditSpan.end()
 
         // Give the async logging/tracing appenders time to flush.
         delay(1.seconds)

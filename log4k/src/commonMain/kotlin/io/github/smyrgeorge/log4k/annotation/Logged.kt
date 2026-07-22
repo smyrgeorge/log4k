@@ -33,14 +33,22 @@ import io.github.smyrgeorge.log4k.Level
  * }
  * ```
  *
- * If the annotated function declares a [io.github.smyrgeorge.log4k.TracingContext] **context
- * parameter**, the current span (if any) is resolved from it and attached to every emitted log line,
- * correlating the logs with the active trace:
+ * The logs are correlated with a span when one is in scope, resolved in this order:
+ * 1. a [io.github.smyrgeorge.log4k.TracingContext] **context parameter or receiver** — its current
+ *    span (`currentOrNull()`) is attached;
+ * 2. otherwise a [io.github.smyrgeorge.log4k.TracingEvent.Span] in scope (e.g. a `Span.Local`
+ *    receiver or context parameter) is attached directly;
+ * 3. otherwise no span is attached.
  *
  * ```kotlin
  * @Logged(level = Level.DEBUG)
  * context(_: TracingContext)
  * suspend fun loadUser(id: Long): User { /* logs carry the current span id */ }
+ *
+ * // A span already in scope is used directly:
+ * @Logged
+ * context(_: TracingEvent.Span.Local)
+ * fun audit(action: String) { /* logs carry this span */ }
  * ```
  *
  * The annotation may also be placed on a **class**. Then every eligible member function is

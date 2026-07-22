@@ -22,6 +22,7 @@ import org.jetbrains.kotlin.ir.builders.irString
 import org.jetbrains.kotlin.ir.declarations.IrEnumEntry
 import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.IrParameterKind
+import org.jetbrains.kotlin.ir.declarations.IrValueParameter
 import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrGetEnumValue
@@ -68,8 +69,9 @@ import org.jetbrains.kotlin.name.Name
  * placed in an inline lambda and therefore keeps its original suspension context. The `Logger` is
  * resolved by [OfThisClassField]: a log4k `log: Logger` member is reused; otherwise (or if `log` is a
  * foreign type such as `org.slf4j.Logger`) `private val _log_ = Logger.of(this::class)` is
- * synthesized. If the function declares a `TracingContext` context parameter, the current span is
- * resolved from it and attached to every emitted log line.
+ * synthesized. A span is attached to the log lines when one is in scope: a `TracingContext`
+ * parameter/receiver (its `currentOrNull()`), else a `TracingEvent.Span` parameter/receiver directly,
+ * else none.
  */
 @OptIn(UnsafeDuringIrConstructionAPI::class)
 class LoggedIrTransformer(
@@ -101,6 +103,10 @@ class LoggedIrTransformer(
     private val currentOrNullFunction: IrSimpleFunctionSymbol? = finder.findFunctions(
         CallableId(ClassId(LOG4K_PACKAGE, FqName("TracingContext"), false), Name.identifier("currentOrNull")),
     ).firstOrNull()
+
+    // `TracingEvent.Span` — a span in scope (e.g. a `Span.Local` receiver) is attached directly.
+    private val spanClassSymbol: IrClassSymbol? =
+        finder.findClass(ClassId(LOG4K_PACKAGE, FqName("TracingEvent.Span"), false))
 
     // The log4k logging API must be on the classpath for the plugin to do anything.
     val isReady: Boolean = loggedFunction != null && loggerField != null && levelClassSymbol != null
@@ -213,18 +219,22 @@ class LoggedIrTransformer(
         return concat
     }
 
-    /** `ctx.currentOrNull()` when the function has a `TracingContext` context parameter, else `null`. */
+    /**
+     * The span to attach to the emitted log lines:
+     * 1. `ctx.currentOrNull()` when a `TracingContext` is in scope (context parameter or receiver);
+     * 2. otherwise a `TracingEvent.Span` in scope (e.g. a `Span.Local` receiver), used directly;
+     * 3. otherwise `null`.
+     */
     private fun buildSpan(
         builder: DeclarationIrBuilder,
         function: IrFunction,
         spanType: IrType,
     ): IrExpression {
+        // 1. A TracingContext in scope -> its current span.
         val contextSymbol = tracingContextSymbol
         val currentFn = currentOrNullFunction
         if (contextSymbol != null && currentFn != null) {
-            val contextParam = function.parameters.firstOrNull {
-                it.kind == IrParameterKind.Context && it.type.isSubtypeOfClass(contextSymbol)
-            }
+            val contextParam = function.receiverOrContextOf(contextSymbol)
             if (contextParam != null) {
                 return builder.irCall(currentFn).apply {
                     currentFn.owner.parameters.firstOrNull { it.kind == IrParameterKind.DispatchReceiver }
@@ -232,8 +242,22 @@ class LoggedIrTransformer(
                 }
             }
         }
+        // 2. A TracingEvent.Span in scope (e.g. a `Span.Local` receiver) -> attach it directly.
+        val spanSymbol = spanClassSymbol
+        if (spanSymbol != null) {
+            val spanParam = function.receiverOrContextOf(spanSymbol)
+            if (spanParam != null) return builder.irGet(spanParam)
+        }
+        // 3. Nothing in scope.
         return builder.irNull(spanType)
     }
+
+    /** The first context parameter or extension receiver of [this] that is a subtype of [type]. */
+    private fun IrFunction.receiverOrContextOf(type: IrClassSymbol): IrValueParameter? =
+        parameters.firstOrNull {
+            (it.kind == IrParameterKind.Context || it.kind == IrParameterKind.ExtensionReceiver) &&
+                it.type.isSubtypeOfClass(type)
+        }
 
     companion object {
         private val LOGGED_ANNOTATION = FqName("io.github.smyrgeorge.log4k.annotation.Logged")

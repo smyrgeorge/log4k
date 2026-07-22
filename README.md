@@ -466,8 +466,9 @@ exception is rethrown. Both `suspend` and regular functions are supported (the w
 - **Logger** — read from a `log: Logger` property on the enclosing class. If none exists — or `log` is a foreign type
   such as `org.slf4j.Logger` — the plugin synthesizes `private val _log_ = Logger.of(this::class)` under a distinct
   name, so it never clashes with the existing `log`.
-- **Span correlation** — when the function declares a `TracingContext` **context parameter**, the current span is
-  resolved from it and attached to every emitted log line.
+- **Span correlation** — a span is attached to every emitted log line when one is in scope: a `TracingContext`
+  parameter/receiver (its current span), otherwise a `TracingEvent.Span` in scope (e.g. a `Span.Local` receiver) used
+  directly.
 - **Class-level** — annotate a **class** with `@Logged` to instrument every eligible public member function; a
   function's own `@Logged` overrides the class-level `level`.
 
