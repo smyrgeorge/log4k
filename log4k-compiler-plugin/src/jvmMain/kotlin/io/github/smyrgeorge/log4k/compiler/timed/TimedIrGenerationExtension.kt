@@ -17,5 +17,7 @@ class TimedIrGenerationExtension(
         val transformer = TimedIrTransformer(pluginContext, finder, messageCollector)
         if (!transformer.isReady) return
         moduleFragment.transform(transformer, null)
+        // Attach any synthesized `_meter_` fields now that the module traversal is complete.
+        transformer.commit()
     }
 }

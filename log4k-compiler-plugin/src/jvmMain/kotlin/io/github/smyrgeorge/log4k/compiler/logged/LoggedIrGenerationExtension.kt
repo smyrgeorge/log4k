@@ -17,7 +17,7 @@ class LoggedIrGenerationExtension(
         val transformer = LoggedIrTransformer(pluginContext, finder, messageCollector)
         if (!transformer.isReady) return
         moduleFragment.transform(transformer, null)
-        // Add any synthesized `log` fields now that the module traversal is complete.
-        transformer.commitCreatedLoggers()
+        // Attach any synthesized `_log_` fields now that the module traversal is complete.
+        transformer.commit()
     }
 }

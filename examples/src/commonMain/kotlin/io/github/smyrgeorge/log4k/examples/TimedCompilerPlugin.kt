@@ -1,5 +1,6 @@
 package io.github.smyrgeorge.log4k.examples
 
+import io.github.smyrgeorge.log4k.Meter
 import io.github.smyrgeorge.log4k.RootLogger
 import io.github.smyrgeorge.log4k.annotation.Timed
 import io.github.smyrgeorge.log4k.impl.appenders.simple.SimpleMeteringCollectorAppender
@@ -10,8 +11,8 @@ import kotlin.time.Duration.Companion.seconds
 
 object TimedCompilerPlugin {
 
-    // Class-level @Timed: every eligible public member is instrumented with call/error/duration metrics
-    // recorded against `Meter.of(this::class)` (here: "OrderService.*").
+    // Class-level @Timed: every eligible public member is instrumented with call/error/duration metrics.
+    // `OrderService` declares no `meter`, so the plugin synthesizes `private val _meter_ = Meter.of(this::class)`.
     @Timed
     class OrderService {
         fun placeOrder(id: Long): String = "order-$id" // -> "OrderService.placeOrder.{calls,duration}"
@@ -33,6 +34,15 @@ object TimedCompilerPlugin {
         fun refund(): Nothing = error("declined")
     }
 
+    class ReportService {
+        // Declared by the user and reused by the plugin (no `_meter_` field is synthesized).
+        @Suppress("unused")
+        private val meter = Meter.of(this::class)
+
+        @Timed
+        fun generate(kind: String): String = "report-$kind"
+    }
+
     fun run() = runBlocking {
         RootLogger.Metering.appenders.unregisterAll()
         RootLogger.Metering.appenders.register(SimpleMeteringCollectorAppender())
@@ -50,6 +60,10 @@ object TimedCompilerPlugin {
         } catch (e: IllegalStateException) {
             println(">> caught rethrown exception: ${e.message}")
         }
+
+        // `ReportService` declares its own `meter`, which the plugin reuses (no `_meter_` synthesized).
+        val reports = ReportService()
+        reports.generate("daily")
 
         // Give the async metering appender time to process the events.
         delay(1.seconds)

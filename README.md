@@ -492,7 +492,7 @@ class OrderService {
 }
 ```
 
-Each call records three metrics against `Meter.of(this::class)`, keyed off the metric base name:
+Each call records three metrics, keyed off the metric base name:
 
 - `"<name>.calls"` — a counter incremented on every invocation.
 - `"<name>.errors"` — a counter incremented when the body throws (the exception is then rethrown).
@@ -502,6 +502,8 @@ Both `suspend` and regular functions are supported (the wrapper reuses the `inli
 the instrument bundle is created once and cached by `Meter.timed(name)`.
 
 - **Metric name** — `@Timed(name = "…")`; when omitted it defaults to `ClassName.functionName`.
+- **Meter** — read from a `meter: Meter` property on the enclosing class; if none exists, the plugin synthesizes
+  `private val _meter_ = Meter.of(this::class)` (mirroring how `@Logged` resolves its logger).
 - **Class-level** — annotate a **class** with `@Timed` to instrument every eligible public member function; a function's
   own `@Timed` overrides the class-level defaults (e.g. its `name`).
 

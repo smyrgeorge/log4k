@@ -10,10 +10,12 @@ package io.github.smyrgeorge.log4k.annotation
  * - `"<name>.errors"` — a counter incremented when the body throws,
  * - `"<name>.duration"` — a histogram of the invocation duration in milliseconds.
  *
- * The [io.github.smyrgeorge.log4k.Meter] is obtained from `Meter.of(this::class)`, and the three
- * instruments are created once and cached (see [io.github.smyrgeorge.log4k.Meter.Timed]). Because the
- * wrapping uses the `inline` [io.github.smyrgeorge.log4k.Meter.Timed.measure] helper, both regular and
- * `suspend` functions are supported.
+ * The [io.github.smyrgeorge.log4k.Meter] is taken from a `meter: Meter` property declared in the
+ * enclosing class; if the class does not declare one, the plugin synthesizes
+ * `private val _meter_ = Meter.of(this::class)`. The three instruments are created once and cached
+ * (see [io.github.smyrgeorge.log4k.Meter.Timed]). Because the wrapping uses the `inline`
+ * [io.github.smyrgeorge.log4k.Meter.Timed.measure] helper, both regular and `suspend` functions are
+ * supported.
  *
  * ```kotlin
  * class UserService {

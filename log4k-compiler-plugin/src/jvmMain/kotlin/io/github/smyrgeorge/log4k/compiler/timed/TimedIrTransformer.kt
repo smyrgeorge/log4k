@@ -2,8 +2,8 @@ package io.github.smyrgeorge.log4k.compiler.timed
 
 import io.github.smyrgeorge.log4k.compiler.ir.Log4kIrFunctionExpression
 import io.github.smyrgeorge.log4k.compiler.ir.utils.LOG4K_PACKAGE
+import io.github.smyrgeorge.log4k.compiler.ir.utils.OfThisClassField
 import io.github.smyrgeorge.log4k.compiler.ir.utils.buildInlineLambda
-import io.github.smyrgeorge.log4k.compiler.ir.utils.irOfThisClass
 import io.github.smyrgeorge.log4k.compiler.ir.utils.isClassLevelEligible
 import io.github.smyrgeorge.log4k.compiler.ir.utils.qualifiedName
 import io.github.smyrgeorge.log4k.compiler.ir.utils.reportError
@@ -23,7 +23,6 @@ import org.jetbrains.kotlin.ir.expressions.IrConst
 import org.jetbrains.kotlin.ir.expressions.IrStatementOrigin
 import org.jetbrains.kotlin.ir.symbols.IrSimpleFunctionSymbol
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
-import org.jetbrains.kotlin.ir.types.classOrNull
 import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.getAnnotation
 import org.jetbrains.kotlin.ir.util.hasAnnotation
@@ -48,13 +47,14 @@ import org.jetbrains.kotlin.name.Name
  *
  * the body is replaced with (conceptually):
  * ```kotlin
- * fun compute(x: Int): Int =
- *     Meter.of(this::class).timed("UserService.compute").measure { /* body */ }
+ * fun compute(x: Int): Int = meter.timed("UserService.compute").measure { /* body */ }
  * ```
  *
- * `Meter.timed` caches its instrument bundle by name, so the instruments are created once; and
- * `Meter.Timed.measure` is `inline`, so both regular and `suspend` functions work: the moved body is
- * placed in an inline lambda and therefore keeps its original suspension context.
+ * The `Meter` is resolved by [OfThisClassField]: a `meter: Meter` member is reused; otherwise
+ * `private val _meter_ = Meter.of(this::class)` is synthesized (created once per class). `Meter.timed`
+ * caches its instrument bundle by name, and `Meter.Timed.measure` is `inline`, so both regular and
+ * `suspend` functions work: the moved body is placed in an inline lambda and therefore keeps its
+ * original suspension context.
  */
 @OptIn(UnsafeDuringIrConstructionAPI::class)
 class TimedIrTransformer(
@@ -63,13 +63,9 @@ class TimedIrTransformer(
     private val messageCollector: MessageCollector,
 ) : IrElementTransformerVoidWithContext() {
 
-    // `Meter.Companion.of(KClass<*>)` — used to obtain the meter via `Meter.of(this::class)`.
-    private val meterOfFunction: IrSimpleFunctionSymbol? = finder.findFunctions(
-        CallableId(ClassId(LOG4K_PACKAGE, FqName("Meter.Companion"), false), Name.identifier("of")),
-    ).firstOrNull { symbol ->
-        val regular = symbol.owner.parameters.filter { it.kind == IrParameterKind.Regular }
-        regular.size == 1 && regular[0].type.classOrNull == pluginContext.irBuiltIns.kClassClass
-    }
+    // Reuses a `meter: Meter` member, or synthesizes `private val _meter_ = Meter.of(this::class)`.
+    private val meterField: OfThisClassField? =
+        OfThisClassField.of(pluginContext, finder, messageCollector, "Meter", "@Timed", "meter", "_meter_")
 
     // `Meter.timed(name): Meter.Timed` — returns the (cached) instrument bundle for a base name.
     private val meterTimedFunction: IrSimpleFunctionSymbol? = finder.findFunctions(
@@ -85,12 +81,15 @@ class TimedIrTransformer(
 
     // The log4k metering API must be on the classpath for the plugin to do anything.
     val isReady: Boolean =
-        meterOfFunction != null && meterTimedFunction != null && measureFunction != null
+        meterField != null && meterTimedFunction != null && measureFunction != null
 
     override fun visitFunctionNew(declaration: IrFunction): IrStatement {
         if (shouldInstrument(declaration)) instrument(declaration)
         return super.visitFunctionNew(declaration)
     }
+
+    /** Attaches every synthesized `_meter_` field to its class. Must run after the module transform. */
+    fun commit() = meterField?.commit()
 
     private fun shouldInstrument(function: IrFunction): Boolean {
         if (function.body == null) return false
@@ -105,19 +104,11 @@ class TimedIrTransformer(
     }
 
     private fun instrument(function: IrFunction) {
-        val meterOfFn = meterOfFunction ?: return
         val timedFn = meterTimedFunction ?: return
         val measureFn = measureFunction ?: return
 
-        val thisParam = function.parameters.firstOrNull { it.kind == IrParameterKind.DispatchReceiver }
-        if (thisParam == null) {
-            messageCollector.reportError(
-                function,
-                "@Timed function '${function.name.asString()}' must be a member of a class or object " +
-                        "so `Meter.of(this::class)` is available.",
-            )
-            return
-        }
+        // Resolve (or synthesize) the `meter: Meter` to time against. Errors are reported inside.
+        val meterAccess = meterField?.access(function) ?: return
 
         val builder = DeclarationIrBuilder(pluginContext, function.symbol)
         val returnType = function.returnType
@@ -125,11 +116,10 @@ class TimedIrTransformer(
         // 1. Build the inline lambda `{ <original body> }` (a plain `() -> T`).
         val lambda = pluginContext.buildInlineLambda(function, returnType)
 
-        // 2. `Meter.of(this::class).timed("name").measure<returnType> { <lambda> }`.
-        val meterOf = builder.irOfThisClass(pluginContext, meterOfFn, thisParam)
+        // 2. `meter.timed("name").measure<returnType> { <lambda> }`.
         val timed = builder.irCall(timedFn).apply {
             timedFn.owner.parameters.firstOrNull { it.kind == IrParameterKind.DispatchReceiver }
-                ?.let { arguments[it] = meterOf }
+                ?.let { arguments[it] = meterAccess }
             timedFn.owner.parameters.firstOrNull { it.kind == IrParameterKind.Regular }
                 ?.let { arguments[it] = builder.irString(resolveName(function)) }
         }
@@ -160,7 +150,7 @@ class TimedIrTransformer(
             arguments[measureF] = lambdaExpression
         }
 
-        // 3. Replace the original body with `return Meter.of(this::class).timed(...).measure { ... }`.
+        // 3. Replace the original body with `return meter.timed(...).measure { ... }`.
         function.body = builder.irBlockBody { +irReturn(call) }
     }
 
