@@ -41,7 +41,10 @@ This project also tries to be fully compatible with `OpenTelemetry` standard.
     - [Json Appender](#json-appender)
 - [Tracing API](#tracing-api)
 - [Metering API](#metering-api)
+    - [Counter](#counter)
+    - [UpDownCounter](#updowncounter)
     - [Gauge](#gauge)
+    - [Histogram](#histogram)
 - [Compiler Plugin](#compiler-plugin)
     - [Logging (`@Logged`)](#logging-logged)
     - [Tracing (`@Trace`)](#tracing-trace)
@@ -296,7 +299,7 @@ Several types of metrics are supported:
   it will increase and decrease with the number of work items in the queue.
 - **Gauge**: Measures a current value at the time it is read. An example would be the fuel gauge in a vehicle. Gauges
   are asynchronous.
-- **Histogram** (in progress): A client-side aggregation of values, such as request latencies. A histogram is a good
+- **Histogram**: A client-side aggregation of values, such as request latencies. A histogram is a good
   choice if you are interested in value statistics. For example: How many requests take fewer than 1s?
 
 ```kotlin
@@ -318,6 +321,12 @@ val g1 = meter.gauge<Int>("thread-pool-size")
 delay(1000)
 g1.record(3, "pool" to "pool-a")
 g1.record(6, "pool" to "pool-b")
+
+// Create a Histogram that holds Double values.
+val h1 = meter.histogram<Double>("request-duration")
+delay(1000)
+h1.record(0.3, "path" to "/a")
+h1.record(0.5, "path" to "/a")
 ```
 
 Each time an operation is performed (i.e., a measurement is taken with a meter), an event is triggered and propagated to
@@ -350,13 +359,43 @@ println(metrics)
 // # HELP event-b
 // # TYPE event-b updowncounter
 // event-b {label="pool-b"} 4.0 1730360802506
+//
+// # TYPE request-duration histogram
+// request-duration_bucket {path="/a", le="+Inf"} 2 1730360802506
+// request-duration_sum {path="/a"} 0.8 1730360802506
+// request-duration_count {path="/a"} 2 1730360802506
+```
+
+### Counter
+
+A `Counter` accumulates a value that only ever goes up — for example the total number of processed requests. Use
+`increment` to add to it, or `set` to assign an absolute value.
+
+```kotlin
+val requests = meter.counter<Int>("requests-total")
+requests.increment(1, "path" to "/a")
+requests.increment(1, "path" to "/a")
+// You can also set an absolute value:
+requests.set(10, "path" to "/a")
+```
+
+### UpDownCounter
+
+An `UpDownCounter` behaves like a `Counter` but can also decrease — for example a queue length or the number of
+in-flight
+requests. In addition to `increment`/`set`, it supports `decrement`.
+
+```kotlin
+val queue = meter.upDownCounter<Int>("queue-size")
+queue.increment(3, "queue" to "jobs")
+queue.decrement(1, "queue" to "jobs")
 ```
 
 ### Gauge
 
-We also provide a convenient way to periodically poll and publish value changes, enabling automated and timely updates.
-This approach ensures that values are recorded consistently, which is particularly useful for monitoring changes over
-time and minimizing manual intervention.
+A `Gauge` records the current value at the time it is read. We also provide a convenient way to periodically poll and
+publish value changes, enabling automated and timely updates. This approach ensures that values are recorded
+consistently, which is particularly useful for monitoring changes over time and minimizing manual intervention.
 
 ```kotlin
 meter.gauge<Int>("thread-pool-size").poll(every = 10.seconds) {
@@ -367,6 +406,26 @@ meter.gauge<Int>("thread-pool-size").poll(every = 10.seconds) {
 
 Using this method, values are automatically recorded at regular intervals, making it ideal for tracking metrics in
 dynamic environments.
+
+### Histogram
+
+A `Histogram` samples individual observations (such as request latencies or payload sizes) and lets appenders aggregate
+their distribution. The `SimpleMeteringCollectorAppender` keeps a running `count` and `sum` per tag-set and exposes them
+as the mandatory OpenMetrics `_count`, `_sum` and cumulative `+Inf` bucket series.
+
+```kotlin
+val durations = meter.histogram<Double>("request-duration", unit = "seconds")
+durations.record(0.3, "path" to "/a")
+durations.record(0.5, "path" to "/a")
+```
+
+Like a `Gauge`, a `Histogram` extends the recorder API, so it can also be polled at a fixed interval:
+
+```kotlin
+meter.histogram<Double>("request-duration").poll(every = 10.seconds) {
+    record(measureLastRequestDuration(), "path" to "/a")
+}
+```
 
 ## Compiler Plugin
 

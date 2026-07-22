@@ -78,6 +78,25 @@ abstract class Meter(
     ): Instrument.Gauge<T> = Instrument.Gauge(name, this, unit, description)
 
     /**
+     * Creates a new histogram instrument with the specified name, unit, and description.
+     *
+     * A histogram samples individual observations (e.g. request durations or payload sizes) and
+     * lets appenders aggregate their distribution — typically exposing a running `count` and `sum`
+     * (and buckets where the appender supports them).
+     *
+     * @param T the numeric type of the values recorded by the histogram.
+     * @param name the name of the histogram.
+     * @param unit the unit of measurement for the histogram, which is optional.
+     * @param description a description of the histogram, which is optional.
+     * @return a new `Instrument.Histogram` instance.
+     */
+    fun <T : Number> histogram(
+        name: String,
+        unit: String? = null,
+        description: String? = null
+    ): Instrument.Histogram<T> = Instrument.Histogram(name, this, unit, description)
+
+    /**
      * Represents a base instrument used for recording various types of metric data.
      * https://opentelemetry.io/docs/specs/otel/metrics/api/#meter
      *
@@ -322,6 +341,25 @@ abstract class Meter(
             unit: String? = null,
             description: String? = null,
         ) : AbstractRecorder<T>(name, meter, Kind.Gauge, unit, description)
+
+        /**
+         * Represents a histogram instrument for sampling observations and aggregating their
+         * distribution (for example, request latencies). Values are reported through
+         * [AbstractRecorder.record]; appenders aggregate them into a `count`/`sum` (and buckets
+         * where supported).
+         *
+         * @param T the numeric type of the values recorded by the histogram.
+         * @param name the name of the histogram.
+         * @param meter the Meter instance to which this histogram belongs.
+         * @param unit the unit of measurement for the histogram, which is optional.
+         * @param description a description of the histogram, which is optional.
+         */
+        class Histogram<T : Number>(
+            name: String,
+            meter: Meter,
+            unit: String? = null,
+            description: String? = null,
+        ) : AbstractRecorder<T>(name, meter, Kind.Histogram, unit, description)
     }
 
     companion object {

@@ -7,9 +7,25 @@ import io.github.smyrgeorge.log4k.impl.Tags
 import io.github.smyrgeorge.log4k.impl.extensions.toName
 import kotlin.time.Instant
 
+/**
+ * An [Appender] that aggregates [MeteringEvent]s in memory and can render them as an
+ * OpenMetrics/Prometheus exposition string via [toOpenMetricsLineFormatString].
+ *
+ * Incoming events are folded into a per-instrument-and-tag-set [Instrument] held in [registry]:
+ * `CreateInstrument` registers an instrument's metadata (see [Instrument.Info]), while the value
+ * events (`Set`/`Increment`/`Decrement`/`Record`) mutate the matching aggregate. The aggregation
+ * model mirrors the OpenTelemetry instruments produced by [Meter].
+ *
+ * - OpenTelemetry metrics: https://opentelemetry.io/docs/specs/otel/metrics/api/
+ * - OpenMetrics: https://github.com/prometheus/OpenMetrics/blob/main/specification/OpenMetrics.md
+ */
 class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
     override val name: String = this::class.toName()
+
+    // The aggregated value per instrument-and-tag-set, keyed by `MeteringEvent.key()`.
     private val registry: MutableMap<Int, Instrument> = mutableMapOf()
+
+    // The metadata registered by `CreateInstrument`, keyed by instrument name.
     private val instruments: MutableMap<String, Instrument.Info> = mutableMapOf()
 
     override suspend fun append(event: MeteringEvent) {
@@ -50,6 +66,7 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
             is MeteringEvent.Record -> {
                 when (val instrument = event.instrument()) {
                     is Instrument.Gauge -> instrument.record(event)
+                    is Instrument.Histogram -> instrument.record(event)
                     else -> Unit
                 }
             }
@@ -128,11 +145,27 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
                     updatedAt = timestamp
                 )
 
-                Meter.Instrument.Kind.Histogram -> TODO()
+                Meter.Instrument.Kind.Histogram -> Instrument.Histogram(
+                    name = name,
+                    tags = tags,
+                    kind = info.kind,
+                    unit = info.unit,
+                    description = info.description,
+                    value = 0,
+                    updatedAt = timestamp
+                )
             }.also { registry[key] = it }
         } else existing
     }
 
+    /**
+     * The in-memory aggregate for a single instrument-and-tag-set, mirroring an OpenTelemetry
+     * instrument. Each implementation knows how to fold its value events and how to render itself
+     * as OpenMetrics.
+     *
+     * - OpenTelemetry instruments: https://opentelemetry.io/docs/specs/otel/metrics/api/#meter
+     * - OpenMetrics: https://github.com/prometheus/OpenMetrics/blob/main/specification/OpenMetrics.md
+     */
     sealed interface Instrument {
         val name: String
         val kind: Meter.Instrument.Kind
@@ -142,14 +175,24 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
         var value: Number
         var updatedAt: Instant?
 
+        /** Orders series that share a name (one per tag-set) deterministically within a `# TYPE` block. */
         fun sortKey(): Int = tags.hashCode()
 
+        /**
+         * The OpenMetrics metadata block (`# HELP`, `# UNIT`, `# TYPE`) emitted once per instrument name.
+         * https://github.com/prometheus/OpenMetrics/blob/main/specification/OpenMetrics.md#metricfamily
+         */
         fun openMetricsHeaderString(): String = buildString {
             description?.let { append("# HELP ").append(name).append(" ").append(it).appendLine() }
             unit?.let { append("# UNIT ").append(name).append(" ").append(it).appendLine() }
             append("# TYPE ").append(name).append(" ").append(kind.name.lowercase()).appendLine()
         }
 
+        /**
+         * The OpenMetrics sample line(s) for this series: `name{tags} value [updatedAt]`.
+         * Overridden by multi-line instruments such as [Histogram].
+         * https://github.com/prometheus/OpenMetrics/blob/main/specification/OpenMetrics.md#sample
+         */
         fun openMetricsValueString(): String = buildString {
             append(name)
             tags?.let { append(it.format()) }
@@ -158,9 +201,11 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
             appendLine()
         }
 
+        /** Renders the tags as an OpenMetrics label set, e.g. `{key="value",…}`. */
         fun Tags.format(): String =
             entries.joinToString(prefix = "{", postfix = "}") { (k, v) -> "$k=\"$v\"" }
 
+        /** Immutable metadata for an instrument, registered from a [MeteringEvent.CreateInstrument]. */
         data class Info(
             val name: String,
             val kind: Meter.Instrument.Kind,
@@ -168,6 +213,10 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
             val description: String?,
         )
 
+        /**
+         * Base for cumulative counter-style aggregates: the value is either overwritten ([set]) or
+         * increased ([increment]) as events arrive.
+         */
         abstract class AbstractCounter(
             override val name: String,
             override val tags: Tags?,
@@ -177,11 +226,13 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
             override var value: Number,
             override var updatedAt: Instant? = null,
         ) : Instrument {
+            /** Overwrites the current value (used for the absolute `set` operation). */
             fun set(event: MeteringEvent.Set) {
                 updatedAt = event.timestamp
                 value = event.value
             }
 
+            /** Adds the event's value to the current one, preserving its numeric type. */
             fun increment(event: MeteringEvent.Increment) {
                 updatedAt = event.timestamp
                 when (event.value) {
@@ -193,6 +244,10 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
             }
         }
 
+        /**
+         * Base for last-value aggregates: each observation replaces the previous value. Used by
+         * [Gauge]; [Histogram] aggregates its observations differently and does not extend this.
+         */
         abstract class AbstractRecorder(
             override val name: String,
             override val tags: Tags?,
@@ -202,12 +257,19 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
             override var value: Number,
             override var updatedAt: Instant? = null,
         ) : Instrument {
+            /** Replaces the current value with the latest observation. */
             fun record(event: MeteringEvent.Record) {
                 updatedAt = event.timestamp
                 value = event.value
             }
         }
 
+        /**
+         * A monotonically increasing counter (only ever `set` or `increment`ed).
+         *
+         * - OpenTelemetry: https://opentelemetry.io/docs/specs/otel/metrics/api/#counter
+         * - Prometheus: https://prometheus.io/docs/concepts/metric_types/#counter
+         */
         class Counter(
             name: String,
             tags: Tags?,
@@ -218,6 +280,11 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
             updatedAt: Instant? = null,
         ) : AbstractCounter(name, tags, kind, unit, description, value, updatedAt)
 
+        /**
+         * A counter that can also go down, adding [decrement] to the [AbstractCounter] operations.
+         *
+         * - OpenTelemetry: https://opentelemetry.io/docs/specs/otel/metrics/api/#updowncounter
+         */
         class UpDownCounter(
             name: String,
             tags: Tags?,
@@ -227,6 +294,7 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
             value: Number,
             updatedAt: Instant? = null,
         ) : AbstractCounter(name, tags, kind, unit, description, value, updatedAt) {
+            /** Subtracts the event's value from the current one; a no-op for a plain (monotonic) counter. */
             fun decrement(event: MeteringEvent.Decrement) {
                 if (kind == Meter.Instrument.Kind.Counter) return
                 updatedAt = event.timestamp
@@ -239,6 +307,12 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
             }
         }
 
+        /**
+         * A gauge that tracks the latest recorded value (it can arbitrarily rise and fall).
+         *
+         * - OpenTelemetry: https://opentelemetry.io/docs/specs/otel/metrics/api/#gauge
+         * - Prometheus: https://prometheus.io/docs/concepts/metric_types/#gauge
+         */
         class Gauge(
             name: String,
             tags: Tags?,
@@ -248,5 +322,47 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
             value: Number,
             updatedAt: Instant? = null,
         ) : AbstractRecorder(name, tags, kind, unit, description, value, updatedAt)
+
+        /**
+         * Aggregates sampled observations into a running `count` and `sum`. Unlike a gauge (which
+         * keeps only the last value), a histogram accumulates every recorded value.
+         *
+         * - OpenTelemetry: https://opentelemetry.io/docs/specs/otel/metrics/api/#histogram
+         * - Prometheus: https://prometheus.io/docs/concepts/metric_types/#histogram
+         */
+        class Histogram(
+            override val name: String,
+            override val tags: Tags?,
+            override val kind: Meter.Instrument.Kind,
+            override val unit: String?,
+            override val description: String?,
+            override var value: Number,
+            override var updatedAt: Instant? = null,
+        ) : Instrument {
+            // Running aggregates over the observed values.
+            private var count: Long = 0
+            private var sum: Double = 0.0
+
+            fun record(event: MeteringEvent.Record) {
+                updatedAt = event.timestamp
+                count += 1
+                sum += event.value.toDouble()
+                value = count // keep the interface's `value` in sync with the observation count.
+            }
+
+            /**
+             * A histogram is exposed as its cumulative `+Inf` bucket plus the mandatory `_sum` and
+             * `_count` series.
+             * https://github.com/prometheus/OpenMetrics/blob/main/specification/OpenMetrics.md#histogram
+             */
+            override fun openMetricsValueString(): String = buildString {
+                val ts = updatedAt?.let { " ${it.epochSeconds}" } ?: ""
+                val tagStr = tags?.format() ?: ""
+                val bucketTags = ((tags ?: emptyMap()) + ("le" to "+Inf")).format()
+                append(name).append("_bucket").append(bucketTags).append(" ").append(count).append(ts).appendLine()
+                append(name).append("_sum").append(tagStr).append(" ").append(sum).append(ts).appendLine()
+                append(name).append("_count").append(tagStr).append(" ").append(count).append(ts).appendLine()
+            }
+        }
     }
 }
