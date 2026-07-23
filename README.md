@@ -46,6 +46,7 @@ This project also tries to be fully compatible with `OpenTelemetry` standard.
     - [Gauge](#gauge)
     - [Histogram](#histogram)
 - [Compiler Plugin](#compiler-plugin)
+    - [Setup](#setup)
     - [Logging (`@Logged`)](#logging-logged)
     - [Metering (`@Timed`)](#metering-timed)
     - [Tracing (`@Trace`)](#tracing-trace)
@@ -434,6 +435,27 @@ The [`log4k-compiler-plugin`](./log4k-compiler-plugin) is a Kotlin IR compiler p
 your code — wrapping functions in tracing spans (`@Trace`), entry/exit logging (`@Logged`) and call/duration metrics
 (`@Timed`) — with no manual `trace.span("…") { }` blocks, `log.info("…")` calls or counters required. Because it
 operates on common IR before backend lowering, it works across all Kotlin Multiplatform targets.
+
+### Setup
+
+Apply the Gradle plugin — it wires the compiler plugin onto every Kotlin compilation, so `@Trace`, `@Timed` and
+`@Logged` are instrumented for all targets with nothing else to configure:
+
+```kotlin
+// https://central.sonatype.com/artifact/io.github.smyrgeorge/log4k-gradle-plugin
+plugins {
+    id("io.github.smyrgeorge.log4k") version "x.y.z"
+}
+```
+
+The annotations and their runtime ship with the core `log4k` artifact, so make sure one of the runtime modules is also
+on the classpath (`log4k`, `log4k-classic` or `log4k-context`):
+
+```kotlin
+dependencies {
+    implementation("io.github.smyrgeorge:log4k-classic:x.y.z")
+}
+```
 
 ### Logging (`@Logged`)
 

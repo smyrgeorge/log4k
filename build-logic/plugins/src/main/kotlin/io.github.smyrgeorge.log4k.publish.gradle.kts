@@ -1,3 +1,5 @@
+import com.vanniktech.maven.publish.GradlePlugin
+import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.KotlinMultiplatform
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import com.vanniktech.maven.publish.SourcesJar
@@ -9,16 +11,29 @@ plugins {
 val descriptions = mapOf(
     "log4k" to "A Comprehensive Logging and Tracing Solution for Kotlin Multiplatform.",
     "log4k-classic" to "A Comprehensive Logging and Tracing Solution for Kotlin Multiplatform.",
+    "log4k-compiler-plugin" to "Kotlin compiler plugin for log4k: compile-time @Logged, @Timed and @Trace instrumentation.",
+    "log4k-gradle-plugin" to "Gradle plugin that wires the log4k Kotlin compiler plugin onto every Kotlin compilation.",
     "log4k-context" to "A Comprehensive Logging and Tracing Solution for Kotlin Multiplatform.",
     "log4k-slf4j" to "A Comprehensive Logging and Tracing Solution for Kotlin Multiplatform.",
 )
 
 configure<MavenPublishBaseExtension> {
-    configure(
-        KotlinMultiplatform(
-            sourcesJar = SourcesJar.Sources()
+    // Gradle plugin modules publish the plugin jar plus its marker; everything else is Kotlin
+    // Multiplatform (JVM-only modules are still applied via the `multiplatform` Kotlin plugin).
+    if (pluginManager.hasPlugin("java-gradle-plugin")) {
+        configure(
+            GradlePlugin(
+                javadocJar = JavadocJar.Empty(),
+                sourcesJar = SourcesJar.Sources()
+            )
         )
-    )
+    } else {
+        configure(
+            KotlinMultiplatform(
+                sourcesJar = SourcesJar.Sources()
+            )
+        )
+    }
     coordinates(
         groupId = project.group as String,
         artifactId = project.name,

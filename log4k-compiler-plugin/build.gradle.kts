@@ -1,5 +1,6 @@
 plugins {
     id("io.github.smyrgeorge.log4k.multiplatform.jvm")
+    id("io.github.smyrgeorge.log4k.publish")
 }
 
 kotlin {
