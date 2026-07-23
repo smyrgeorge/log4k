@@ -359,7 +359,7 @@ abstract class Meter(
             fun decrement(value: T, vararg tags: Pair<String, Any>) {
                 if (meter.isMuted()) return
                 if (value.isLessThanZero()) error("Only non-negative values are allowed.")
-                val event = MeteringEvent.Increment(
+                val event = MeteringEvent.Decrement(
                     id = RootLogger.Metering.id(),
                     name = name,
                     tags = tags.toMap(),
