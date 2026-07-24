@@ -14,6 +14,8 @@ import assertk.assertions.startsWith
 import io.github.smyrgeorge.log4k.classic.debug
 import io.github.smyrgeorge.log4k.classic.error
 import io.github.smyrgeorge.log4k.classic.info
+import io.github.smyrgeorge.log4k.classic.trace
+import io.github.smyrgeorge.log4k.classic.warn
 import io.github.smyrgeorge.log4k.impl.SimpleLogger
 import io.github.smyrgeorge.log4k.utils.CapturingLoggingAppender
 import kotlinx.coroutines.test.runTest
@@ -302,5 +304,159 @@ class LoggerTest {
         // If muting had not gated the middle log, "while muted" would be the next event, not "after".
         val next = appender.awaitEvent { it.logger == "test.mute" }
         assertThat(next.message).isEqualTo("after")
+    }
+
+    // --- extended: classic API breadth (trace / warn / args) -----------------------------------
+
+    @Test
+    fun classicTraceAndWarn_emitAtTheirLevels() = runTest {
+        val logger = SimpleLogger("test.classic.levels", Level.TRACE)
+
+        logger.trace("t-msg")
+        logger.warn("w-msg")
+
+        val events = appender.awaitEvents(2) { it.logger == "test.classic.levels" }
+        assertThat(events[0].level).isEqualTo(Level.TRACE)
+        assertThat(events[0].message).isEqualTo("t-msg")
+        assertThat(events[1].level).isEqualTo(Level.WARN)
+        assertThat(events[1].message).isEqualTo("w-msg")
+    }
+
+    @Test
+    fun classicTrace_withArguments_carriesThemVerbatim() = runTest {
+        val logger = SimpleLogger("test.classic.trace.args", Level.TRACE)
+
+        logger.trace("value = {}", 99)
+
+        val event = appender.awaitEvent { it.logger == "test.classic.trace.args" }
+        assertThat(event.message).isEqualTo("value = {}")
+        assertThat(event.arguments.toList()).containsExactly(99)
+    }
+
+    @Test
+    fun classicWarn_lazyWithThrowable_capturesBoth() = runTest {
+        val logger = SimpleLogger("test.classic.warn.lazy", Level.TRACE)
+        val ex = RuntimeException("warned")
+
+        logger.warn(ex) { "lazy warn" }
+
+        val event = appender.awaitEvent { it.logger == "test.classic.warn.lazy" }
+        assertThat(event.level).isEqualTo(Level.WARN)
+        assertThat(event.message).isEqualTo("lazy warn")
+        assertThat(event.throwable).isSameInstanceAs(ex)
+    }
+
+    // --- extended: span-scoped classic methods -------------------------------------------------
+
+    @Test
+    fun spanScopedInfo_attachesSpanToEvent() = runTest {
+        val logger = SimpleLogger("test.span.info", Level.TRACE)
+        val span = Tracer.of("t").span(id = "sid", traceId = "tid", name = "s")
+
+        logger.info(span, "with span")
+
+        val event = appender.awaitEvent { it.logger == "test.span.info" }
+        assertThat(event.level).isEqualTo(Level.INFO)
+        assertThat(event.message).isEqualTo("with span")
+        assertThat(event.span).isSameInstanceAs(span)
+    }
+
+    @Test
+    fun spanScopedError_withThrowable_attachesSpanAndThrowable() = runTest {
+        val logger = SimpleLogger("test.span.error", Level.TRACE)
+        val span = Tracer.of("t").span(id = "sid", traceId = "tid", name = "s")
+        val ex = RuntimeException("span-boom")
+
+        logger.error(span, "failed", ex)
+
+        val event = appender.awaitEvent { it.logger == "test.span.error" }
+        assertThat(event.level).isEqualTo(Level.ERROR)
+        assertThat(event.span).isSameInstanceAs(span)
+        assertThat(event.throwable).isSameInstanceAs(ex)
+    }
+
+    @Test
+    fun spanScopedLazyDebug_notEvaluatedWhenLevelDisabled() = runTest {
+        val logger = SimpleLogger("test.span.lazy", Level.INFO)
+        val span = Tracer.of("t").span(id = "sid", traceId = "tid", name = "s")
+        var evaluated = false
+
+        logger.debug(span) { evaluated = true; "x" }
+
+        assertThat(evaluated).isFalse()
+        logger.info(span, "marker")
+        val first = appender.awaitEvent { it.logger == "test.span.lazy" }
+        assertThat(first.message).isEqualTo("marker")
+        assertThat(first.span).isSameInstanceAs(span)
+    }
+
+    // --- extended: logged(...) interaction with the logger's own level -------------------------
+
+    @Test
+    fun logged_whenEntryExitLevelBelowThreshold_stillLogsErrorOnThrow() = runTest {
+        val logger = SimpleLogger("test.logged.gated.err", Level.WARN)
+        val boom = IllegalStateException("boom")
+
+        assertFailsWith<IllegalStateException> {
+            logger.logged<Unit>(Level.INFO, null, "op", "") { throw boom }
+        }
+
+        // The entry/exit lines are at INFO (< WARN, suppressed); the failure line is at ERROR (emitted).
+        val event = appender.awaitEvent { it.logger == "test.logged.gated.err" }
+        assertThat(event.level).isEqualTo(Level.ERROR)
+        assertThat(event.message).startsWith("✗ op failed (")
+        assertThat(event.throwable).isSameInstanceAs(boom)
+    }
+
+    @Test
+    fun logged_whenEntryExitLevelBelowThreshold_normalCompletionEmitsNothing() = runTest {
+        val logger = SimpleLogger("test.logged.gated.ok", Level.WARN)
+
+        val result = logger.logged(Level.INFO, null, "op", "") { 7 }
+
+        assertThat(result).isEqualTo(7)
+        // Both entry and exit are at INFO (< WARN), so nothing is emitted; a WARN marker comes first.
+        logger.warn("marker")
+        val first = appender.awaitEvent { it.logger == "test.logged.gated.ok" }
+        assertThat(first.message).isEqualTo("marker")
+    }
+
+    // --- extended: dynamic level & registry mute -----------------------------------------------
+
+    @Test
+    fun changingLevelAtRuntime_gatesSubsequentLogs() = runTest {
+        val logger = SimpleLogger("test.dynamic.level", Level.INFO)
+
+        logger.level = Level.ERROR
+        logger.info("suppressed") // INFO < ERROR now
+        logger.error("emitted")
+
+        val first = appender.awaitEvent { it.logger == "test.dynamic.level" }
+        assertThat(first.level).isEqualTo(Level.ERROR)
+        assertThat(first.message).isEqualTo("emitted")
+    }
+
+    @Test
+    fun registryMute_gatesRegisteredLogger_andUnmuteRestores() = runTest {
+        val name = "test.registry.mute"
+        val logger = SimpleLogger(name, Level.INFO)
+        Logger.registry.register(logger)
+
+        Logger.registry.mute(name)
+        assertThat(logger.isMuted()).isTrue()
+        logger.info("while muted") // suppressed
+
+        Logger.registry.unmute(name)
+        assertThat(logger.isMuted()).isFalse()
+        logger.info("after")
+
+        val next = appender.awaitEvent { it.logger == name }
+        assertThat(next.message).isEqualTo("after")
+    }
+
+    @Test
+    fun loggerConstructedAtOff_reportsMuted() {
+        val logger = SimpleLogger("test.off.muted", Level.OFF)
+        assertThat(logger.isMuted()).isTrue()
     }
 }

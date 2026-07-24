@@ -3,6 +3,9 @@ package io.github.smyrgeorge.log4k
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isInstanceOf
+import assertk.assertions.isNotEmpty
+import assertk.assertions.isNotSameInstanceAs
+import assertk.assertions.isSameInstanceAs
 import io.github.smyrgeorge.log4k.Meter.Instrument.Kind
 import io.github.smyrgeorge.log4k.impl.SimpleMeter
 import io.github.smyrgeorge.log4k.utils.CapturingMeteringAppender
@@ -22,6 +25,8 @@ import kotlin.test.assertFailsWith
  * `awaitValue(...)` until the event in question has been appended.
  */
 class MeterTest {
+
+    private class SampleForMeterFactory
 
     private lateinit var appender: CapturingMeteringAppender
 
@@ -155,5 +160,130 @@ class MeterTest {
         }
         assertThat(firstValue.name).isEqualTo("marker.count")
         assertThat((firstValue as MeteringEvent.ValueEvent).value).isEqualTo(9L)
+    }
+
+    // --- Value events: set / record / negative handling ----------------------------------------
+
+    @Test
+    fun counterSet_emitsSetEvent() = runTest {
+        val meter = SimpleMeter("test.meter", Level.INFO)
+        val counter = meter.counter<Long>("orders.total")
+
+        counter.set(10L)
+
+        val event = appender.awaitValue("orders.total")
+        assertThat(event).isInstanceOf(MeteringEvent.Set::class)
+        assertThat(event.value).isEqualTo(10L)
+    }
+
+    @Test
+    fun counterSet_negativeValue_isRejected() {
+        val meter = SimpleMeter("test.meter", Level.INFO)
+        val counter = meter.counter<Long>("negative.set")
+        assertFailsWith<IllegalStateException> { counter.set(-1L) }
+    }
+
+    @Test
+    fun upDownCounterDecrement_negativeValue_isRejected() {
+        val meter = SimpleMeter("test.meter", Level.INFO)
+        val counter = meter.upDownCounter<Long>("negative.decrement")
+        assertFailsWith<IllegalStateException> { counter.decrement(-1L) }
+    }
+
+    @Test
+    fun negativeValues_rejectedAcrossNumericTypes() {
+        val meter = SimpleMeter("test.meter", Level.INFO)
+        assertFailsWith<IllegalStateException> { meter.counter<Int>("neg.int").increment(-1) }
+        assertFailsWith<IllegalStateException> { meter.counter<Long>("neg.long").increment(-1L) }
+        assertFailsWith<IllegalStateException> { meter.counter<Float>("neg.float").increment(-1.0f) }
+        assertFailsWith<IllegalStateException> { meter.counter<Double>("neg.double").increment(-1.0) }
+    }
+
+    @Test
+    fun histogramRecord_allowsNegativeValues() = runTest {
+        val meter = SimpleMeter("test.meter", Level.INFO)
+        val histogram = meter.histogram<Double>("delta") // recorders do not gate negatives
+
+        histogram.record(-3.5)
+
+        val event = appender.awaitValue("delta")
+        assertThat(event).isInstanceOf(MeteringEvent.Record::class)
+        assertThat(event.value).isEqualTo(-3.5)
+    }
+
+    @Test
+    fun counterOfInt_carriesIntValue() = runTest {
+        val meter = SimpleMeter("test.meter", Level.INFO)
+        val counter = meter.counter<Int>("int.count")
+
+        counter.increment(2)
+
+        val event = appender.awaitValue("int.count")
+        assertThat(event.value).isEqualTo(2)
+    }
+
+    // --- Instrument kinds & metadata on creation -----------------------------------------------
+
+    @Test
+    fun instrumentKinds_areReportedOnCreation() = runTest {
+        val meter = SimpleMeter("test.meter", Level.INFO)
+
+        meter.upDownCounter<Long>("kind.updown")
+        meter.gauge<Double>("kind.gauge")
+        meter.histogram<Double>("kind.histogram")
+
+        assertThat(appender.awaitCreate("kind.updown").kind).isEqualTo(Kind.UpDownCounter)
+        assertThat(appender.awaitCreate("kind.gauge").kind).isEqualTo(Kind.Gauge)
+        assertThat(appender.awaitCreate("kind.histogram").kind).isEqualTo(Kind.Histogram)
+    }
+
+    @Test
+    fun histogramCreation_carriesUnit() = runTest {
+        val meter = SimpleMeter("test.meter", Level.INFO)
+
+        meter.histogram<Double>("latency.unit", unit = "ms")
+
+        assertThat(appender.awaitCreate("latency.unit").unit).isEqualTo("ms")
+    }
+
+    // --- timed(...) bundle ---------------------------------------------------------------------
+
+    @Test
+    fun timed_cachesBundleByName() {
+        val meter = SimpleMeter("test.meter", Level.INFO)
+        assertThat(meter.timed("cache.op")).isSameInstanceAs(meter.timed("cache.op"))
+        assertThat(meter.timed("cache.op")).isNotSameInstanceAs(meter.timed("cache.other"))
+    }
+
+    @Test
+    fun timed_createsCallsErrorsAndDurationInstruments() = runTest {
+        val meter = SimpleMeter("test.meter", Level.INFO)
+
+        meter.timed("timed.svc")
+
+        assertThat(appender.awaitCreate("timed.svc.calls").kind).isEqualTo(Kind.Counter)
+        assertThat(appender.awaitCreate("timed.svc.errors").kind).isEqualTo(Kind.Counter)
+        val duration = appender.awaitCreate("timed.svc.duration")
+        assertThat(duration.kind).isEqualTo(Kind.Histogram)
+        assertThat(duration.unit).isEqualTo("ms")
+    }
+
+    // --- Companion factory / registry ----------------------------------------------------------
+
+    @Test
+    fun of_byName_returnsSimpleMeter_andCachesByName() {
+        val a = Meter.of("test.meter.factory.ByName")
+        val b = Meter.of("test.meter.factory.ByName")
+        assertThat(a).isInstanceOf(SimpleMeter::class)
+        assertThat(a.name).isEqualTo("test.meter.factory.ByName")
+        assertThat(a).isSameInstanceAs(b)
+    }
+
+    @Test
+    fun of_byClass_cachesInstance() {
+        val a = Meter.of(SampleForMeterFactory::class)
+        val b = Meter.of(SampleForMeterFactory::class)
+        assertThat(a).isSameInstanceAs(b)
+        assertThat(a.name).isNotEmpty()
     }
 }
