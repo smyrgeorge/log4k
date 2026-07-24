@@ -49,7 +49,7 @@ This project also tries to be fully compatible with `OpenTelemetry` standard.
     - [Setup](#setup)
     - [Logging (`@Logged`)](#logging-logged)
     - [Metering (`@Timed`)](#metering-timed)
-    - [Tracing (`@Trace`)](#tracing-trace)
+    - [Tracing (`@Traced`)](#tracing-traced)
 - [Appenders](#appenders)
     - [Logging](#logging)
     - [Tracing](#tracing)
@@ -432,13 +432,13 @@ meter.histogram<Double>("request-duration").poll(every = 10.seconds) {
 ## Compiler Plugin
 
 The [`log4k-compiler-plugin`](./log4k-compiler-plugin) is a Kotlin IR compiler plugin that automatically instruments
-your code — wrapping functions in tracing spans (`@Trace`), entry/exit logging (`@Logged`) and call/duration metrics
+your code — wrapping functions in tracing spans (`@Traced`), entry/exit logging (`@Logged`) and call/duration metrics
 (`@Timed`) — with no manual `trace.span("…") { }` blocks, `log.info("…")` calls or counters required. Because it
 operates on common IR before backend lowering, it works across all Kotlin Multiplatform targets.
 
 ### Setup
 
-Apply the Gradle plugin — it wires the compiler plugin onto every Kotlin compilation, so `@Trace`, `@Timed` and
+Apply the Gradle plugin — it wires the compiler plugin onto every Kotlin compilation, so `@Traced`, `@Timed` and
 `@Logged` are instrumented for all targets with nothing else to configure:
 
 ```kotlin
@@ -543,13 +543,13 @@ OrderService.placeOrder.duration_sum{} 1.732 1730360802506
 OrderService.placeOrder.duration_count{} 3 1730360802506
 ```
 
-### Tracing (`@Trace`)
+### Tracing (`@Traced`)
 
-Annotate a function with `@Trace` and its body is wrapped in a new span at compile time — without a single explicit
+Annotate a function with `@Traced` and its body is wrapped in a new span at compile time — without a single explicit
 `span { }` call:
 
 ```kotlin
-@Trace
+@Traced
 context(_: TracingContext)
 suspend fun loadUser(id: Long): User {
     // ... runs inside a span (started, ended, and marked failed on exceptions).
@@ -566,9 +566,9 @@ The new span's **parent** (and the tracer that creates it) is resolved from what
 3. otherwise a `trace: Tracer` member — reused, or synthesized as `private val _trace_ = Tracer.of(this::class)` — which
    creates a new **root** span (mirroring how `@Logged`/`@Timed` resolve their logger/meter).
 
-- **Span name** — `@Trace(name = "…")`; when omitted it defaults to `ClassName.functionName`.
-- **Static tags** — `@Trace(tags = [Tag("component", "billing")])` attaches key/value tags to the span.
-- **Class-level** — annotate a **class** with `@Trace` to instrument every eligible public member function; class-level
+- **Span name** — `@Traced(name = "…")`; when omitted it defaults to `ClassName.functionName`.
+- **Static tags** — `@Traced(tags = [Tag("component", "billing")])` attaches key/value tags to the span.
+- **Class-level** — annotate a **class** with `@Traced` to instrument every eligible public member function; class-level
   `tags` apply to every generated span.
 - **Opt out** — `@NoTrace` excludes a single function, or (on a class) disables tracing for the whole class.
 

@@ -82,7 +82,7 @@ fun IrPluginContext.moveBody(function: IrFunction, lambda: IrFunction): IrBlockB
  * be passed to an `inline` helper such as `span { … }`, `logged { … }` or `measure { … }`.
  *
  * When [extensionReceiverType] is provided, the lambda gains an extension receiver of that type
- * (e.g. `Span.Local.() -> T` for `@Trace`); otherwise it is a plain `() -> T`.
+ * (e.g. `Span.Local.() -> T` for `@Traced`); otherwise it is a plain `() -> T`.
  */
 fun IrPluginContext.buildInlineLambda(
     enclosing: IrFunction,
@@ -129,7 +129,7 @@ fun DeclarationIrBuilder.irOfThisClass(
 
 /**
  * The instrumentation name of [this] function: `"ClassName.functionName"`, or just the function
- * name for a top-level function. Used as the default span name (`@Trace`) and the log name (`@Logged`).
+ * name for a top-level function. Used as the default span name (`@Traced`) and the log name (`@Logged`).
  */
 fun IrFunction.qualifiedName(): String {
     val functionName = name.asString()

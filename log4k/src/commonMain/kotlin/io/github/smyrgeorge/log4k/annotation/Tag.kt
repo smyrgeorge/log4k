@@ -1,8 +1,8 @@
 package io.github.smyrgeorge.log4k.annotation
 
 /**
- * A single static key/value tag attached to a [Trace] span, e.g.
- * `@Trace(tags = [Tag("component", "billing")])`.
+ * A single static key/value tag attached to a [Traced] span, e.g.
+ * `@Traced(tags = [Tag("component", "billing")])`.
  *
  * Kotlin annotation parameters cannot be a `Map`, so tags are expressed as an array of this
  * annotation; the `log4k-compiler-plugin` materializes them onto the span's `tags` at compile

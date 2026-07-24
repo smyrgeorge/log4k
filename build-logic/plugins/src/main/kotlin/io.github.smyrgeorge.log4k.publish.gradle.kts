@@ -11,7 +11,7 @@ plugins {
 val descriptions = mapOf(
     "log4k" to "A Comprehensive Logging and Tracing Solution for Kotlin Multiplatform.",
     "log4k-classic" to "A Comprehensive Logging and Tracing Solution for Kotlin Multiplatform.",
-    "log4k-compiler-plugin" to "Kotlin compiler plugin for log4k: compile-time @Logged, @Timed and @Trace instrumentation.",
+    "log4k-compiler-plugin" to "Kotlin compiler plugin for log4k: compile-time @Logged, @Timed and @Traced instrumentation.",
     "log4k-gradle-plugin" to "Gradle plugin that wires the log4k Kotlin compiler plugin onto every Kotlin compilation.",
     "log4k-context" to "A Comprehensive Logging and Tracing Solution for Kotlin Multiplatform.",
     "log4k-slf4j" to "A Comprehensive Logging and Tracing Solution for Kotlin Multiplatform.",

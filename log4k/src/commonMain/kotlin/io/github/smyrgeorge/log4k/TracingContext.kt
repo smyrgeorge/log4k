@@ -61,7 +61,7 @@ interface TracingContext {
 
         /**
          * The runtime helper the `log4k-compiler-plugin` generates a call to for
-         * [io.github.smyrgeorge.log4k.annotation.Trace]. Executes [f] inside a new span whose parent
+         * [io.github.smyrgeorge.log4k.annotation.Traced]. Executes [f] inside a new span whose parent
          * and tracer are resolved from whichever of [context], [parent] or [tracer] is in scope (the
          * plugin passes exactly one): the [context]'s current span, else [parent], else a new root
          * span from [tracer]. The span is started, ended, and — if [f] throws — marked failed (the

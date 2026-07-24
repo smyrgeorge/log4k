@@ -37,7 +37,7 @@ gradlePlugin {
             implementationClass = "io.github.smyrgeorge.log4k.gradle.Log4kGradlePlugin"
             displayName = "log4k Gradle plugin"
             description =
-                "Wires the log4k Kotlin compiler plugin (@Logged, @Timed, @Trace) onto every Kotlin compilation."
+                "Wires the log4k Kotlin compiler plugin (@Logged, @Timed, @Traced) onto every Kotlin compilation."
         }
     }
 }

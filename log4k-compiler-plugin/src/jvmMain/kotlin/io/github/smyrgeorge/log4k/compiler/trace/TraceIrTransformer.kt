@@ -48,7 +48,7 @@ import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 
 /**
- * Rewrites the body of every function annotated with `io.github.smyrgeorge.log4k.annotation.Trace`
+ * Rewrites the body of every function annotated with `io.github.smyrgeorge.log4k.annotation.Traced`
  * so that it is executed inside a new tracing span.
  *
  * The span's **parent** (and the tracer that creates it) is resolved from what is in scope, in order:
@@ -59,7 +59,7 @@ import org.jetbrains.kotlin.name.Name
  *
  * Given:
  * ```kotlin
- * @Trace(name = "load")
+ * @Traced(name = "load")
  * context(_: TracingContext)
  * suspend fun load(id: Long): User { /* body */ }
  * ```
@@ -95,9 +95,9 @@ class TraceIrTransformer(
 
     // Reuses a `trace: Tracer` member, or synthesizes `private val _trace_ = Tracer.of(this::class)`.
     private val tracerField: OfThisClassField? =
-        OfThisClassField.of(pluginContext, finder, messageCollector, "Tracer", "@Trace", "trace", "_trace_")
+        OfThisClassField.of(pluginContext, finder, messageCollector, "Tracer", "@Traced", "trace", "_trace_")
 
-    // Used to materialize @Trace(tags = [...]) as `this.tags.put(key, value)` inside the span lambda.
+    // Used to materialize @Traced(tags = [...]) as `this.tags.put(key, value)` inside the span lambda.
     private val spanTagsGetter: IrSimpleFunctionSymbol? = finder.findProperties(
         CallableId(ClassId(LOG4K_PACKAGE, FqName("TracingEvent.Span"), false), Name.identifier("tags")),
     ).firstOrNull()?.owner?.getter?.symbol
@@ -123,15 +123,15 @@ class TraceIrTransformer(
 
         val enclosingClass = function.parentClassOrNull
         // @NoTrace on the function — or on its class (a per-class kill switch) — disables tracing,
-        // overriding any @Trace.
+        // overriding any @Traced.
         if (function.hasAnnotation(NO_TRACE_ANNOTATION)) return false
         if (enclosingClass?.hasAnnotation(NO_TRACE_ANNOTATION) == true) return false
 
-        // Explicit @Trace on the function.
-        if (function.hasAnnotation(TRACE_ANNOTATION)) return true
+        // Explicit @Traced on the function.
+        if (function.hasAnnotation(TRACED_ANNOTATION)) return true
 
-        // Class-level @Trace: instrument every eligible public member function.
-        if (enclosingClass == null || !enclosingClass.hasAnnotation(TRACE_ANNOTATION)) return false
+        // Class-level @Traced: instrument every eligible public member function.
+        if (enclosingClass == null || !enclosingClass.hasAnnotation(TRACED_ANNOTATION)) return false
         return function.isClassLevelEligible()
     }
 
@@ -158,7 +158,7 @@ class TraceIrTransformer(
         val parentArgParam = regular[1]
         val tracerArgParam = regular[2]
         val nameArgParam = regular[3]
-        // regular[4] is `tags` — left to its `emptyMap()` default; @Trace tags are materialized into
+        // regular[4] is `tags` — left to its `emptyMap()` default; @Traced tags are materialized into
         // `span.tags` inside the lambda below.
 
         val builder = DeclarationIrBuilder(pluginContext, function.symbol)
@@ -186,7 +186,7 @@ class TraceIrTransformer(
             extensionReceiverName = Name.identifier($$"$this$span"),
         )
 
-        // 1b. Materialize `@Trace(tags = [...])` as `this.tags.put(k, v)` at the start of the lambda.
+        // 1b. Materialize `@Traced(tags = [...])` as `this.tags.put(k, v)` at the start of the lambda.
         val tags = resolveTags(function)
         if (tags.isNotEmpty()) {
             val tagsGetter = spanTagsGetter
@@ -196,7 +196,7 @@ class TraceIrTransformer(
             if (tagsGetter == null || putFn == null || lambdaReceiver == null || lambdaBody == null) {
                 messageCollector.reportError(
                     function,
-                    "log4k-compiler-plugin: could not apply @Trace tags (unresolved `Span.tags` / `MutableMap.put`).",
+                    "log4k-compiler-plugin: could not apply @Traced tags (unresolved `Span.tags` / `MutableMap.put`).",
                 )
                 return
             }
@@ -231,7 +231,7 @@ class TraceIrTransformer(
     }
 
     private fun resolveSpanName(function: IrFunction): String {
-        val annotation = function.getAnnotation(TRACE_ANNOTATION)
+        val annotation = function.getAnnotation(TRACED_ANNOTATION)
         val configured = (annotation?.arguments?.getOrNull(0) as? IrConst)?.value as? String
         if (!configured.isNullOrBlank()) return configured
 
@@ -239,11 +239,11 @@ class TraceIrTransformer(
         return function.qualifiedName()
     }
 
-    /** Reads the `@Trace(tags = [Tag(k, v), …])` array into (key, value) pairs. */
+    /** Reads the `@Traced(tags = [Tag(k, v), …])` array into (key, value) pairs. */
     private fun resolveTags(function: IrFunction): List<Pair<String, String>> {
         // Class-level tags come first so a function's own tags override them (later puts win).
-        val classTags = tagsOf(function.parentClassOrNull?.getAnnotation(TRACE_ANNOTATION))
-        val functionTags = tagsOf(function.getAnnotation(TRACE_ANNOTATION))
+        val classTags = tagsOf(function.parentClassOrNull?.getAnnotation(TRACED_ANNOTATION))
+        val functionTags = tagsOf(function.getAnnotation(TRACED_ANNOTATION))
         return classTags + functionTags
     }
 
@@ -278,7 +278,7 @@ class TraceIrTransformer(
     }
 
     companion object {
-        private val TRACE_ANNOTATION = FqName("io.github.smyrgeorge.log4k.annotation.Trace")
+        private val TRACED_ANNOTATION = FqName("io.github.smyrgeorge.log4k.annotation.Traced")
         private val NO_TRACE_ANNOTATION = FqName("io.github.smyrgeorge.log4k.annotation.NoTrace")
     }
 }

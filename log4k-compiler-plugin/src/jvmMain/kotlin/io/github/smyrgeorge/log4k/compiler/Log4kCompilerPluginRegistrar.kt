@@ -10,7 +10,7 @@ import org.jetbrains.kotlin.config.CompilerConfiguration
 
 /**
  * Registers every log4k IR instrumentation pass:
- * - [TraceIrGenerationExtension] — wraps `@Trace` functions in a tracing span.
+ * - [TraceIrGenerationExtension] — wraps `@Traced` functions in a tracing span.
  * - [TimedIrGenerationExtension] — wraps `@Timed` functions in call/error/duration metrics.
  * - [LoggedIrGenerationExtension] — wraps `@Logged` functions in entry/exit logging.
  */

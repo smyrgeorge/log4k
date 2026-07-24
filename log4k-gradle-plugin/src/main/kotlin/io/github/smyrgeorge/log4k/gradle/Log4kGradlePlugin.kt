@@ -18,7 +18,7 @@ import org.jetbrains.kotlin.gradle.plugin.SubpluginOption
  * }
  * ```
  *
- * There is nothing else to configure: `@Trace`, `@Timed` and `@Logged` instrumentation runs for
+ * There is nothing else to configure: `@Traced`, `@Timed` and `@Logged` instrumentation runs for
  * all targets and the common metadata compilation. The annotations themselves live in
  * `log4k-classic`, which the consumer is expected to add as a regular dependency.
  */

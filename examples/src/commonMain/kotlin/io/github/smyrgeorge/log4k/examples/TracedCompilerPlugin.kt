@@ -6,7 +6,7 @@ import io.github.smyrgeorge.log4k.TracingContext
 import io.github.smyrgeorge.log4k.TracingEvent
 import io.github.smyrgeorge.log4k.annotation.NoTrace
 import io.github.smyrgeorge.log4k.annotation.Tag
-import io.github.smyrgeorge.log4k.annotation.Trace
+import io.github.smyrgeorge.log4k.annotation.Traced
 import io.github.smyrgeorge.log4k.impl.appenders.simple.SimpleConsoleLoggingAppender
 import io.github.smyrgeorge.log4k.impl.appenders.simple.SimpleConsoleTracingAppender
 import kotlinx.coroutines.delay
@@ -14,16 +14,16 @@ import kotlinx.coroutines.runBlocking
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
-object TraceCompilerPlugin {
+object TracedCompilerPlugin {
 
     @NoTrace
     class DisabledService {
-        @Trace(name = "should-not-appear")
+        @Traced(name = "should-not-appear")
         context(_: TracingContext)
         fun ignored(): String = "ignored"
     }
 
-    @Trace(tags = [Tag("layer", "service")])
+    @Traced(tags = [Tag("layer", "service")])
     class UserService {
         context(_: TracingContext)
         fun load(id: Long): String = "user-$id" // traced -> span "UserService.load" (parent = ctx's current)
@@ -39,20 +39,20 @@ object TraceCompilerPlugin {
 
     // --- span in scope (no TracingContext) ---
 
-    @Trace(name = "child-op")
+    @Traced(name = "child-op")
     context(_: TracingEvent.Span.Local)
     fun childOp(): String = "child-done" // parent = the Span.Local in scope
 
     // --- suspend functions ---
 
-    @Trace(name = "outer-span", tags = [Tag("component", "billing"), Tag("tier", "gold")])
+    @Traced(name = "outer-span", tags = [Tag("component", "billing"), Tag("tier", "gold")])
     context(_: TracingContext)
     suspend fun outer(): Int {
         val n = inner()
         return n + 1
     }
 
-    @Trace // no name -> defaults to "ClassName.functionName": "TraceCompilerPlugin.inner"
+    @Traced // no name -> defaults to "ClassName.functionName": "TracedCompilerPlugin.inner"
     context(_: TracingContext)
     suspend fun inner(): Int {
         delay(10.milliseconds)
@@ -61,13 +61,13 @@ object TraceCompilerPlugin {
 
     // --- non-suspend functions ---
 
-    @Trace(name = "compute")
+    @Traced(name = "compute")
     context(_: TracingContext)
     fun compute(x: Int): Int {
         return square(x) + 1
     }
 
-    @Trace // no name -> defaults to "ClassName.functionName": "TraceCompilerPlugin.square"
+    @Traced // no name -> defaults to "ClassName.functionName": "TracedCompilerPlugin.square"
     context(_: TracingContext)
     fun square(x: Int): Int {
         return x * x
@@ -75,7 +75,7 @@ object TraceCompilerPlugin {
 
     // --- exception path ---
 
-    @Trace(name = "boom")
+    @Traced(name = "boom")
     context(_: TracingContext)
     suspend fun boom() {
         delay(5.milliseconds)
@@ -113,7 +113,7 @@ object TraceCompilerPlugin {
 
         delay(1.seconds)
 
-        // class-level @Trace: `load` (span 'UserService.load') and `helper` (root span
+        // class-level @Traced: `load` (span 'UserService.load') and `helper` (root span
         // 'UserService.helper', via the synthesized `_trace_`) are both traced; `secret` opts out.
         val service = UserService()
         with(TracingContext.create(tracer = tracer)) {
@@ -131,7 +131,7 @@ object TraceCompilerPlugin {
 
         delay(1.seconds)
 
-        // class-level @NoTrace kill switch: no spans at all, even though `ignored` has @Trace.
+        // class-level @NoTrace kill switch: no spans at all, even though `ignored` has @Traced.
         with(TracingContext.create(tracer = tracer)) {
             println(">> ignored() -> ${DisabledService().ignored()}  (@NoTrace class -> NOT traced)")
         }
