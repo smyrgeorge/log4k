@@ -24,7 +24,7 @@ import kotlin.test.assertFailsWith
  * Delivery is asynchronous, so the tests run inside [runTest] and suspend on `awaitCreate(...)` /
  * `awaitValue(...)` until the event in question has been appended.
  */
-class MeterTest {
+class MeterTests {
 
     private class SampleForMeterFactory
 

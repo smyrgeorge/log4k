@@ -31,3 +31,16 @@ kotlin {
         }
     }
 }
+
+// Apply the log4k compiler plugin to the *test* compilations only, so that @Traced/@Logged/@Timed
+// annotated functions in `commonTest` are actually instrumented and can be exercised end-to-end
+// (annotation -> IR plugin -> runtime -> RootLogger -> capturing appender). The library's own main
+// sources are intentionally left untouched. There is no dependency cycle: the compiler plugin only
+// needs `kotlin-compiler-embeddable`, not this module.
+afterEvaluate {
+    configurations.names
+        .filter { it.startsWith("kotlinCompilerPluginClasspath") && it.contains("Test") }
+        .forEach { cfg ->
+            dependencies.add(cfg, project(":log4k-compiler-plugin"))
+        }
+}

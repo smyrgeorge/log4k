@@ -34,7 +34,7 @@ import kotlin.test.assertFailsWith
  * `awaitEvents(...)` until the event(s) in question have been appended. Suppression ("no event")
  * cases are proven deterministically by ordering against a marker log rather than with a timeout.
  */
-class LoggerTest {
+class LoggerTests {
 
     private class SampleForFactory
 

@@ -29,7 +29,7 @@ import kotlin.test.assertFailsWith
  * Delivery is asynchronous, so the tests run inside [runTest] and suspend on `awaitSpan(...)` until the
  * span in question has been appended.
  */
-class TracerTest {
+class TracerTests {
 
     private class SampleForTracerFactory
 
