@@ -431,6 +431,9 @@ meter.histogram<Double>("request-duration").poll(every = 10.seconds) {
 
 ## Compiler Plugin
 
+> [!NOTE]
+> The compiler plugin is an **experimental** feature. Its behavior and API may change in future releases.
+
 The [`log4k-compiler-plugin`](./log4k-compiler-plugin) is a Kotlin IR compiler plugin that automatically instruments
 your code — wrapping functions in tracing spans (`@Traced`), entry/exit logging (`@Logged`) and call/duration metrics
 (`@Timed`) — with no manual `trace.span("…") { }` blocks, `log.info("…")` calls or counters required. Because it
