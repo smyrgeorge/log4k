@@ -4,6 +4,9 @@ plugins {
 
 dependencies {
     dokka(project(":log4k"))
+    dokka(project(":log4k-classic"))
+    dokka(project(":log4k-compiler-plugin"))
+    dokka(project(":log4k-context"))
     dokka(project(":log4k-slf4j"))
 }
 
