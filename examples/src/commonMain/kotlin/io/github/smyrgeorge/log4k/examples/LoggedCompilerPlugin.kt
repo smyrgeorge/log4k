@@ -7,6 +7,7 @@ import io.github.smyrgeorge.log4k.Tracer
 import io.github.smyrgeorge.log4k.TracingContext
 import io.github.smyrgeorge.log4k.TracingEvent
 import io.github.smyrgeorge.log4k.annotation.Logged
+import io.github.smyrgeorge.log4k.annotation.NoLog
 import io.github.smyrgeorge.log4k.impl.appenders.simple.SimpleConsoleLoggingAppender
 import io.github.smyrgeorge.log4k.impl.appenders.simple.SimpleConsoleTracingAppender
 import kotlinx.coroutines.delay
@@ -24,6 +25,16 @@ object LoggedCompilerPlugin {
 
         @Logged(level = Level.DEBUG) // per-function override -> logged at DEBUG
         fun mul(a: Int, b: Int): Int = a * b
+
+        @NoLog // opts out, even though the class is @Logged
+        fun sub(a: Int, b: Int): Int = a - b
+    }
+
+    // Class-level @NoLog kill switch: nothing is logged, even members with their own @Logged.
+    @NoLog
+    class SilentCalculator {
+        @Logged
+        fun div(a: Int, b: Int): Int = a / b // NOT logged (class-level @NoLog wins)
     }
 
     class UserRepository {
@@ -84,6 +95,13 @@ object LoggedCompilerPlugin {
         val calc = Calculator()
         println(">> add(2, 3) -> ${calc.add(2, 3)}")   // INFO  entry/exit -> "Calculator.add"
         println(">> mul(4, 5) -> ${calc.mul(4, 5)}")   // DEBUG entry/exit -> "Calculator.mul"
+        println(">> sub(9, 4) -> ${calc.sub(9, 4)}")   // @NoLog -> NOT logged
+
+        delay(500.milliseconds)
+
+        // class-level @NoLog kill switch: no log lines even though `div` carries its own @Logged.
+        val silent = SilentCalculator()
+        println(">> div(8, 2) -> ${silent.div(8, 2)}") // @NoLog class -> NOT logged
 
         delay(500.milliseconds)
 

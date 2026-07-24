@@ -53,8 +53,8 @@ import io.github.smyrgeorge.log4k.Level
  *
  * The annotation may also be placed on a **class**. Then every eligible member function is
  * instrumented: one that is `public`, concrete (has a body), not a constructor, property accessor,
- * or inherited (fake-override) member. A function's own `@Logged` overrides the class-level
- * defaults (e.g. its [level]).
+ * or inherited (fake-override) member. Individual functions can opt out with [NoLog], and a
+ * function's own `@Logged` overrides the class-level defaults (e.g. its [level]).
  *
  * @property level The [Level] used for the entry/exit log lines. Defaults to [Level.INFO]. The
  *   failure log line is always emitted at [Level.ERROR].

@@ -120,12 +120,17 @@ class LoggedIrTransformer(
     private fun shouldInstrument(function: IrFunction): Boolean {
         if (function.body == null) return false
 
+        val enclosingClass = function.parentClassOrNull
+        // @NoLog on the function — or on its class (a per-class kill switch) — disables logging,
+        // overriding any @Logged.
+        if (function.hasAnnotation(NO_LOG_ANNOTATION)) return false
+        if (enclosingClass?.hasAnnotation(NO_LOG_ANNOTATION) == true) return false
+
         // Explicit @Logged on the function.
         if (function.hasAnnotation(LOGGED_ANNOTATION)) return true
 
-        // Class-level @Logged: instrument eligible public member functions.
-        val enclosingClass = function.parentClassOrNull ?: return false
-        if (!enclosingClass.hasAnnotation(LOGGED_ANNOTATION)) return false
+        // Class-level @Logged: instrument every eligible public member function.
+        if (enclosingClass == null || !enclosingClass.hasAnnotation(LOGGED_ANNOTATION)) return false
         return function.isClassLevelEligible()
     }
 
@@ -250,5 +255,6 @@ class LoggedIrTransformer(
 
     companion object {
         private val LOGGED_ANNOTATION = FqName("io.github.smyrgeorge.log4k.annotation.Logged")
+        private val NO_LOG_ANNOTATION = FqName("io.github.smyrgeorge.log4k.annotation.NoLog")
     }
 }

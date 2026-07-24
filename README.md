@@ -493,6 +493,7 @@ exception is rethrown. Both `suspend` and regular functions are supported (the w
   directly.
 - **Class-level** — annotate a **class** with `@Logged` to instrument every eligible public member function; a
   function's own `@Logged` overrides the class-level `level`.
+- **Opt out** — `@NoLog` excludes a single function, or (on a class) disables logging for the whole class.
 
 ```kotlin
 @Logged(level = Level.DEBUG)
