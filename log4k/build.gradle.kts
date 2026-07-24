@@ -26,6 +26,7 @@ kotlin {
                 implementation(project(":log4k-classic"))
                 implementation(libs.kotlin.test)
                 implementation(libs.assertk)
+                implementation(libs.kotlinx.coroutines.test)
             }
         }
     }
