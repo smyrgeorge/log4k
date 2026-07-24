@@ -113,15 +113,18 @@ abstract class Meter(
      * aggregates metric values by name (not by instrument identity).
      *
      * @param name the base metric name; the bundle's instruments are derived from it.
+     * @param tags static dimensions (labels) attached to every recorded value. Keep them
+     *   low-cardinality — they become time-series labels. Cached with the bundle by [name].
      * @return the existing or newly created [Timed] bundle for [name].
      */
     @OptIn(ExperimentalAtomicApi::class)
-    fun timed(name: String): Timed {
+    fun timed(name: String, vararg tags: Pair<String, Any>): Timed {
         timers.load()[name]?.let { return it }
         val created = Timed(
             calls = counter("$name.calls", description = "Total number of invocations of '$name'."),
             errors = counter("$name.errors", description = "Total number of failed invocations of '$name'."),
             duration = histogram("$name.duration", unit = "ms", description = "Invocation duration of '$name'."),
+            tags = tags,
         )
         // Copy-on-write: `update`'s transform may run several times, so never mutate the published map —
         // publish a fresh copy that adds `name` (unless another thread already added it).
@@ -396,29 +399,31 @@ abstract class Meter(
      * @property calls incremented on every [measure] invocation.
      * @property errors incremented when the measured block throws.
      * @property duration records the elapsed time of the measured block, in milliseconds.
+     * @property tags static dimensions attached to every recorded value (labels).
      */
     class Timed @PublishedApi internal constructor(
         @PublishedApi internal val calls: Instrument.Counter<Long>,
         @PublishedApi internal val errors: Instrument.Counter<Long>,
         @PublishedApi internal val duration: Instrument.Histogram<Double>,
+        @PublishedApi internal val tags: Array<out Pair<String, Any>>,
     ) {
         /**
          * Runs [f], recording a call, its duration (in milliseconds) and — if it throws — an error.
-         * The throwable is rethrown after being counted. Being `inline`, this works for both regular
-         * and `suspend` functions.
+         * Each recorded value carries the bundle's [tags] as dimensions. The throwable is rethrown
+         * after being counted. Being `inline`, this works for both regular and `suspend` functions.
          *
          * @param T the type of the result produced by [f].
          * @param f the block to measure.
          * @return the result produced by [f].
          */
         inline fun <T> measure(f: () -> T): T {
-            calls.increment(1L)
+            calls.increment(1L, *tags)
             val mark = TimeSource.Monotonic.markNow()
             return try {
-                f().also { duration.record(mark.elapsedNow().toDouble(DurationUnit.MILLISECONDS)) }
+                f().also { duration.record(mark.elapsedNow().toDouble(DurationUnit.MILLISECONDS), *tags) }
             } catch (e: Throwable) {
-                errors.increment(1L)
-                duration.record(mark.elapsedNow().toDouble(DurationUnit.MILLISECONDS))
+                errors.increment(1L, *tags)
+                duration.record(mark.elapsedNow().toDouble(DurationUnit.MILLISECONDS), *tags)
                 throw e
             }
         }

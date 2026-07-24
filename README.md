@@ -529,6 +529,10 @@ Both `suspend` and regular functions are supported (the wrapper reuses the `inli
 the instrument bundle is created once and cached by `Meter.timed(name)`.
 
 - **Metric name** — `@Timed(name = "…")`; when omitted it defaults to `ClassName.functionName`.
+- **Dimensions** — `@Timed(tags = [Tag("tier", "gold")])` attaches static labels to the recorded `calls`/`errors`/
+  `duration` values. Keep them **low-cardinality** (they become time-series labels); for per-request data use a
+  `@Traced` span attribute instead. Class-level tags apply to every member, and a function's own tag with the same key
+  wins.
 - **Meter** — read from a `meter: Meter` property on the enclosing class; if none exists, the plugin synthesizes
   `private val _meter_ = Meter.of(this::class)` (mirroring how `@Logged` resolves its logger).
 - **Class-level** — annotate a **class** with `@Timed` to instrument every eligible public member function; a function's

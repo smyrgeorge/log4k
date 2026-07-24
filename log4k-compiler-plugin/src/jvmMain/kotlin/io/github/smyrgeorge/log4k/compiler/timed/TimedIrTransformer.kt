@@ -17,17 +17,25 @@ import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.builders.irBlockBody
 import org.jetbrains.kotlin.ir.builders.irCall
+import org.jetbrains.kotlin.ir.builders.irCallConstructor
 import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.builders.irString
 import org.jetbrains.kotlin.ir.declarations.IrFunction
+import org.jetbrains.kotlin.ir.declarations.IrValueParameter
 import org.jetbrains.kotlin.ir.expressions.IrConst
+import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
+import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrStatementOrigin
+import org.jetbrains.kotlin.ir.expressions.IrVararg
+import org.jetbrains.kotlin.ir.expressions.impl.IrVarargImpl
+import org.jetbrains.kotlin.ir.symbols.IrConstructorSymbol
 import org.jetbrains.kotlin.ir.symbols.IrSimpleFunctionSymbol
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.getAnnotation
 import org.jetbrains.kotlin.ir.util.hasAnnotation
 import org.jetbrains.kotlin.ir.util.parentClassOrNull
+import org.jetbrains.kotlin.ir.util.primaryConstructor
 import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
@@ -68,10 +76,14 @@ class TimedIrTransformer(
     private val meterField: OfThisClassField? =
         OfThisClassField.of(pluginContext, finder, messageCollector, "Meter", "@Timed", "meter", "_meter_")
 
-    // `Meter.timed(name): Meter.Timed` — returns the (cached) instrument bundle for a base name.
+    // `Meter.timed(name, vararg tags): Meter.Timed` — returns the (cached) instrument bundle.
     private val meterTimedFunction: IrSimpleFunctionSymbol? = finder.findFunctions(
         CallableId(ClassId(LOG4K_PACKAGE, FqName("Meter"), false), Name.identifier("timed")),
-    ).firstOrNull { symbol -> symbol.owner.regularParams().size == 1 }
+    ).firstOrNull { symbol -> symbol.owner.regularParams().size == 2 }
+
+    // `Pair` constructor, used to materialize `@Timed(tags = [...])` as metric dimensions.
+    private val pairConstructor: IrConstructorSymbol? =
+        finder.findClass(ClassId(FqName("kotlin"), Name.identifier("Pair")))?.owner?.primaryConstructor?.symbol
 
     // `Meter.Timed.measure(f)` — the inline helper that records the metrics around the body.
     private val measureFunction: IrSimpleFunctionSymbol? = finder.findFunctions(
@@ -120,10 +132,12 @@ class TimedIrTransformer(
         // 1. Build the inline lambda `{ <original body> }` (a plain `() -> T`).
         val lambda = pluginContext.buildInlineLambda(function, returnType)
 
-        // 2. `meter.timed("name").measure<returnType> { <lambda> }`.
+        // 2. `meter.timed("name", *tags).measure<returnType> { <lambda> }`.
+        val timedRegular = timedFn.owner.regularParams()
         val timed = builder.irCall(timedFn).apply {
             timedFn.owner.dispatchReceiverParam()?.let { arguments[it] = meterAccess }
-            timedFn.owner.regularParams().firstOrNull()?.let { arguments[it] = builder.irString(resolveName(function)) }
+            timedRegular.getOrNull(0)?.let { arguments[it] = builder.irString(resolveName(function)) }
+            timedRegular.getOrNull(1)?.let { arguments[it] = buildTags(builder, function, it) }
         }
 
         val functionType = pluginContext.irBuiltIns.functionN(0).symbol.typeWith(returnType)
@@ -161,6 +175,55 @@ class TimedIrTransformer(
         val configured = (annotation?.arguments?.getOrNull(0) as? IrConst)?.value as? String
         if (!configured.isNullOrBlank()) return configured
         return function.qualifiedName()
+    }
+
+    /** Reads the `@Timed(tags = [Tag(k, v), …])` array into (key, value) pairs. */
+    private fun resolveTags(function: IrFunction): List<Pair<String, String>> {
+        // Class-level tags come first so a function's own tags override them (later entries win in the map).
+        val classTags = tagsOf(function.parentClassOrNull?.getAnnotation(TIMED_ANNOTATION))
+        val functionTags = tagsOf(function.getAnnotation(TIMED_ANNOTATION))
+        return classTags + functionTags
+    }
+
+    private fun tagsOf(annotation: IrConstructorCall?): List<Pair<String, String>> {
+        val tagsArg = annotation?.arguments?.getOrNull(1) as? IrVararg ?: return emptyList()
+        return tagsArg.elements.mapNotNull { element ->
+            val tag = element as? IrConstructorCall ?: return@mapNotNull null
+            val key = (tag.arguments.getOrNull(0) as? IrConst)?.value as? String
+            val value = (tag.arguments.getOrNull(1) as? IrConst)?.value as? String
+            if (key != null && value != null) key to value else null
+        }
+    }
+
+    /** Materializes `@Timed(tags = [...])` as the `vararg tags: Pair<String, Any>` for `Meter.timed`. */
+    private fun buildTags(
+        builder: DeclarationIrBuilder,
+        function: IrFunction,
+        tagsParam: IrValueParameter,
+    ): IrExpression {
+        val elementType = tagsParam.varargElementType ?: tagsParam.type
+        val vararg = IrVarargImpl(function.startOffset, function.endOffset, tagsParam.type, elementType)
+        val tags = resolveTags(function)
+        if (tags.isEmpty()) return vararg
+        val constructor = pairConstructor
+        if (constructor == null) {
+            messageCollector.reportError(
+                function,
+                "log4k-compiler-plugin: could not apply @Timed tags (unresolved `Pair`).",
+            )
+            return vararg
+        }
+        val stringType = pluginContext.irBuiltIns.stringType
+        val anyType = pluginContext.irBuiltIns.anyType
+        tags.forEach { (key, value) ->
+            vararg.elements.add(
+                builder.irCallConstructor(constructor, listOf(stringType, anyType)).apply {
+                    arguments[0] = builder.irString(key)
+                    arguments[1] = builder.irString(value)
+                },
+            )
+        }
+        return vararg
     }
 
     companion object {

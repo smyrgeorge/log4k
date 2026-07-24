@@ -34,6 +34,14 @@ private class SilencedTimedFixture {
     fun ping(): String = "pong" // class-level @NoTime kill switch -> not measured despite @Timed
 }
 
+@Timed(tags = [Tag("layer", "service")])
+private class TaggedTimedFixture {
+    fun run(): Int = 1 // "TaggedTimedFixture.run.*" carry layer=service (class-level tag)
+
+    @Timed(name = "custom.op", tags = [Tag("tier", "gold")])
+    fun custom(): Int = 2 // "custom.op.*" carry layer=service (class) + tier=gold (function)
+}
+
 /**
  * End-to-end tests for the [Timed] / [NoTime] annotations. The compiler plugin is applied to the test
  * compilations, so the fixtures above are really instrumented; each test drives a fixture and asserts
@@ -76,6 +84,25 @@ class TimedTests {
 
         val calls = appender.awaitValue("orders.checkout.calls")
         assertThat(calls).isInstanceOf(MeteringEvent.Increment::class)
+    }
+
+    @Test
+    fun classLevelTimedTags_appliedToRecordedMetrics() = runTest {
+        TaggedTimedFixture().run()
+
+        val calls = appender.awaitValue("TaggedTimedFixture.run.calls")
+        assertThat(calls.tags["layer"]).isEqualTo("service")
+        val duration = appender.awaitValue("TaggedTimedFixture.run.duration")
+        assertThat(duration.tags["layer"]).isEqualTo("service")
+    }
+
+    @Test
+    fun functionAndClassTags_areMerged() = runTest {
+        TaggedTimedFixture().custom()
+
+        val calls = appender.awaitValue("custom.op.calls")
+        assertThat(calls.tags["layer"]).isEqualTo("service") // from the class
+        assertThat(calls.tags["tier"]).isEqualTo("gold")     // from the function
     }
 
     @Test

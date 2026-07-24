@@ -268,6 +268,18 @@ class MeterTests {
         assertThat(duration.unit).isEqualTo("ms")
     }
 
+    @Test
+    fun timed_withTags_recordsDimensionsOnEveryValue() = runTest {
+        val meter = SimpleMeter("test.meter", Level.INFO)
+
+        meter.timed("dim.op", "endpoint" to "checkout").measure { }
+
+        val calls = appender.awaitValue("dim.op.calls")
+        assertThat(calls.tags["endpoint"]).isEqualTo("checkout")
+        val duration = appender.awaitValue("dim.op.duration")
+        assertThat(duration.tags["endpoint"]).isEqualTo("checkout")
+    }
+
     // --- Companion factory / registry ----------------------------------------------------------
 
     @Test

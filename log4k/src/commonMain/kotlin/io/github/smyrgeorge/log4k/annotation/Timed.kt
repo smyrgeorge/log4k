@@ -24,16 +24,31 @@ package io.github.smyrgeorge.log4k.annotation
  * }
  * ```
  *
+ * Static [tags] are attached to every recorded value as **metric dimensions** (labels):
+ *
+ * ```kotlin
+ * @Timed(name = "orders.place", tags = [Tag("tier", "gold")])
+ * fun placeOrder(id: Long): Order { /* "orders.place.*" values carry tier=gold */ }
+ * ```
+ *
+ * Keep [tags] **static and low-cardinality**: they become time-series labels, and high-cardinality
+ * dimensions (per-request ids, timestamps, …) blow up a metrics backend. For per-invocation data,
+ * prefer a span attribute (`@Traced`) over a metric dimension.
+ *
  * The annotation may also be placed on a **class**. Then every eligible member function is
  * instrumented: one that is `public`, concrete (has a body), not a constructor, property accessor, or
- * inherited (fake-override) member. Individual functions can opt out with [NoTime], and a function's
- * own `@Timed` overrides the class-level defaults (e.g. its [name]).
+ * inherited (fake-override) member. Individual functions can opt out with [NoTime], a function's own
+ * `@Timed` overrides the class-level defaults (e.g. its [name]), and class-level [tags] are added to
+ * every instrumented member (a function's own tag with the same key wins).
  *
  * @property name The base metric name. When left blank, it defaults to `ClassName.functionName` (or
  *   just the function name for a top-level function).
+ * @property tags Static key/value dimensions added to the recorded metrics. (Annotation parameters
+ *   cannot be a `Map`, so tags are expressed as an array of [Tag].)
  */
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.BINARY)
 annotation class Timed(
     val name: String = "",
+    val tags: Array<Tag> = [],
 )

@@ -3,6 +3,7 @@ package io.github.smyrgeorge.log4k.examples
 import io.github.smyrgeorge.log4k.Meter
 import io.github.smyrgeorge.log4k.RootLogger
 import io.github.smyrgeorge.log4k.annotation.NoTime
+import io.github.smyrgeorge.log4k.annotation.Tag
 import io.github.smyrgeorge.log4k.annotation.Timed
 import io.github.smyrgeorge.log4k.impl.appenders.simple.SimpleMeteringCollectorAppender
 import kotlinx.coroutines.delay
@@ -18,7 +19,8 @@ object TimedCompilerPlugin {
     class OrderService {
         fun placeOrder(id: Long): String = "order-$id" // -> "OrderService.placeOrder.{calls,duration}"
 
-        @Timed(name = "orders.checkout") // per-function override of the metric base name.
+        // per-function override of the metric base name, plus a static dimension (label) on the metrics.
+        @Timed(name = "orders.checkout", tags = [Tag("tier", "gold")])
         fun checkout(total: Double): Double = total * 1.24
 
         @NoTime // opts out, even though the class is @Timed
