@@ -1,5 +1,3 @@
-@file:Suppress("unused")
-
 package io.github.smyrgeorge.log4k
 
 import io.github.smyrgeorge.log4k.impl.SimpleMeterFactory
@@ -7,16 +5,11 @@ import io.github.smyrgeorge.log4k.impl.extensions.dispatcher
 import io.github.smyrgeorge.log4k.impl.extensions.doEvery
 import io.github.smyrgeorge.log4k.impl.extensions.toName
 import io.github.smyrgeorge.log4k.impl.registry.CollectorRegistry
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
 import kotlin.concurrent.atomics.AtomicReference
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.update
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.reflect.KClass
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
 import kotlin.time.DurationUnit
 import kotlin.time.TimeSource
 
@@ -295,21 +288,11 @@ abstract class Meter(
              * Schedules a polling task that runs a given suspending function at a specified interval.
              *
              * @param every The duration between consecutive executions of the function.
-             * @param initial The initial delay before the first execution of the function. Defaults to 10 seconds.
              * @param f The suspending function to be executed at each polling interval.
              */
-            fun poll(every: Duration, initial: Duration = 10.seconds, f: suspend AbstractRecorder<T>.() -> Unit) {
-                doEvery(every, dispatcher) {
+            fun poll(every: Duration, f: suspend AbstractRecorder<T>.() -> Unit) {
+                doEvery(every, dispatcher()) {
                     f(this@AbstractRecorder)
-                }
-            }
-
-            companion object {
-                private val dispatcher: CoroutineDispatcher = dispatcher()
-
-                private object GaugeScope : CoroutineScope {
-                    override val coroutineContext: CoroutineContext
-                        get() = EmptyCoroutineContext
                 }
             }
         }
