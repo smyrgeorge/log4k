@@ -2,6 +2,7 @@ package io.github.smyrgeorge.log4k.examples
 
 import io.github.smyrgeorge.log4k.Meter
 import io.github.smyrgeorge.log4k.RootLogger
+import io.github.smyrgeorge.log4k.annotation.NoTime
 import io.github.smyrgeorge.log4k.annotation.Timed
 import io.github.smyrgeorge.log4k.impl.appenders.simple.SimpleMeteringCollectorAppender
 import kotlinx.coroutines.delay
@@ -19,6 +20,16 @@ object TimedCompilerPlugin {
 
         @Timed(name = "orders.checkout") // per-function override of the metric base name.
         fun checkout(total: Double): Double = total * 1.24
+
+        @NoTime // opts out, even though the class is @Timed
+        fun quote(total: Double): Double = total * 1.1
+    }
+
+    // Class-level @NoTime kill switch: no metrics at all, even members with their own @Timed.
+    @NoTime
+    class InternalService {
+        @Timed
+        fun ping(): String = "pong" // NOT measured (class-level @NoTime wins)
     }
 
     class PaymentService {
@@ -51,6 +62,10 @@ object TimedCompilerPlugin {
         val orders = OrderService()
         repeat(3) { orders.placeOrder(it.toLong()) }
         orders.checkout(100.0)
+        orders.quote(100.0) // @NoTime -> not measured (no "OrderService.quote.*" metrics)
+
+        // class-level @NoTime kill switch: `ping` is not measured even though it carries its own @Timed.
+        InternalService().ping()
 
         val payments = PaymentService()
         payments.charge(42.0)

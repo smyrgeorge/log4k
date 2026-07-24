@@ -93,12 +93,17 @@ class TimedIrTransformer(
     private fun shouldInstrument(function: IrFunction): Boolean {
         if (function.body == null) return false
 
+        val enclosingClass = function.parentClassOrNull
+        // @NoTime on the function — or on its class (a per-class kill switch) — disables metrics,
+        // overriding any @Timed.
+        if (function.hasAnnotation(NO_TIME_ANNOTATION)) return false
+        if (enclosingClass?.hasAnnotation(NO_TIME_ANNOTATION) == true) return false
+
         // Explicit @Timed on the function.
         if (function.hasAnnotation(TIMED_ANNOTATION)) return true
 
-        // Class-level @Timed: instrument eligible public member functions.
-        val enclosingClass = function.parentClassOrNull ?: return false
-        if (!enclosingClass.hasAnnotation(TIMED_ANNOTATION)) return false
+        // Class-level @Timed: instrument every eligible public member function.
+        if (enclosingClass == null || !enclosingClass.hasAnnotation(TIMED_ANNOTATION)) return false
         return function.isClassLevelEligible()
     }
 
@@ -160,5 +165,6 @@ class TimedIrTransformer(
 
     companion object {
         private val TIMED_ANNOTATION = FqName("io.github.smyrgeorge.log4k.annotation.Timed")
+        private val NO_TIME_ANNOTATION = FqName("io.github.smyrgeorge.log4k.annotation.NoTime")
     }
 }

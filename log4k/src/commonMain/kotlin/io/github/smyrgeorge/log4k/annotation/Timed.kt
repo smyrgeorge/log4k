@@ -26,8 +26,8 @@ package io.github.smyrgeorge.log4k.annotation
  *
  * The annotation may also be placed on a **class**. Then every eligible member function is
  * instrumented: one that is `public`, concrete (has a body), not a constructor, property accessor, or
- * inherited (fake-override) member. A function's own `@Timed` overrides the class-level defaults (e.g.
- * its [name]).
+ * inherited (fake-override) member. Individual functions can opt out with [NoTime], and a function's
+ * own `@Timed` overrides the class-level defaults (e.g. its [name]).
  *
  * @property name The base metric name. When left blank, it defaults to `ClassName.functionName` (or
  *   just the function name for a top-level function).

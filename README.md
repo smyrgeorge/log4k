@@ -530,6 +530,7 @@ the instrument bundle is created once and cached by `Meter.timed(name)`.
   `private val _meter_ = Meter.of(this::class)` (mirroring how `@Logged` resolves its logger).
 - **Class-level** — annotate a **class** with `@Timed` to instrument every eligible public member function; a function's
   own `@Timed` overrides the class-level defaults (e.g. its `name`).
+- **Opt out** — `@NoTime` excludes a single function, or (on a class) disables metrics for the whole class.
 
 With a `SimpleMeteringCollectorAppender` registered, calling `placeOrder` a few times exposes, in OpenMetrics form:
 
