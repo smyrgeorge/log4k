@@ -3,9 +3,21 @@ $dokka.linkExtension:html
 
 module:log4k
 io.github.smyrgeorge.log4k
+io.github.smyrgeorge.log4k.annotation
 io.github.smyrgeorge.log4k.impl
 io.github.smyrgeorge.log4k.impl.appenders
 io.github.smyrgeorge.log4k.impl.appenders.simple
 io.github.smyrgeorge.log4k.impl.registry
+module:log4k-classic
+io.github.smyrgeorge.log4k.classic
+module:log4k-compiler-plugin
+io.github.smyrgeorge.log4k.compiler
+io.github.smyrgeorge.log4k.compiler.ir
+io.github.smyrgeorge.log4k.compiler.ir.utils
+io.github.smyrgeorge.log4k.compiler.logged
+io.github.smyrgeorge.log4k.compiler.timed
+io.github.smyrgeorge.log4k.compiler.trace
+module:log4k-context
+io.github.smyrgeorge.log4k.context
 module:log4k-slf4j
 io.github.smyrgeorge.log4k.slf4j

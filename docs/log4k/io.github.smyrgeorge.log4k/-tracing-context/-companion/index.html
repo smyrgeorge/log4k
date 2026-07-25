@@ -38,7 +38,7 @@
             </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
         </button>
         <div class="navigation-controls--break ui-kit_mobile-only"></div>
-        <div class="library-version" id="library-version">2.2.0
+        <div class="library-version" id="library-version">2.3.0
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
@@ -115,6 +115,21 @@
               </div>
             </div>
           </div>
+<a data-name="-256384292%2FFunctions%2F-757297100" anchor-label="create" id="-256384292%2FFunctions%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="create.html"><span><span>create</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-256384292%2FFunctions%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="create.html"><span class="token function">create</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">tracer<span class="token operator">: </span><a href="../../-tracer/index.html">Tracer</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">parent<span class="token operator">: </span><a href="../../-tracing-event/-span/index.html">TracingEvent.Span</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../io.github.smyrgeorge.log4k.impl/-simple-coroutines-tracing-context/index.html">SimpleCoroutinesTracingContext</a></div><div class="brief "><p class="paragraph">Creates a new instance of <code class="lang-kotlin">SimpleCoroutinesTracingContext</code> with the specified tracer and parent span.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
 <a data-name="133817275%2FFunctions%2F-757297100" anchor-label="current" id="133817275%2FFunctions%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
             <div class="main-subrow keyValue ">
@@ -141,6 +156,21 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">inline </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="span.html">T</a><span class="token operator">&gt; </span><a href="../index.html">TracingContext</a><span class="token punctuation">.</span><a href="span.html"><span class="token function">span</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">name<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">f<span class="token operator">: </span><a href="../../-tracing-event/-span/-local/index.html">TracingEvent.Span.Local</a><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="span.html">T</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="span.html">T</a></div><div class="brief "><p class="paragraph">Creates a new tracing span within the current tracing context, executing the given function within the scope of the new span.</p></div><div class="symbol monospace"><span class="token keyword">inline </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="span.html">T</a><span class="token operator">&gt; </span><a href="../index.html">TracingContext</a><span class="token punctuation">.</span><a href="span.html"><span class="token function">span</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">name<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">tags<span class="token operator">: </span><a href="../../../io.github.smyrgeorge.log4k.impl/-tags/index.html">Tags</a><span class="token operator"> = </span>emptyMap()<span class="token punctuation">, </span></span><span class="parameter ">f<span class="token operator">: </span><a href="../../-tracing-event/-span/-local/index.html">TracingEvent.Span.Local</a><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="span.html">T</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="span.html">T</a></div><div class="brief "><p class="paragraph">Creates a new span with the specified name and tags, executes the given block of code within the context of the span, and automatically handles starting, ending, and exception management for the span.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="274843755%2FFunctions%2F-757297100" anchor-label="traced" id="274843755%2FFunctions%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="traced.html"><span><span>traced</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="274843755%2FFunctions%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">inline </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><a href="traced.html">T</a><span class="token operator">&gt; </span><a href="traced.html"><span class="token function">traced</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">context<span class="token operator">: </span><a href="../index.html">TracingContext</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">parent<span class="token operator">: </span><a href="../../-tracing-event/-span/index.html">TracingEvent.Span</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">tracer<span class="token operator">: </span><a href="../../-tracer/index.html">Tracer</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">name<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">tags<span class="token operator">: </span><a href="../../../io.github.smyrgeorge.log4k.impl/-tags/index.html">Tags</a><span class="token operator"> = </span>emptyMap()<span class="token punctuation">, </span></span><span class="parameter ">f<span class="token operator">: </span><a href="../../-tracing-event/-span/-local/index.html">TracingEvent.Span.Local</a><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="traced.html">T</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="traced.html">T</a></div><div class="brief "><p class="paragraph">The runtime helper the <code class="lang-kotlin">log4k-compiler-plugin</code> generates a call to for <a href="../../../io.github.smyrgeorge.log4k.annotation/-traced/index.html">io.github.smyrgeorge.log4k.annotation.Traced</a>. Executes <a href="traced.html">f</a> inside a new span whose parent and tracer are resolved from whichever of <a href="traced.html">context</a>, <a href="traced.html">parent</a> or <a href="traced.html">tracer</a> is in scope (the plugin passes exactly one): the <a href="traced.html">context</a>'s current span, else <a href="traced.html">parent</a>, else a new root span from <a href="traced.html">tracer</a>. The span is started, ended, and — if <a href="traced.html">f</a> throws — marked failed (the exception is recorded and rethrown).</p></div></div></div>
                 </div>
               </div>
             </div>

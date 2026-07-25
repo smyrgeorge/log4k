@@ -1,0 +1,298 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>io.github.smyrgeorge.log4k.compiler.ir.utils</title>
+<link href="../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../styles/style.css" rel="Stylesheet">
+<link href="../../styles/main.css" rel="Stylesheet">
+<link href="../../styles/prism.css" rel="Stylesheet">
+<link href="../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../index.html" tabindex="1">
+                    log4k
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">2.3.0
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":log4k-compiler-plugin/jvmMain">jvm</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":log4k-compiler-plugin/jvmMain" data-filter=":log4k-compiler-plugin/jvmMain">
+                                <span class="checkbox--icon"></span>
+                                jvm
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    log4k
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="package" id="content" pageids="log4k-compiler-plugin::io.github.smyrgeorge.log4k.compiler.ir.utils////PointingToDeclaration//283408238">
+  <div class="breadcrumbs"><a href="../index.html">log4k-compiler-plugin</a><span class="delimiter">/</span><span class="current">io.github.smyrgeorge.log4k.compiler.ir.utils</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="TYPE">Types</button><button class="section-tab" data-togglable="FUNCTION,EXTENSION_FUNCTION">Functions</button><button class="section-tab" data-togglable="PROPERTY,EXTENSION_PROPERTY">Properties</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="TYPE">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="-2023811526%2FClasslikes%2F283408238" anchor-label="OfThisClassField" id="-2023811526%2FClasslikes%2F283408238" data-filterable-set=":log4k-compiler-plugin/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k-compiler-plugin/jvmMain" data-filterable-set=":log4k-compiler-plugin/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-of-this-class-field/index.html"><span>Of</span><wbr><span>This</span><wbr><span>Class</span><wbr><span><span>Field</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2023811526%2FClasslikes%2F283408238"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k-compiler-plugin/jvmMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="-of-this-class-field/index.html">OfThisClassField</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">pluginContext<span class="token operator">: </span><span data-unresolved-link="org.jetbrains.kotlin.backend.common.extensions/IrPluginContext///PointingToDeclaration/">IrPluginContext</span><span class="token punctuation">, </span></span><span class="parameter ">messageCollector<span class="token operator">: </span><span data-unresolved-link="org.jetbrains.kotlin.cli.common.messages/MessageCollector///PointingToDeclaration/">MessageCollector</span><span class="token punctuation">, </span></span><span class="parameter ">typeSymbol<span class="token operator">: </span><span data-unresolved-link="org.jetbrains.kotlin.ir.symbols/IrClassSymbol///PointingToDeclaration/">IrClassSymbol</span><span class="token punctuation">, </span></span><span class="parameter ">ofFunction<span class="token operator">: </span><span data-unresolved-link="org.jetbrains.kotlin.ir.symbols/IrSimpleFunctionSymbol///PointingToDeclaration/">IrSimpleFunctionSymbol</span><span class="token punctuation">, </span></span><span class="parameter ">annotation<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">memberName<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">syntheticName<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Resolves — or synthesizes — a per-class member holding an instance of <a href="../../log4k-compiler-plugin/io.github.smyrgeorge.log4k.compiler.ir.utils/-of-this-class-field/--root--.html">typeSymbol</a> obtained via a companion <code class="lang-kotlin">of(KClass&lt;*&gt;)</code> factory (e.g. <code class="lang-kotlin">Logger.of(this::class)</code> / <code class="lang-kotlin">Meter.of(this::class)</code>).</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="-285941782%2FProperties%2F283408238" anchor-label="LOG4K_PACKAGE" id="-285941782%2FProperties%2F283408238" data-filterable-set=":log4k-compiler-plugin/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k-compiler-plugin/jvmMain" data-filterable-set=":log4k-compiler-plugin/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-l-o-g4-k_-p-a-c-k-a-g-e.html"><span>LOG4K_</span><wbr><span>PACKAGE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-285941782%2FProperties%2F283408238"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k-compiler-plugin/jvmMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="-l-o-g4-k_-p-a-c-k-a-g-e.html">LOG4K_PACKAGE</a><span class="token operator">: </span><span data-unresolved-link="org.jetbrains.kotlin.name/FqName///PointingToDeclaration/">FqName</span></div><div class="brief "><p class="paragraph">The root package of the log4k runtime API.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="EXTENSION_FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="-532923094%2FFunctions%2F283408238" anchor-label="buildInlineLambda" id="-532923094%2FFunctions%2F283408238" data-filterable-set=":log4k-compiler-plugin/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k-compiler-plugin/jvmMain" data-filterable-set=":log4k-compiler-plugin/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="build-inline-lambda.html"><span>build</span><wbr><span>Inline</span><wbr><span><span>Lambda</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-532923094%2FFunctions%2F283408238"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k-compiler-plugin/jvmMain"><div class="symbol monospace"><span class="token keyword">fun </span><span data-unresolved-link="org.jetbrains.kotlin.backend.common.extensions/IrPluginContext///PointingToDeclaration/">IrPluginContext</span><span class="token punctuation">.</span><a href="build-inline-lambda.html"><span class="token function">buildInlineLambda</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">enclosing<span class="token operator">: </span><span data-unresolved-link="org.jetbrains.kotlin.ir.declarations/IrFunction///PointingToDeclaration/">IrFunction</span><span class="token punctuation">, </span></span><span class="parameter ">returnType<span class="token operator">: </span><span data-unresolved-link="org.jetbrains.kotlin.ir.types/IrType///PointingToDeclaration/">IrType</span><span class="token punctuation">, </span></span><span class="parameter ">extensionReceiverType<span class="token operator">: </span><span data-unresolved-link="org.jetbrains.kotlin.ir.types/IrType///PointingToDeclaration/">IrType</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">extensionReceiverName<span class="token operator">: </span><span data-unresolved-link="org.jetbrains.kotlin.name/Name///PointingToDeclaration/">Name</span><span class="token operator"> = </span>Name.identifier($$"$this$lambda")</span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="org.jetbrains.kotlin.ir.declarations/IrSimpleFunction///PointingToDeclaration/">IrSimpleFunction</span></div><div class="brief "><p class="paragraph">Builds the inline lambda that wraps <a href="build-inline-lambda.html">enclosing</a>'s original body (moved in via <a href="move-body.html">moveBody</a>) so it can be passed to an <code class="lang-kotlin">inline</code> helper such as <code class="lang-kotlin">span { … }</code>, <code class="lang-kotlin">logged { … }</code> or <code class="lang-kotlin">measure { … }</code>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="286013968%2FFunctions%2F283408238" anchor-label="dispatchReceiverParam" id="286013968%2FFunctions%2F283408238" data-filterable-set=":log4k-compiler-plugin/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k-compiler-plugin/jvmMain" data-filterable-set=":log4k-compiler-plugin/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="dispatch-receiver-param.html"><span>dispatch</span><wbr><span>Receiver</span><wbr><span><span>Param</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="286013968%2FFunctions%2F283408238"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k-compiler-plugin/jvmMain"><div class="symbol monospace"><span class="token keyword">fun </span><span data-unresolved-link="org.jetbrains.kotlin.ir.declarations/IrFunction///PointingToDeclaration/">IrFunction</span><span class="token punctuation">.</span><a href="dispatch-receiver-param.html"><span class="token function">dispatchReceiverParam</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="org.jetbrains.kotlin.ir.declarations/IrValueParameter///PointingToDeclaration/">IrValueParameter</span><span class="token operator">?</span></div><div class="brief "><p class="paragraph">The single dispatch-receiver parameter of <span data-unresolved-link="org.jetbrains.kotlin.ir.declarations/IrFunction///PointingToDeclaration/">this</span>, or <code class="lang-kotlin">null</code> (new-API <code class="lang-kotlin">parameters</code> accessor).</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1574836688%2FFunctions%2F283408238" anchor-label="irOfThisClass" id="1574836688%2FFunctions%2F283408238" data-filterable-set=":log4k-compiler-plugin/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k-compiler-plugin/jvmMain" data-filterable-set=":log4k-compiler-plugin/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="ir-of-this-class.html"><span>ir</span><wbr><span>Of</span><wbr><span>This</span><wbr><span><span>Class</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1574836688%2FFunctions%2F283408238"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k-compiler-plugin/jvmMain"><div class="symbol monospace"><span class="token keyword">fun </span><span data-unresolved-link="org.jetbrains.kotlin.backend.common.lower/DeclarationIrBuilder///PointingToDeclaration/">DeclarationIrBuilder</span><span class="token punctuation">.</span><a href="ir-of-this-class.html"><span class="token function">irOfThisClass</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">pluginContext<span class="token operator">: </span><span data-unresolved-link="org.jetbrains.kotlin.backend.common.extensions/IrPluginContext///PointingToDeclaration/">IrPluginContext</span><span class="token punctuation">, </span></span><span class="parameter ">ofFn<span class="token operator">: </span><span data-unresolved-link="org.jetbrains.kotlin.ir.symbols/IrSimpleFunctionSymbol///PointingToDeclaration/">IrSimpleFunctionSymbol</span><span class="token punctuation">, </span></span><span class="parameter ">thisReceiver<span class="token operator">: </span><span data-unresolved-link="org.jetbrains.kotlin.ir.declarations/IrValueParameter///PointingToDeclaration/">IrValueParameter</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="org.jetbrains.kotlin.ir.expressions/IrExpression///PointingToDeclaration/">IrExpression</span></div><div class="brief "><p class="paragraph">Builds <code class="lang-kotlin">&lt;Companion&gt;.of(this::class)</code> for a companion <code class="lang-kotlin">of(KClass&lt;*&gt;)</code> factory such as <code class="lang-kotlin">Logger.of</code> or <code class="lang-kotlin">Meter.of</code>, using <a href="ir-of-this-class.html">thisReceiver</a> (a class or function dispatch receiver) as <code class="lang-kotlin">this</code>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1832879607%2FFunctions%2F283408238" anchor-label="isClassLevelEligible" id="1832879607%2FFunctions%2F283408238" data-filterable-set=":log4k-compiler-plugin/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k-compiler-plugin/jvmMain" data-filterable-set=":log4k-compiler-plugin/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="is-class-level-eligible.html"><span>is</span><wbr><span>Class</span><wbr><span>Level</span><wbr><span><span>Eligible</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1832879607%2FFunctions%2F283408238"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k-compiler-plugin/jvmMain"><div class="symbol monospace"><span class="token keyword">fun </span><span data-unresolved-link="org.jetbrains.kotlin.ir.declarations/IrFunction///PointingToDeclaration/">IrFunction</span><span class="token punctuation">.</span><a href="is-class-level-eligible.html"><span class="token function">isClassLevelEligible</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Whether <span data-unresolved-link="org.jetbrains.kotlin.ir.declarations/IrFunction///PointingToDeclaration/">this</span> function is an eligible target for <strong>class-level</strong> instrumentation: a public, concrete member function that is not a constructor, property accessor, or inherited (fake-override) member.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1114926405%2FFunctions%2F283408238" anchor-label="moveBody" id="-1114926405%2FFunctions%2F283408238" data-filterable-set=":log4k-compiler-plugin/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k-compiler-plugin/jvmMain" data-filterable-set=":log4k-compiler-plugin/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="move-body.html"><span>move</span><wbr><span><span>Body</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1114926405%2FFunctions%2F283408238"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k-compiler-plugin/jvmMain"><div class="symbol monospace"><span class="token keyword">fun </span><span data-unresolved-link="org.jetbrains.kotlin.backend.common.extensions/IrPluginContext///PointingToDeclaration/">IrPluginContext</span><span class="token punctuation">.</span><a href="move-body.html"><span class="token function">moveBody</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">function<span class="token operator">: </span><span data-unresolved-link="org.jetbrains.kotlin.ir.declarations/IrFunction///PointingToDeclaration/">IrFunction</span><span class="token punctuation">, </span></span><span class="parameter ">lambda<span class="token operator">: </span><span data-unresolved-link="org.jetbrains.kotlin.ir.declarations/IrFunction///PointingToDeclaration/">IrFunction</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="org.jetbrains.kotlin.ir.expressions/IrBlockBody///PointingToDeclaration/">IrBlockBody</span></div><div class="brief "><p class="paragraph">Detaches the original body from <a href="move-body.html">function</a> and re-homes it inside <a href="move-body.html">lambda</a>, so it can be used as the body of an inline lambda that wraps the original code (e.g. <code class="lang-kotlin">span { … }</code> or <code class="lang-kotlin">logged { … }</code>).</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1227234349%2FFunctions%2F283408238" anchor-label="qualifiedName" id="-1227234349%2FFunctions%2F283408238" data-filterable-set=":log4k-compiler-plugin/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k-compiler-plugin/jvmMain" data-filterable-set=":log4k-compiler-plugin/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="qualified-name.html"><span>qualified</span><wbr><span><span>Name</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1227234349%2FFunctions%2F283408238"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k-compiler-plugin/jvmMain"><div class="symbol monospace"><span class="token keyword">fun </span><span data-unresolved-link="org.jetbrains.kotlin.ir.declarations/IrFunction///PointingToDeclaration/">IrFunction</span><span class="token punctuation">.</span><a href="qualified-name.html"><span class="token function">qualifiedName</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">The instrumentation name of <span data-unresolved-link="org.jetbrains.kotlin.ir.declarations/IrFunction///PointingToDeclaration/">this</span> function: <code class="lang-kotlin">"ClassName.functionName"</code>, or just the function name for a top-level function. Used as the default span name (<code class="lang-kotlin">@Traced</code>) and the log name (<code class="lang-kotlin">@Logged</code>).</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1277961112%2FFunctions%2F283408238" anchor-label="receiverOrContextOf" id="-1277961112%2FFunctions%2F283408238" data-filterable-set=":log4k-compiler-plugin/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k-compiler-plugin/jvmMain" data-filterable-set=":log4k-compiler-plugin/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="receiver-or-context-of.html"><span>receiver</span><wbr><span>Or</span><wbr><span>Context</span><wbr><span><span>Of</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1277961112%2FFunctions%2F283408238"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k-compiler-plugin/jvmMain"><div class="symbol monospace"><span class="token keyword">fun </span><span data-unresolved-link="org.jetbrains.kotlin.ir.declarations/IrFunction///PointingToDeclaration/">IrFunction</span><span class="token punctuation">.</span><a href="receiver-or-context-of.html"><span class="token function">receiverOrContextOf</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">type<span class="token operator">: </span><span data-unresolved-link="org.jetbrains.kotlin.ir.symbols/IrClassSymbol///PointingToDeclaration/">IrClassSymbol</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="org.jetbrains.kotlin.ir.declarations/IrValueParameter///PointingToDeclaration/">IrValueParameter</span><span class="token operator">?</span></div><div class="brief "><p class="paragraph">The first context parameter or extension receiver of <span data-unresolved-link="org.jetbrains.kotlin.ir.declarations/IrFunction///PointingToDeclaration/">this</span> function whose type is a subtype of <a href="receiver-or-context-of.html">type</a> — i.e. a value of <a href="receiver-or-context-of.html">type</a> "in scope" for the function. Used to pick up a <code class="lang-kotlin">TracingContext</code> or <code class="lang-kotlin">TracingEvent.Span</code> provided via <code class="lang-kotlin">context(_: …)</code> or an extension receiver.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="712052686%2FFunctions%2F283408238" anchor-label="regularParams" id="712052686%2FFunctions%2F283408238" data-filterable-set=":log4k-compiler-plugin/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k-compiler-plugin/jvmMain" data-filterable-set=":log4k-compiler-plugin/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="regular-params.html"><span>regular</span><wbr><span><span>Params</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="712052686%2FFunctions%2F283408238"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k-compiler-plugin/jvmMain"><div class="symbol monospace"><span class="token keyword">fun </span><span data-unresolved-link="org.jetbrains.kotlin.ir.declarations/IrFunction///PointingToDeclaration/">IrFunction</span><span class="token punctuation">.</span><a href="regular-params.html"><span class="token function">regularParams</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span data-unresolved-link="org.jetbrains.kotlin.ir.declarations/IrValueParameter///PointingToDeclaration/">IrValueParameter</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">The regular (value) parameters of <span data-unresolved-link="org.jetbrains.kotlin.ir.declarations/IrFunction///PointingToDeclaration/">this</span> — excluding receivers and context parameters.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-305883159%2FFunctions%2F283408238" anchor-label="reportError" id="-305883159%2FFunctions%2F283408238" data-filterable-set=":log4k-compiler-plugin/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k-compiler-plugin/jvmMain" data-filterable-set=":log4k-compiler-plugin/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="report-error.html"><span>report</span><wbr><span><span>Error</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-305883159%2FFunctions%2F283408238"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k-compiler-plugin/jvmMain"><div class="symbol monospace"><span class="token keyword">fun </span><span data-unresolved-link="org.jetbrains.kotlin.cli.common.messages/MessageCollector///PointingToDeclaration/">MessageCollector</span><span class="token punctuation">.</span><a href="report-error.html"><span class="token function">reportError</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">function<span class="token operator">: </span><span data-unresolved-link="org.jetbrains.kotlin.ir.declarations/IrFunction///PointingToDeclaration/">IrFunction</span><span class="token punctuation">, </span></span><span class="parameter ">message<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-nothing/index.html">Nothing</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Reports a compilation error anchored at <a href="report-error.html">function</a>, failing the build. Returns <code class="lang-kotlin">null</code> so it can be used as <code class="lang-kotlin">?: return messageCollector.reportError(...)</code> from functions with a nullable return type.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
