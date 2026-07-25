@@ -10,6 +10,11 @@ import io.github.smyrgeorge.log4k.Level.WARN
 import io.github.smyrgeorge.log4k.Logger
 import io.github.smyrgeorge.log4k.TracingEvent.Span
 
+// NOTE: whenever a function is added, removed or changed here, mirror it on `Log4kClassic` in the
+// `log4k-context` module (io.github.smyrgeorge.log4k.context.extentions.kt). That `log.classic.*`
+// escape hatch re-exports this API by hand — there is no automatic re-export — so the two must be
+// kept in sync.
+
 //@formatter:off
 inline fun Logger.trace(f: () -> String): Unit = if (TRACE.enabled()) trace(f()) else Unit
 inline fun Logger.trace(t: Throwable, f: () -> String): Unit = if (TRACE.enabled()) trace(f(), t) else Unit

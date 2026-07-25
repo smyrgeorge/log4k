@@ -18,6 +18,7 @@ kotlin {
         commonMain {
             dependencies {
                 api(project(":log4k"))
+                implementation(project(":log4k-classic"))
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.serialisation.json)
             }

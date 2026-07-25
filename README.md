@@ -34,6 +34,7 @@ This project also tries to be fully compatible with `OpenTelemetry` standard.
 
 - [Usage](#usage)
     - [Extension Modules](#extension-modules)
+        - [The `classic` escape hatch (`log4k-context`)](#the-classic-escape-hatch-log4k-context)
 - [Architecture](#architecture)
 - [Logging API](#logging-api)
     - [Context Parameters Support](#context-parameters-support)
@@ -100,6 +101,24 @@ trace.span("my-operation") {
 ```
 
 You can depend on both modules simultaneously if you need both styles in the same source set.
+
+#### The `classic` escape hatch (`log4k-context`)
+
+Inside a `TracingContext` / `Span` scope the context-aware overloads win, so `log.info { … }` always attaches the
+current span. When you want the **classic** behavior right there — logging with **no** span auto-attached — reach for
+`log.classic`:
+
+```kotlin
+trace.span("my-operation") {
+    log.info { "with span" }          // context overload — attaches the current span
+    log.classic.info { "no span" }    // escape hatch — classic behavior, span = null
+    log.classic.info(span) { "…" }    // classic with an explicit span
+}
+```
+
+`Logger.classic` is a `@JvmInline value class` wrapper carrying the logger, so it is **zero-cost** (no allocation — it
+erases to the underlying `Logger`). It is also the only way to reach the classic API from a module that depends solely
+on `log4k-context`, since that module does not re-export `log4k-classic`.
 
 ## Architecture
 
