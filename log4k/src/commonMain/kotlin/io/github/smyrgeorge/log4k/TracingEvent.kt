@@ -31,11 +31,11 @@ sealed interface TracingEvent {
      * @property status The status of the span, containing the result of its execution.
      */
     abstract class Span(
-        open val id: String,
-        open val name: String,
-        open val level: Level,
+        val id: String,
+        val name: String,
+        val level: Level,
         val context: Context,
-        open val parent: Span?,
+        val parent: Span?,
         var startAt: Instant?,
         var endAt: Instant?,
         val tags: MutableTags,
@@ -77,11 +77,11 @@ sealed interface TracingEvent {
          * @param traceId The unique identifier for the trace. Defaults to the parent's traceId or the span's own id.
          */
         class Local(
-            override val id: String,
-            override val name: String,
-            override val level: Level,
+            id: String,
+            name: String,
+            level: Level,
             tracer: Tracer,
-            override val parent: Span? = null,
+            parent: Span? = null,
             tags: Tags = emptyMap(),
             traceId: String = parent?.context?.traceId ?: Tracer.traceId()
         ) : Span(
@@ -226,10 +226,10 @@ sealed interface TracingEvent {
          * @param tracer The tracer associated with this span.
          */
         class Remote(
-            override val id: String,
+            id: String,
             traceId: String,
-            override val name: String = "remote-$id",
-            override val level: Level,
+            name: String = "remote-$id",
+            level: Level,
             tracer: Tracer
         ) : Span(
             id = id,
