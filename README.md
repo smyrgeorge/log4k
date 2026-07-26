@@ -220,9 +220,8 @@ details.
 
 ### Full SLF4J Integration Supported
 
-We’ve ensured complete compatibility with SLF4J, allowing seamless integration into projects that already use SLF4J as a
-logging abstraction layer. By providing SLF4J support, `log4k` can be easily adopted in both new and existing
-applications
+We’ve ensured compatibility with SLF4J, allowing seamless integration into projects that already use SLF4J as a logging
+abstraction layer. By providing SLF4J support, `log4k` can be easily adopted in both new and existing applications
 without requiring significant changes to your current logging setup. This means you can leverage log4k’s powerful,
 multiplatform capabilities while maintaining compatibility with other SLF4J-compatible libraries and frameworks.
 
