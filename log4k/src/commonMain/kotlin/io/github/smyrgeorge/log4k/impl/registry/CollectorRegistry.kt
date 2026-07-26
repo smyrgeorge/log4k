@@ -4,7 +4,6 @@ import io.github.smyrgeorge.log4k.Level
 import io.github.smyrgeorge.log4k.impl.extensions.toName
 import kotlin.reflect.KClass
 
-@Suppress("unused")
 class CollectorRegistry<T> where T : CollectorRegistry.Collector {
     private val muted = mutableSetOf<String>()
     private val loggers = mutableMapOf<String, T>()

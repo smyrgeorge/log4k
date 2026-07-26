@@ -14,7 +14,6 @@ import kotlin.reflect.KClass
  *
  * @param T The type of event that the appenders handle.
  */
-@Suppress("unused")
 class AppenderRegistry<T> {
     private val appenders = mutableListOf<Appender<T>>()
 
