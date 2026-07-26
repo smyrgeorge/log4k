@@ -35,13 +35,4 @@ class CapturingLoggingAppender : Appender<LoggingEvent> {
             if (predicate(event)) return event
         }
     }
-
-    /** Suspends until [count] events matching [predicate] are appended and returns them in order. */
-    suspend fun awaitEvents(count: Int, predicate: (LoggingEvent) -> Boolean = { true }): List<LoggingEvent> =
-        buildList {
-            while (size < count) {
-                val event = delivered.receive()
-                if (predicate(event)) add(event)
-            }
-        }
 }
