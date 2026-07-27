@@ -400,7 +400,10 @@ RootLogger.Metering.appenders.register(collector)
 ```
 
 The `SimpleMeteringCollectorAppender` processes all events, updating the value for each registered instrument. It also
-provides a method that returns a string with the collected data in the `OpenMetrics` line format.
+provides a method that returns a string with the collected data in the `OpenMetrics` line format: metric and label
+names are sanitized to the exposition alphabet (e.g. `event-a` becomes `event_a`), counter samples carry the mandatory
+`_total` suffix, an `UpDownCounter` is exposed as a `gauge`, units are appended to the metric name, and the exposition
+is terminated with `# EOF`.
 
 ```kotlin
 val metrics = collector.toOpenMetricsLineFormatString()
@@ -408,23 +411,18 @@ println(metrics)
 
 // The above example will print:
 //
-// # HELP event-a
-// # TYPE event-a counter
-// event-a {label="pool-a"} 2 1730360802506
-//
-// # HELP thread-pool-size
-// # TYPE thread-pool-size gauge
-// thread-pool-size {pool="pool-a"} 3 1730360802506
-// thread-pool-size {pool="pool-b"} 6 1730360802506
-//
-// # HELP event-b
-// # TYPE event-b updowncounter
-// event-b {label="pool-b"} 4.0 1730360802506
-//
-// # TYPE request-duration histogram
-// request-duration_bucket {path="/a", le="+Inf"} 2 1730360802506
-// request-duration_sum {path="/a"} 0.8 1730360802506
-// request-duration_count {path="/a"} 2 1730360802506
+// # TYPE event_a counter
+// event_a_total{label="pool-a"} 2
+// # TYPE event_b gauge
+// event_b{label="pool-b"} 4.0
+// # TYPE request_duration histogram
+// request_duration_bucket{path="/a",le="+Inf"} 2
+// request_duration_sum{path="/a"} 0.8
+// request_duration_count{path="/a"} 2
+// # TYPE thread_pool_size gauge
+// thread_pool_size{pool="pool-a"} 3
+// thread_pool_size{pool="pool-b"} 6
+// # EOF
 ```
 
 ### Counter
@@ -598,17 +596,20 @@ the instrument bundle is created once and cached by `Meter.timed(name)`.
   own `@Timed` overrides the class-level defaults (e.g., its `name`).
 - **Opt out** — `@NoTime` excludes a single function, or (on a class) disables metrics for the whole class.
 
-With a `SimpleMeteringCollectorAppender` registered, calling `placeOrder` a few times exposes, in OpenMetrics form:
+With a `SimpleMeteringCollectorAppender` registered, calling `placeOrder` a few times exposes, in OpenMetrics form
+(dots in instrument names are sanitized to `_`, and the unit is appended to the metric name):
 
 ```text
-# TYPE OrderService.placeOrder.calls counter
-OrderService.placeOrder.calls{} 3 1730360802506
-
-# UNIT OrderService.placeOrder.duration ms
-# TYPE OrderService.placeOrder.duration histogram
-OrderService.placeOrder.duration_bucket{le="+Inf"} 3 1730360802506
-OrderService.placeOrder.duration_sum{} 1.732 1730360802506
-OrderService.placeOrder.duration_count{} 3 1730360802506
+# TYPE OrderService_placeOrder_calls counter
+# HELP OrderService_placeOrder_calls Total number of invocations of 'OrderService.placeOrder'.
+OrderService_placeOrder_calls_total{} 3
+# TYPE OrderService_placeOrder_duration_ms histogram
+# UNIT OrderService_placeOrder_duration_ms ms
+# HELP OrderService_placeOrder_duration_ms Invocation duration of 'OrderService.placeOrder'.
+OrderService_placeOrder_duration_ms_bucket{le="+Inf"} 3
+OrderService_placeOrder_duration_ms_sum{} 1.732
+OrderService_placeOrder_duration_ms_count{} 3
+# EOF
 ```
 
 ### Tracing (`@Traced`)
