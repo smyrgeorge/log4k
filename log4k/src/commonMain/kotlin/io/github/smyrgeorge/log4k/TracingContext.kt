@@ -86,7 +86,7 @@ interface TracingContext {
         ): T {
             val parentSpan: Span? = context?.currentOrNull() ?: parent
             val effectiveTracer: Tracer = parentSpan?.context?.tracer ?: tracer ?: context?.tracer
-                ?: error("No tracer found for span '$name'.")
+            ?: error("No tracer found for span '$name'.")
             val span = effectiveTracer.span(name, tags, parentSpan).start()
             context?.current = span
             return try {

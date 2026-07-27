@@ -46,8 +46,11 @@ class CollectorRegistry<T> where T : CollectorRegistry.Collector {
          * Mutes the logger by setting its logging level to `Level.OFF`.
          *
          * This method saves the current logging level in the `levelBeforeMute` field before muting.
+         * Muting an already-muted collector is a no-op, so a later [unmute] always restores the
+         * level from before the first mute (a repeated mute must not overwrite it with `OFF`).
          */
         fun mute() {
+            if (isMuted()) return
             levelBeforeMute = level
             level = Level.OFF
         }

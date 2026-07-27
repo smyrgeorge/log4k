@@ -123,7 +123,7 @@ class TimedTests {
 
         val first = appender.awaitEvent {
             it is MeteringEvent.ValueEvent &&
-                (it.name == "TimedFixture.quote.calls" || it.name == "TimedFixture.placeOrder.calls")
+                    (it.name == "TimedFixture.quote.calls" || it.name == "TimedFixture.placeOrder.calls")
         }
         assertThat(first.name).isEqualTo("TimedFixture.placeOrder.calls")
     }
@@ -135,7 +135,7 @@ class TimedTests {
 
         val first = appender.awaitEvent {
             it is MeteringEvent.ValueEvent &&
-                (it.name == "SilencedTimedFixture.ping.calls" || it.name == "TimedFixture.placeOrder.calls")
+                    (it.name == "SilencedTimedFixture.ping.calls" || it.name == "TimedFixture.placeOrder.calls")
         }
         assertThat(first.name).isEqualTo("TimedFixture.placeOrder.calls")
     }

@@ -464,7 +464,7 @@ meter.gauge<Int>("thread-pool-size").poll(every = 10.seconds) {
 ```
 
 Using this method, values are automatically recorded at regular intervals, making it ideal for tracking metrics in
-dynamic environments.
+dynamic environments. `poll` returns the `Job` backing the loop — cancel it to stop polling.
 
 ### Histogram
 
@@ -583,7 +583,7 @@ Each call records three metrics, keyed off the metric base name:
 - `"<name>.duration"` — a histogram of the invocation duration, in milliseconds.
 
 Both `suspend` and regular functions are supported (the wrapper reuses the `inline` `Meter.Timed.measure` helper), and
-the instrument bundle is created once and cached by `Meter.timed(name)`.
+the instrument bundle is created once per `(name, tags)` combination and cached by `Meter.timed(name, tags)`.
 
 - **Metric name** — `@Timed(name = "…")`; when omitted it defaults to `ClassName.functionName`.
 - **Dimensions** — `@Timed(tags = [Tag("tier", "gold")])` attaches static labels to the recorded `calls`/`errors`/

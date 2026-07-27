@@ -170,6 +170,34 @@ class CollectorRegistryTests {
     }
 
     @Test
+    fun collector_doubleMute_thenUnmute_restoresOriginalLevel() {
+        val collector = FakeCollector("a", Level.WARN)
+
+        // A repeated mute must be a no-op: it must not overwrite `levelBeforeMute` with OFF,
+        // which would make the collector impossible to unmute.
+        collector.mute()
+        collector.mute()
+        collector.unmute()
+
+        assertThat(collector.level).isEqualTo(Level.WARN)
+        assertThat(collector.isMuted()).isFalse()
+    }
+
+    @Test
+    fun mute_calledTwiceViaRegistry_stillUnmutesToOriginalLevel() {
+        val registry = CollectorRegistry<FakeCollector>()
+        val collector = FakeCollector("a", Level.INFO)
+        registry.register(collector)
+
+        registry.mute("a")
+        registry.mute("a")
+        registry.unmute("a")
+
+        assertThat(collector.level).isEqualTo(Level.INFO)
+        assertThat(collector.isMuted()).isFalse()
+    }
+
+    @Test
     fun collector_constructedAtOff_reportsMuted() {
         assertThat(FakeCollector("a", Level.OFF).isMuted()).isTrue()
     }

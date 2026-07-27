@@ -3,8 +3,9 @@ package io.github.smyrgeorge.log4k
 import io.github.smyrgeorge.log4k.impl.SimpleMeterFactory
 import io.github.smyrgeorge.log4k.impl.extensions.dispatcher
 import io.github.smyrgeorge.log4k.impl.extensions.doEvery
-import io.github.smyrgeorge.log4k.impl.extensions.toName
 import io.github.smyrgeorge.log4k.impl.registry.CollectorRegistry
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlin.concurrent.atomics.AtomicReference
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.update
@@ -94,32 +95,38 @@ abstract class Meter(
         description: String? = null
     ): Instrument.Histogram<T> = Instrument.Histogram(name, this, unit, description)
 
-    // The [Timed] bundles created by [timed], cached by name so their instruments are created once.
+    // The [Timed] bundles created by [timed], cached by (name, tags) so each distinct combination
+    // creates its instruments once.
     // A copy-on-write [AtomicReference] keeps the cache lock-free and thread-safe across platforms.
     @OptIn(ExperimentalAtomicApi::class)
-    private val timers: AtomicReference<MutableMap<String, Timed>> = AtomicReference(mutableMapOf())
+    private val timers: AtomicReference<MutableMap<Pair<String, List<Pair<String, Any>>>, Timed>> =
+        AtomicReference(mutableMapOf())
 
     /**
      * Returns a [Timed] bundle — a call counter, an error counter and a duration histogram — for the
-     * given base [name], creating (and caching) it on first use.
+     * given base [name] and [tags], creating (and caching) it on first use.
      *
      * This is the runtime helper the `log4k-compiler-plugin` uses for
      * [io.github.smyrgeorge.log4k.annotation.Timed]: instruments named `"<name>.calls"`,
-     * `"<name>.errors"` and `"<name>.duration"` (in milliseconds) are created once and reused across
-     * invocations.
+     * `"<name>.errors"` and `"<name>.duration"` (in milliseconds) are created once per (name, tags)
+     * combination and reused across invocations.
      *
      * The lookup is thread-safe. Under a race two bundles may briefly be constructed for the same
-     * [name], but only one is ever published; the discarded bundle is harmless, since the collector
+     * key, but only one is ever published; the discarded bundle is harmless, since the collector
      * aggregates metric values by name (not by instrument identity).
      *
      * @param name the base metric name; the bundle's instruments are derived from it.
      * @param tags static dimensions (labels) attached to every recorded value. Keep them
-     *   low-cardinality — they become time-series labels. Cached with the bundle by [name].
-     * @return the existing or newly created [Timed] bundle for [name].
+     *   low-cardinality — they become time-series labels. Part of the cache key, so the same [name]
+     *   with different tags yields distinct bundles (and distinct time series).
+     * @return the existing or newly created [Timed] bundle for the given [name] and [tags].
      */
     @OptIn(ExperimentalAtomicApi::class)
     fun timed(name: String, vararg tags: Pair<String, Any>): Timed {
-        timers.load()[name]?.let { return it }
+        // Key by name AND tags: the same base name with different dimensions must not silently
+        // reuse (and mislabel values with) the first call's tags.
+        val key = name to tags.toList()
+        timers.load()[key]?.let { return it }
         val created = Timed(
             calls = counter("$name.calls", description = "Total number of invocations of '$name'."),
             errors = counter("$name.errors", description = "Total number of failed invocations of '$name'."),
@@ -127,13 +134,13 @@ abstract class Meter(
             tags = tags,
         )
         // Copy-on-write: `update`'s transform may run several times, so never mutate the published map —
-        // publish a fresh copy that adds `name` (unless another thread already added it).
+        // publish a fresh copy that adds `key` (unless another thread already added it).
         timers.update { current ->
-            if (name in current) current
+            if (key in current) current
             // We intentionally create a new mutable map to avoid mutating the published map.
-            else current.toMutableMap().apply { put(name, created) }
+            else current.toMutableMap().apply { put(key, created) }
         }
-        return timers.load().getValue(name)
+        return timers.load().getValue(key)
     }
 
     /**
@@ -207,14 +214,16 @@ abstract class Meter(
             description: String? = null,
         ) : Instrument(name, meter, kind, unit, description) {
             /**
-             * Sets the counter to the specified non-negative value with associated tags.
+             * Sets the counter to the specified value with associated tags. A monotonic [Counter]
+             * only accepts non-negative values; an [UpDownCounter] can be set to any value, since
+             * negative values are legitimately reachable through [UpDownCounter.decrement] anyway.
              *
-             * @param value The non-negative value to set the counter to.
+             * @param value The value to set the counter to (non-negative for a [Counter]).
              * @param tags A vararg of pairs representing additional tags/metadata associated with the set action.
              */
             fun set(value: T, vararg tags: Pair<String, Any>) {
                 if (meter.isMuted()) return
-                if (value.isLessThanZero()) error("Only non-negative values are allowed.")
+                if (kind == Kind.Counter && value.isLessThanZero()) error("Only non-negative values are allowed.")
                 val event = MeteringEvent.Set(
                     id = RootLogger.Metering.id(),
                     name = name,
@@ -247,7 +256,10 @@ abstract class Meter(
                 is Long -> this < 0
                 is Float -> this < 0
                 is Double -> this < 0
-                else -> error("Unsupported number type: ${this::class.toName()}")
+                is Short -> this < 0
+                is Byte -> this < 0
+                // Any other Number implementation is sign-checked via its double value.
+                else -> toDouble() < 0.0
             }
         }
 
@@ -292,12 +304,12 @@ abstract class Meter(
              *
              * @param every The duration between consecutive executions of the function.
              * @param f The suspending function to be executed at each polling interval.
+             * @return The [Job] backing the polling loop; cancel it to stop polling.
              */
-            fun poll(every: Duration, f: suspend AbstractRecorder<T>.() -> Unit) {
+            fun poll(every: Duration, f: suspend AbstractRecorder<T>.() -> Unit): Job =
                 doEvery(every, dispatcher()) {
                     f(this@AbstractRecorder)
                 }
-            }
         }
 
         /**
@@ -412,6 +424,10 @@ abstract class Meter(
          * Each recorded value carries the bundle's [tags] as dimensions. The throwable is rethrown
          * after being counted. Being `inline`, this works for both regular and `suspend` functions.
          *
+         * A [CancellationException] is rethrown *without* being counted as an error: coroutine
+         * cancellation is part of normal control flow, not an application failure, and counting it
+         * would skew error rates for cancelled operations.
+         *
          * @param T the type of the result produced by [f].
          * @param f the block to measure.
          * @return the result produced by [f].
@@ -421,6 +437,9 @@ abstract class Meter(
             val mark = TimeSource.Monotonic.markNow()
             return try {
                 f().also { duration.record(mark.elapsedNow().toDouble(DurationUnit.MILLISECONDS), *tags) }
+            } catch (e: CancellationException) {
+                duration.record(mark.elapsedNow().toDouble(DurationUnit.MILLISECONDS), *tags)
+                throw e
             } catch (e: Throwable) {
                 errors.increment(1L, *tags)
                 duration.record(mark.elapsedNow().toDouble(DurationUnit.MILLISECONDS), *tags)

@@ -41,6 +41,7 @@ internal fun launch(
  *
  * @param delay The duration to wait between each execution of the provided suspend function.
  * @param f The suspend function to be executed repeatedly.
+ * @return The [Job] backing the loop; cancel it to stop the periodic execution.
  */
 internal fun doEvery(
     delay: Duration,

@@ -2,6 +2,7 @@ package io.github.smyrgeorge.log4k
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
+import assertk.assertions.isFalse
 import assertk.assertions.isInstanceOf
 import assertk.assertions.isNotEmpty
 import assertk.assertions.isNotSameInstanceAs
@@ -9,11 +10,13 @@ import assertk.assertions.isSameInstanceAs
 import io.github.smyrgeorge.log4k.Meter.Instrument.Kind
 import io.github.smyrgeorge.log4k.impl.SimpleMeter
 import io.github.smyrgeorge.log4k.utils.CapturingMeteringAppender
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Integration tests for [Meter]. Each test registers a [CapturingMeteringAppender] and drives real
@@ -136,6 +139,29 @@ class MeterTests {
     }
 
     @Test
+    fun timedMeasure_cancellation_isRethrownWithoutCountingAnError() = runTest {
+        val meter = SimpleMeter("test.meter", Level.INFO)
+        val timed = meter.timed("svc.cancel")
+
+        assertFailsWith<CancellationException> {
+            timed.measure<Unit> { throw CancellationException("stop") }
+        }
+        timed.measure { } // a follow-up successful call, as a sequence marker
+
+        // Events are emitted (and delivered) in order. A cancelled measure must produce exactly
+        // `calls` + `duration`; if it (wrongly) counted an error, `svc.cancel.errors` would appear
+        // as the second event below.
+        val names = buildList {
+            repeat(4) {
+                add(appender.awaitEvent { it is MeteringEvent.ValueEvent && it.name.startsWith("svc.cancel") }.name)
+            }
+        }
+        assertThat(names).isEqualTo(
+            listOf("svc.cancel.calls", "svc.cancel.duration", "svc.cancel.calls", "svc.cancel.duration")
+        )
+    }
+
+    @Test
     fun mutedMeter_suppressesInstrumentCreationAndValueEvents() = runTest {
         val meter = SimpleMeter("test.meter", Level.INFO)
 
@@ -191,12 +217,41 @@ class MeterTests {
     }
 
     @Test
+    fun upDownCounterSet_allowsNegativeValues() = runTest {
+        // An UpDownCounter can legitimately be negative (increment/decrement can reach any value),
+        // so an absolute `set` must accept negatives too; only the monotonic Counter rejects them.
+        val meter = SimpleMeter("test.meter", Level.INFO)
+        val counter = meter.upDownCounter<Long>("updown.set.negative")
+
+        counter.set(-5L)
+
+        val event = appender.awaitValue("updown.set.negative")
+        assertThat(event).isInstanceOf(MeteringEvent.Set::class)
+        assertThat(event.value).isEqualTo(-5L)
+    }
+
+    @Test
     fun negativeValues_rejectedAcrossNumericTypes() {
         val meter = SimpleMeter("test.meter", Level.INFO)
         assertFailsWith<IllegalStateException> { meter.counter<Int>("neg.int").increment(-1) }
         assertFailsWith<IllegalStateException> { meter.counter<Long>("neg.long").increment(-1L) }
         assertFailsWith<IllegalStateException> { meter.counter<Float>("neg.float").increment(-1.0f) }
         assertFailsWith<IllegalStateException> { meter.counter<Double>("neg.double").increment(-1.0) }
+        assertFailsWith<IllegalStateException> { meter.counter<Short>("neg.short").increment((-1).toShort()) }
+        assertFailsWith<IllegalStateException> { meter.counter<Byte>("neg.byte").increment((-1).toByte()) }
+    }
+
+    @Test
+    fun shortAndByteValues_areSupported() = runTest {
+        // `T : Number` admits Short/Byte at compile time, so the runtime must accept them instead
+        // of failing with "Unsupported number type".
+        val meter = SimpleMeter("test.meter", Level.INFO)
+
+        meter.counter<Short>("short.count").increment(3.toShort())
+        assertThat(appender.awaitValue("short.count").value).isEqualTo(3.toShort())
+
+        meter.counter<Byte>("byte.count").increment(2.toByte())
+        assertThat(appender.awaitValue("byte.count").value).isEqualTo(2.toByte())
     }
 
     @Test
@@ -249,10 +304,41 @@ class MeterTests {
     // --- timed(...) bundle ---------------------------------------------------------------------
 
     @Test
-    fun timed_cachesBundleByName() {
+    fun timed_cachesBundleByNameAndTags() {
         val meter = SimpleMeter("test.meter", Level.INFO)
         assertThat(meter.timed("cache.op")).isSameInstanceAs(meter.timed("cache.op"))
         assertThat(meter.timed("cache.op")).isNotSameInstanceAs(meter.timed("cache.other"))
+
+        // Same name with different tags must be distinct bundles: the second caller's dimensions
+        // must not be silently replaced by the first caller's.
+        val gold = meter.timed("cache.tagged", "tier" to "gold")
+        assertThat(gold).isSameInstanceAs(meter.timed("cache.tagged", "tier" to "gold"))
+        assertThat(gold).isNotSameInstanceAs(meter.timed("cache.tagged", "tier" to "silver"))
+    }
+
+    @Test
+    fun timed_sameNameDifferentTags_recordsDistinctDimensions() = runTest {
+        val meter = SimpleMeter("test.meter", Level.INFO)
+
+        meter.timed("tiered.op", "tier" to "gold").measure { }
+        meter.timed("tiered.op", "tier" to "silver").measure { }
+
+        // Events arrive in emission order: the first calls-increment carries the gold tag, the
+        // second the silver one (previously both were recorded under gold).
+        assertThat(appender.awaitValue("tiered.op.calls").tags["tier"]).isEqualTo("gold")
+        assertThat(appender.awaitValue("tiered.op.calls").tags["tier"]).isEqualTo("silver")
+    }
+
+    @Test
+    fun gaugePoll_returnsACancellableJob() = runTest {
+        val meter = SimpleMeter("test.meter", Level.INFO)
+        val gauge = meter.gauge<Int>("poll.gauge")
+
+        val job = gauge.poll(every = 10.milliseconds) { record(1) }
+
+        appender.awaitValue("poll.gauge") // the polling loop ran at least once
+        job.cancel()
+        assertThat(job.isActive).isFalse()
     }
 
     @Test
