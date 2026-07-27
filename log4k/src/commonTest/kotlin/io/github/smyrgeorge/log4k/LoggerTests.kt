@@ -62,6 +62,23 @@ class LoggerTests {
     // --- Level gating (log() + enabled()) ------------------------------------------------------
 
     @Test
+    fun log_atLevelOff_isAlwaysDiscarded() = runTest {
+        val logger = SimpleLogger("test.gate.off", Level.INFO)
+
+        // OFF is a filter level, not an event level: it must never pass the gate — not even on a
+        // muted logger, where `OFF >= OFF` would otherwise hold.
+        assertThat(logger.isEnabled(Level.OFF)).isFalse()
+        logger.log(Level.OFF, null, "should never appear", emptyArray(), null)
+        logger.mute()
+        logger.log(Level.OFF, null, "should never appear either", emptyArray(), null)
+        logger.unmute()
+
+        logger.log(Level.INFO, null, "marker", emptyArray(), null)
+        val first = appender.awaitEvent { it.logger == "test.gate.off" }
+        assertThat(first.message).isEqualTo("marker")
+    }
+
+    @Test
     fun log_belowThreshold_emitsNoEvent() = runTest {
         val logger = SimpleLogger("test.gate.below", Level.INFO)
 
@@ -262,6 +279,85 @@ class LoggerTests {
         val events = appender.awaitEvents(2) { it.logger == "test.logged.span" }
         assertThat(events[0].span).isSameInstanceAs(span)
         assertThat(events[1].span).isSameInstanceAs(span)
+    }
+
+    @Test
+    fun logged_disabledLevel_neverRendersTheResult() = runTest {
+        val logger = SimpleLogger("test.logged.disabled", Level.INFO)
+        var renders = 0
+        val instance = object {
+            override fun toString(): String {
+                renders++
+                return "rendered"
+            }
+        }
+
+        // DEBUG < INFO: the lines must not be emitted, and no string (in particular the result's
+        // toString()) may be built for them.
+        val result = logger.logged(Level.DEBUG, null, "compute", "") { instance }
+
+        assertThat(result).isSameInstanceAs(instance)
+        assertThat(renders).isEqualTo(0)
+        logger.log(Level.INFO, null, "marker", emptyArray(), null)
+        val first = appender.awaitEvent { it.logger == "test.logged.disabled" }
+        assertThat(first.message).isEqualTo("marker")
+    }
+
+    @Test
+    fun logged_throwingResultToString_doesNotFailTheCall() = runTest {
+        val logger = SimpleLogger("test.logged.badstring", Level.TRACE)
+        val instance = object {
+            override fun toString(): String = error("toString boom")
+        }
+
+        // The block succeeded; a throwing toString() while rendering the exit line must not
+        // turn that success into a failure.
+        val result = logger.logged(Level.INFO, null, "compute", "") { instance }
+
+        assertThat(result).isSameInstanceAs(instance)
+        val events = appender.awaitEvents(2) { it.logger == "test.logged.badstring" }
+        assertThat(events[1].message).startsWith("← compute = <toString() failed> (")
+    }
+
+    @Test
+    fun logged_nonLocalReturn_stillEmitsACompletionLine() = runTest {
+        val logger = SimpleLogger("test.logged.nonlocal", Level.TRACE)
+
+        // A non-local return exits `compute` from inside the block, skipping both the normal path
+        // and the catch — the `finally` must still emit a completion line (without a result value)
+        // so the entry line is never left dangling.
+        fun compute(flag: Boolean): Int {
+            logger.logged(Level.INFO, null, "compute", "") {
+                if (flag) return 7
+            }
+            return 0
+        }
+
+        assertThat(compute(true)).isEqualTo(7)
+        val events = appender.awaitEvents(2) { it.logger == "test.logged.nonlocal" }
+        assertThat(events[0].message).isEqualTo("→ compute()")
+        assertThat(events[1].message).startsWith("← compute (")
+    }
+
+    // --- RootLogger appender isolation ----------------------------------------------------------
+
+    @Test
+    fun aThrowingAppender_doesNotStarveTheRemainingAppenders() = runTest {
+        // Register a throwing appender BEFORE the capturing one: the event must still reach the
+        // capturing appender instead of being lost for every appender after the failing one.
+        val throwing = object : Appender<LoggingEvent> {
+            override val name: String = "throwing-logging-appender"
+            override suspend fun append(event: LoggingEvent): Unit = error("appender boom")
+        }
+        RootLogger.Logging.appenders.unregisterAll()
+        RootLogger.Logging.appenders.register(throwing)
+        RootLogger.Logging.appenders.register(appender)
+
+        val logger = SimpleLogger("test.appender.isolation", Level.INFO)
+        logger.log(Level.INFO, null, "survives", emptyArray(), null)
+
+        val event = appender.awaitEvent { it.logger == "test.appender.isolation" }
+        assertThat(event.message).isEqualTo("survives")
     }
 
     // --- Companion factory / registry ----------------------------------------------------------

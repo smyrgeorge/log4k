@@ -52,6 +52,24 @@ class MeterTests {
     }
 
     @Test
+    fun aThrowingAppender_doesNotStarveTheRemainingAppenders() = runTest {
+        // Register a throwing appender BEFORE the capturing one: the event must still reach the
+        // capturing appender instead of being lost for every appender after the failing one.
+        val throwing = object : Appender<MeteringEvent> {
+            override val name: String = "throwing-metering-appender"
+            override suspend fun append(event: MeteringEvent): Unit = error("appender boom")
+        }
+        RootLogger.Metering.appenders.unregisterAll()
+        RootLogger.Metering.appenders.register(throwing)
+        RootLogger.Metering.appenders.register(appender)
+
+        val meter = SimpleMeter("test.meter", Level.INFO)
+        meter.counter<Long>("isolation.count").increment(1L)
+
+        assertThat(appender.awaitValue("isolation.count").value).isEqualTo(1L)
+    }
+
+    @Test
     fun creatingInstrument_emitsCreateInstrumentEvent() = runTest {
         val meter = SimpleMeter("test.meter", Level.INFO)
 

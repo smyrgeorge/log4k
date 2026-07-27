@@ -3,6 +3,7 @@ package io.github.smyrgeorge.log4k
 import io.github.smyrgeorge.log4k.impl.appenders.platformDefaultAppender
 import io.github.smyrgeorge.log4k.impl.extensions.dispatcher
 import io.github.smyrgeorge.log4k.impl.registry.AppenderRegistry
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
@@ -42,33 +43,28 @@ object RootLogger {
     private val meters: Channel<MeteringEvent> = Channel(capacity = Channel.UNLIMITED)
 
     init {
+        // Register the default Logging appender.
         val default: Appender<LoggingEvent> = platformDefaultAppender()
         Logging.appenders.register(default)
 
         // Start consuming the Logging queue.
         RootLoggerScope.launch(dispatcher) {
             logs.consumeEach { event ->
-                runCatching {
-                    Logging.appenders.all().forEach { it.append(event) }
-                }
+                Logging.appenders.all().forEach { it.appendSafely(event) }
             }
         }
 
         // Start consuming the Tracing queue.
         RootLoggerScope.launch(dispatcher) {
             traces.consumeEach { event ->
-                runCatching {
-                    Tracing.appenders.all().forEach { it.append(event) }
-                }
+                Tracing.appenders.all().forEach { it.appendSafely(event) }
             }
         }
 
-        // Start consuming the Tracing queue.
+        // Start consuming the Metering queue.
         RootLoggerScope.launch(dispatcher) {
             meters.consumeEach { event ->
-                runCatching {
-                    Metering.appenders.all().forEach { it.append(event) }
-                }
+                Metering.appenders.all().forEach { it.appendSafely(event) }
             }
         }
     }
@@ -143,6 +139,23 @@ object RootLogger {
         @OptIn(ExperimentalAtomicApi::class)
         fun id(): Long = idx.incrementAndFetch()
         val appenders = AppenderRegistry<MeteringEvent>()
+    }
+
+    /**
+     * Safely appends an event using the given Appender, swallowing any non-critical errors
+     * to ensure other appenders still process the event.
+     *
+     * @param T The type of event to be appended.
+     * @param event The event to append using the Appender.
+     */
+    private suspend fun <T> Appender<T>.appendSafely(event: T) {
+        try {
+            append(event)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Throwable) {
+            // Swallow the appender's failure so the remaining appenders still receive the event.
+        }
     }
 
     private object RootLoggerScope : CoroutineScope {

@@ -56,6 +56,24 @@ class TracerTests {
     }
 
     @Test
+    fun aThrowingAppender_doesNotStarveTheRemainingAppenders() = runTest {
+        // Register a throwing appender BEFORE the capturing one: the span must still reach the
+        // capturing appender instead of being lost for every appender after the failing one.
+        val throwing = object : Appender<TracingEvent> {
+            override val name: String = "throwing-tracing-appender"
+            override suspend fun append(event: TracingEvent): Unit = error("appender boom")
+        }
+        RootLogger.Tracing.appenders.unregisterAll()
+        RootLogger.Tracing.appenders.register(throwing)
+        RootLogger.Tracing.appenders.register(appender)
+
+        val tracer = SimpleTracer("test.tracer", Level.TRACE)
+        tracer.span("isolation-op") { }
+
+        assertThat(appender.awaitSpan("isolation-op").name).isEqualTo("isolation-op")
+    }
+
+    @Test
     fun startedSpan_isDeliveredWhenEnded() = runTest {
         val tracer = SimpleTracer("test.tracer", Level.TRACE)
 
