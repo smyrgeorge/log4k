@@ -10,11 +10,12 @@ plugins {
 
 val descriptions = mapOf(
     "log4k" to "A Comprehensive Logging and Tracing Solution for Kotlin Multiplatform.",
-    "log4k-classic" to "A Comprehensive Logging and Tracing Solution for Kotlin Multiplatform.",
+    "log4k-classic" to "Classic logging extensions for log4k: trace/debug/info/warn/error with varargs, throwables and lazy message lambdas.",
     "log4k-compiler-plugin" to "Kotlin compiler plugin for log4k: compile-time @Logged, @Timed and @Traced instrumentation.",
     "log4k-gradle-plugin" to "Gradle plugin that wires the log4k Kotlin compiler plugin onto every Kotlin compilation.",
-    "log4k-context" to "A Comprehensive Logging and Tracing Solution for Kotlin Multiplatform.",
-    "log4k-slf4j" to "A Comprehensive Logging and Tracing Solution for Kotlin Multiplatform.",
+    "log4k-context" to "Context-parameter logging extensions for log4k: log lines automatically correlate with the TracingContext or Span in scope.",
+    "log4k-slf4j" to "SLF4J 2.x provider backed by log4k: routes every org.slf4j.Logger call into log4k's logging pipeline.",
+    "log4k-slf4j-appender" to "log4k appender that forwards logging events to SLF4J (Logback, Log4j2, ...).",
 )
 
 configure<MavenPublishBaseExtension> {

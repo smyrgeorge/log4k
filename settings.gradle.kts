@@ -16,6 +16,7 @@ include("log4k-compiler-plugin")
 include("log4k-gradle-plugin")
 include("log4k-context")
 include("log4k-slf4j")
+include("log4k-slf4j-appender")
 
 include("dokka")
 include("examples")

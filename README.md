@@ -38,7 +38,9 @@ This project also tries to be fully compatible with `OpenTelemetry` standard.
 - [Architecture](#architecture)
 - [Logging API](#logging-api)
     - [Context Parameters Support](#context-parameters-support)
-    - [Full SLF4J Integration Supported](#full-slf4j-integration-supported)
+    - [SLF4J Integration](#slf4j-integration)
+        - [Using SLF4J on top of log4k (`log4k-slf4j`)](#using-slf4j-on-top-of-log4k-log4k-slf4j)
+        - [Using log4k on top of SLF4J (`log4k-slf4j-appender`)](#using-log4k-on-top-of-slf4j-log4k-slf4j-appender)
     - [Json Appender](#json-appender)
 - [Tracing API](#tracing-api)
 - [Metering API](#metering-api)
@@ -68,7 +70,7 @@ implementation("io.github.smyrgeorge:log4k:x.y.z")
 
 ### Extension Modules
 
-Starting with Kotlin 2.3.20, what was previously a call-ambiguity warning between context-aware and non-context
+Starting with Kotlin `2.3.20`, what was previously a call-ambiguity warning between context-aware and non-context
 extension functions became a compilation error. To resolve this, the lambda-based extension functions have been
 split into two separate modules:
 
@@ -218,21 +220,60 @@ See the [Logger](./log4k/src/commonMain/kotlin/io/github/smyrgeorge/log4k/Logger
 and [TracingContext](./log4k/src/commonMain/kotlin/io/github/smyrgeorge/log4k/TracingContext.kt) classes for more
 details.
 
-### Full SLF4J Integration Supported
+### SLF4J Integration
 
-We’ve ensured compatibility with SLF4J, allowing seamless integration into projects that already use SLF4J as a logging
-abstraction layer. By providing SLF4J support, `log4k` can be easily adopted in both new and existing applications
-without requiring significant changes to your current logging setup. This means you can leverage log4k’s powerful,
-multiplatform capabilities while maintaining compatibility with other SLF4J-compatible libraries and frameworks.
+SLF4J integration works in both directions; pick the module that matches your situation:
 
-To enable SLF4J integration, simply add the following dependency to your project:
+- [`log4k-slf4j`](./log4k-slf4j/README.md) makes **log4k the backend for SLF4J** — for applications that standardize on
+  log4k and want the SLF4J logging of third-party libraries routed into it.
+- [`log4k-slf4j-appender`](./log4k-slf4j-appender/README.md) makes **SLF4J the sink for log4k** — for existing JVM
+  projects with a configured backend (Logback, Log4j2, …) that want to adopt the log4k API without touching their
+  logging setup.
+
+Both modules are JVM-only: SLF4J itself is a JVM API.
+
+> [!WARNING]
+> The two modules bridge opposite directions and must never be combined on the same classpath — the result would be an
+> endless loop. `Slf4jLoggingAppender` fails fast at construction if it detects that SLF4J is bound to the log4k
+> provider.
+
+#### Using SLF4J on top of log4k (`log4k-slf4j`)
+
+An SLF4J 2.x provider backed by log4k. Add it to a JVM project and every `org.slf4j.Logger` call — from your own code
+and from every third-party library that logs through SLF4J (Spring, Netty, Hibernate, …) — is routed into log4k's
+asynchronous, channel-based pipeline and handled by log4k appenders. There is nothing to configure: SLF4J discovers the
+provider on the classpath.
 
 ```kotlin
 // https://central.sonatype.com/artifact/io.github.smyrgeorge/log4k-slf4j
 implementation("io.github.smyrgeorge:log4k-slf4j:x.y.z")
 ```
 
-For detailed setup instructions and usage, see the project’s [README.md](./log4k-slf4j/README.md)
+SLF4J loggers *are* log4k loggers: `LoggerFactory.getLogger("com.acme.Service")` and `Logger.of("com.acme.Service")`
+resolve the same instance from the same registry, so anything the log4k API can do to a logger — change its level, mute
+it — also applies to loggers created by third-party libraries.
+
+For detailed setup instructions and usage (level mapping, Spring Boot), see the module's
+[README.md](./log4k-slf4j/README.md).
+
+#### Using log4k on top of SLF4J (`log4k-slf4j-appender`)
+
+A log4k appender that forwards every logging event to SLF4J, so a project that already has a configured backend can
+adopt the log4k API — and the compiler plugin's `@Logged` instrumentation — while all output keeps flowing through the
+existing setup (patterns, files, rolling policies, JSON encoders). Events are forwarded with their raw `{}` pattern and
+arguments, so structured encoders keep the individual arguments.
+
+```kotlin
+// https://central.sonatype.com/artifact/io.github.smyrgeorge/log4k-slf4j-appender
+implementation("io.github.smyrgeorge:log4k-slf4j-appender:x.y.z")
+```
+
+```kotlin
+// Once at startup: replaces the default console appender with the SLF4J one.
+Slf4jLoggingAppender.install()
+```
+
+For detailed setup instructions and usage, see the module's [README.md](./log4k-slf4j-appender/README.md).
 
 ### Json Appender
 
@@ -285,7 +326,7 @@ trace.span("test", parent) {
 ```
 
 Additionally, you can instantiate a span that represents the parent span.
-This is useful in cases that the parent span is created outside our application (e.g. received from an HTTP call).
+This is useful in cases that the parent span is created outside our application (e.g., received from an HTTP call).
 
 ```kotlin
 // Create the parent span.
@@ -307,7 +348,7 @@ In the examples above, we see two variations of the `Span` class:
 
 A measurement captured at runtime.
 
-A metric is a measurement of a service captured at runtime. The moment of capturing a measurements is known as a metric
+A metric is a measurement of a service captured at runtime. The moment of capturing a measurement is known as a metric
 event, which consists not only of the measurement itself, but also the time at which it was captured and associated
 metadata.
 
@@ -315,12 +356,12 @@ Several types of metrics are supported:
 
 - **Counter**: A value that accumulates over time – you can think of this like an odometer on a car; it only ever goes
   up.
-- **UpDownCounter**: A value that accumulates over time, but can also go down again. An example could be a queue length,
+- **UpDownCounter**: A value that accumulates over time but can also go down again. An example could be a queue length,
   it will increase and decrease with the number of work items in the queue.
 - **Gauge**: Measures a current value at the time it is read. An example would be the fuel gauge in a vehicle. Gauges
   are asynchronous.
 - **Histogram**: A client-side aggregation of values, such as request latencies. A histogram is a good
-  choice if you are interested in value statistics. For example: How many requests take fewer than 1s?
+  choice if you are interested in value statistics. For example, How many requests take fewer than 1s?
 
 ```kotlin
 // Create a Counter that holds Int values.
@@ -329,7 +370,7 @@ delay(1000)
 c1.increment(1, "label" to "pool-a")
 c1.increment(1, "label" to "pool-a")
 
-// Create a UpDownCounter that holds Double values.
+// Create an UpDownCounter that holds Double values.
 val c2 = meter.upDownCounter<Double>("event-b")
 delay(1000)
 c2.increment(2.0, "label" to "pool-b")
@@ -388,7 +429,7 @@ println(metrics)
 
 ### Counter
 
-A `Counter` accumulates a value that only ever goes up — for example the total number of processed requests. Use
+A `Counter` accumulates a value that only ever goes up — for example, the total number of processed requests. Use
 `increment` to add to it, or `set` to assign an absolute value.
 
 ```kotlin
@@ -401,7 +442,7 @@ requests.set(10, "path" to "/a")
 
 ### UpDownCounter
 
-An `UpDownCounter` behaves like a `Counter` but can also decrease — for example a queue length or the number of
+An `UpDownCounter` behaves like a `Counter` but can also decrease — for example, a queue length or the number of
 in-flight
 requests. In addition to `increment`/`set`, it supports `decrement`.
 
@@ -454,7 +495,7 @@ meter.histogram<Double>("request-duration").poll(every = 10.seconds) {
 
 The [`log4k-compiler-plugin`](./log4k-compiler-plugin) is a Kotlin IR compiler plugin that automatically instruments
 your code — wrapping functions in tracing spans (`@Traced`), entry/exit logging (`@Logged`) and call/duration metrics
-(`@Timed`) — with no manual `trace.span("…") { }` blocks, `log.info("…")` calls or counters required. Because it
+(`@Timed`) — with no manual `trace.span("…") { }` blocks, `log.info("…")` calls, or counters required. Because it
 operates on common IR before backend lowering, it works across all Kotlin Multiplatform targets.
 
 ### Setup
@@ -510,7 +551,7 @@ exception is rethrown. Both `suspend` and regular functions are supported (the w
   such as `org.slf4j.Logger` — the plugin synthesizes `private val _log_ = Logger.of(this::class)` under a distinct
   name, so it never clashes with the existing `log`.
 - **Span correlation** — a span is attached to every emitted log line when one is in scope: a `TracingContext`
-  parameter/receiver (its current span), otherwise a `TracingEvent.Span` in scope (e.g. a `Span.Local` receiver) used
+  parameter/receiver (its current span), otherwise a `TracingEvent.Span` in scope (e.g., a `Span.Local` receiver) used
   directly.
 - **Class-level** — annotate a **class** with `@Logged` to instrument every eligible public member function; a
   function's own `@Logged` overrides the class-level `level`.
@@ -554,7 +595,7 @@ the instrument bundle is created once and cached by `Meter.timed(name)`.
 - **Meter** — read from a `meter: Meter` property on the enclosing class; if none exists, the plugin synthesizes
   `private val _meter_ = Meter.of(this::class)` (mirroring how `@Logged` resolves its logger).
 - **Class-level** — annotate a **class** with `@Timed` to instrument every eligible public member function; a function's
-  own `@Timed` overrides the class-level defaults (e.g. its `name`).
+  own `@Timed` overrides the class-level defaults (e.g., its `name`).
 - **Opt out** — `@NoTime` excludes a single function, or (on a class) disables metrics for the whole class.
 
 With a `SimpleMeteringCollectorAppender` registered, calling `placeOrder` a few times exposes, in OpenMetrics form:
@@ -589,7 +630,7 @@ Both `suspend` and regular functions are supported (the wrapper reuses the `inli
 The new span's **parent** (and the tracer that creates it) is resolved from what is in scope, in order:
 
 1. a `TracingContext` parameter/receiver — the span nests under its current span;
-2. otherwise a `TracingEvent.Span` parameter/receiver (e.g. a `Span.Local` receiver) — used directly as the parent;
+2. otherwise a `TracingEvent.Span` parameter/receiver (e.g., a `Span.Local` receiver) — used directly as the parent;
 3. otherwise a `trace: Tracer` member — reused, or synthesized as `private val _trace_ = Tracer.of(this::class)` — which
    creates a new **root** span (mirroring how `@Logged`/`@Timed` resolve their logger/meter).
 
