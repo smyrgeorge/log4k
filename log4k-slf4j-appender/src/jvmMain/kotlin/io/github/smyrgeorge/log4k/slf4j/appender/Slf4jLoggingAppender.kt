@@ -58,12 +58,12 @@ public class Slf4jLoggingAppender : Appender<LoggingEvent> {
     override suspend fun append(event: LoggingEvent) {
         val level = event.level.toSlf4j() ?: return
         // A backend-disabled level yields SLF4J's NOP builder, so the calls below are free no-ops.
-        val builder = loggers.computeIfAbsent(event.logger, LoggerFactory::getLogger).atLevel(level)
-        event.arguments.forEach { builder.addArgument(it) }
-        event.throwable?.let { builder.setCause(it) }
+        var builder = loggers.computeIfAbsent(event.logger, LoggerFactory::getLogger).atLevel(level)
+        event.arguments.forEach { builder = builder.addArgument(it) }
+        event.throwable?.let { builder = builder.setCause(it) }
         event.span?.context?.let {
-            builder.addKeyValue("traceId", it.traceId)
-            builder.addKeyValue("spanId", it.spanId)
+            builder = builder.addKeyValue("traceId", it.traceId)
+            builder = builder.addKeyValue("spanId", it.spanId)
         }
         builder.log(event.message)
     }
