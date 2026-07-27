@@ -2,41 +2,61 @@ package io.github.smyrgeorge.log4k.impl.registry
 
 import io.github.smyrgeorge.log4k.Level
 import io.github.smyrgeorge.log4k.impl.extensions.toName
+import kotlin.concurrent.atomics.AtomicReference
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlin.concurrent.atomics.update
 import kotlin.reflect.KClass
 
+/**
+ * A registry for managing and organizing `Collector` instances of a specified type.
+ *
+ * This class facilitates operations for registering, retrieving, and configuring collectors,
+ * as well as muting and unmuting their logging capabilities. Each collector in the registry
+ * is uniquely identified by its name or its class type.
+ *
+ * @param T The type of the collector that extends the [CollectorRegistry.Collector] interface.
+ */
+@OptIn(ExperimentalAtomicApi::class)
 class CollectorRegistry<T> where T : CollectorRegistry.Collector {
-    private val muted = mutableSetOf<String>()
-    private val loggers = mutableMapOf<String, T>()
+    private val muted: AtomicReference<Set<String>> = AtomicReference(emptySet())
+    private val collectors: AtomicReference<Map<String, T>> = AtomicReference(emptyMap())
 
     fun get(clazz: KClass<*>): T? = get(clazz.toName())
-    fun get(name: String): T? = loggers[name]
-    fun register(logger: T) {
-        fun isMuted(name: String): Boolean = name in muted
-        val muted = isMuted(logger.name)
-        if (muted) logger.mute()
-        loggers[logger.name] = logger
+    fun get(name: String): T? = collectors.load()[name]
+
+    fun register(collector: T) {
+        if (isMuted(collector.name)) collector.mute()
+        collectors.update { it + (collector.name to collector) }
     }
 
     fun setLevel(clazz: KClass<*>, level: Level): Unit = setLevel(clazz.toName(), level)
     fun setLevel(name: String, level: Level) {
-        loggers[name]?.level = level
+        get(name)?.level = level
     }
 
     fun mute(clazz: KClass<*>): Unit = mute(clazz.toName())
     fun mute(name: String) {
-        muted.add(name)
-        loggers[name]?.mute()
+        muted.update { it + name }
+        get(name)?.mute()
     }
 
     fun unmute(clazz: KClass<*>): Unit = unmute(clazz.toName())
     fun unmute(name: String) {
-        muted.remove(name)
-        loggers[name]?.unmute()
+        muted.update { it - name }
+        get(name)?.unmute()
     }
 
     fun isMuted(clazz: KClass<*>): Boolean = isMuted(clazz.toName())
-    fun isMuted(name: String): Boolean = name in muted
+    fun isMuted(name: String): Boolean = name in muted.load()
 
+    /**
+     * Represents an entity responsible for collecting and managing log messages
+     * or related system events based on their logging level.
+     *
+     * The `Collector` interface defines functionalities for controlling the logging level,
+     * muting/unmuting log output, and retrieving muted state information. Implementations
+     * of this interface should allow dynamic adjustment of logging behavior.
+     */
     interface Collector {
         val name: String
         var level: Level

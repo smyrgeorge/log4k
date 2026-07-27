@@ -3,11 +3,17 @@ package io.github.smyrgeorge.log4k.impl.registry
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
+import assertk.assertions.isNotNull
 import assertk.assertions.isNull
 import assertk.assertions.isSameInstanceAs
 import assertk.assertions.isTrue
 import io.github.smyrgeorge.log4k.Level
 import io.github.smyrgeorge.log4k.impl.extensions.toName
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 import kotlin.test.Test
 
 /** A minimal [CollectorRegistry.Collector] test double, relying on the interface's default mute logic. */
@@ -152,6 +158,31 @@ class CollectorRegistryTests {
 
         assertThat(collector.isMuted()).isTrue()
         assertThat(registry.isMuted(CollectorSample::class)).isTrue()
+    }
+
+    @Test
+    fun registry_isSafeUnderConcurrentMutationAndReads() = runTest {
+        // Smoke test for the copy-on-write implementation: concurrent registration, muting and
+        // lookups must never crash (a plain-map implementation can throw a
+        // ConcurrentModificationException or corrupt its state under this load).
+        val registry = CollectorRegistry<FakeCollector>()
+
+        withContext(Dispatchers.Default) {
+            (1..100).map { i ->
+                launch {
+                    registry.register(FakeCollector("c-$i"))
+                    registry.mute("c-$i")
+                    repeat(10) { registry.get("c-${it + 1}") }
+                    registry.unmute("c-$i")
+                }
+            }.joinAll()
+        }
+
+        // Every collector survived the churn, and none is left muted.
+        (1..100).forEach { i ->
+            assertThat(registry.get("c-$i")).isNotNull()
+            assertThat(registry.isMuted("c-$i")).isFalse()
+        }
     }
 
     // --- Collector default mute/unmute ---------------------------------------------------------

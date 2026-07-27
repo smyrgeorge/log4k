@@ -47,24 +47,46 @@ object RootLogger {
         val default: Appender<LoggingEvent> = platformDefaultAppender()
         Logging.appenders.register(default)
 
-        // Start consuming the Logging queue.
-        RootLoggerScope.launch(dispatcher) {
-            logs.consumeEach { event ->
-                Logging.appenders.all().forEach { it.appendSafely(event) }
+        startConsumer(logs, Logging.appenders)
+        startConsumer(traces, Tracing.appenders)
+        startConsumer(meters, Metering.appenders)
+    }
+
+    /**
+     * Starts consuming events from the provided channel and dispatches them to all appenders
+     * registered in the given appender registry. Each appender processes the events asynchronously
+     * and in isolation, ensuring that failures in one appender do not disrupt the processing
+     * of others.
+     *
+     * This function is designed to run as part of a coroutine scope. It continuously consumes
+     * messages until the channel is closed. Errors occurring in the consumer loop or appenders
+     * are logged or suppressed, ensuring the overall consumer loop remains operational.
+     *
+     * @param T The type of events being consumed and processed by the appenders.
+     * @param channel The channel from which events are consumed. Events pushed to this channel
+     *                will be processed by the registered appenders.
+     * @param appenders The registry that manages all appenders responsible for event processing.
+     */
+    private fun <T> startConsumer(channel: Channel<T>, appenders: AppenderRegistry<T>) {
+        suspend fun <T> Appender<T>.appendSafely(event: T) {
+            try {
+                append(event)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Throwable) {
+                // Swallow the appender's failure so the remaining appenders still receive the event.
             }
         }
 
-        // Start consuming the Tracing queue.
         RootLoggerScope.launch(dispatcher) {
-            traces.consumeEach { event ->
-                Tracing.appenders.all().forEach { it.appendSafely(event) }
-            }
-        }
-
-        // Start consuming the Metering queue.
-        RootLoggerScope.launch(dispatcher) {
-            meters.consumeEach { event ->
-                Metering.appenders.all().forEach { it.appendSafely(event) }
+            channel.consumeEach { event ->
+                try {
+                    appenders.all().forEach { it.appendSafely(event) }
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (_: Throwable) {
+                    // Drop this event; the consumer loop itself must survive.
+                }
             }
         }
     }
@@ -139,23 +161,6 @@ object RootLogger {
         @OptIn(ExperimentalAtomicApi::class)
         fun id(): Long = idx.incrementAndFetch()
         val appenders = AppenderRegistry<MeteringEvent>()
-    }
-
-    /**
-     * Safely appends an event using the given Appender, swallowing any non-critical errors
-     * to ensure other appenders still process the event.
-     *
-     * @param T The type of event to be appended.
-     * @param event The event to append using the Appender.
-     */
-    private suspend fun <T> Appender<T>.appendSafely(event: T) {
-        try {
-            append(event)
-        } catch (e: CancellationException) {
-            throw e
-        } catch (_: Throwable) {
-            // Swallow the appender's failure so the remaining appenders still receive the event.
-        }
     }
 
     private object RootLoggerScope : CoroutineScope {

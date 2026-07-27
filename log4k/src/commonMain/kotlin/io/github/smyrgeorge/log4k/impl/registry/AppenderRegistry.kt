@@ -2,6 +2,9 @@ package io.github.smyrgeorge.log4k.impl.registry
 
 import io.github.smyrgeorge.log4k.Appender
 import io.github.smyrgeorge.log4k.impl.extensions.toName
+import kotlin.concurrent.atomics.AtomicReference
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlin.concurrent.atomics.update
 import kotlin.reflect.KClass
 
 /**
@@ -14,21 +17,39 @@ import kotlin.reflect.KClass
  *
  * @param T The type of event that the appenders handle.
  */
+@OptIn(ExperimentalAtomicApi::class)
 class AppenderRegistry<T> {
-    private val appenders = mutableListOf<Appender<T>>()
+    private val appenders: AtomicReference<List<Appender<T>>> = AtomicReference(emptyList())
 
-    fun all(): List<Appender<T>> = appenders.toList()
+    fun all(): List<Appender<T>> = appenders.load()
 
     @Suppress("UNCHECKED_CAST")
     fun <A : Appender<*>> get(clazz: KClass<A>): A = get(clazz.toName()) as? A
         ?: error("Could not find appender with class: ${clazz.toName()}")
 
-    fun get(name: String): Appender<T> = appenders.find { it.name == name }
+    fun get(name: String): Appender<T> = all().find { it.name == name }
         ?: error("Could not find appender with name: $name")
 
-    fun register(appender: Appender<T>) = appenders.add(appender)
-    fun unregister(name: String) = appenders.removeAll { it.name == name }
-    fun unregister(appender: Appender<*>) = unregister(appender.name)
-    fun unregister(clazz: KClass<*>) = unregister(clazz.toName())
-    fun unregisterAll() = appenders.clear()
+    fun register(appender: Appender<T>) {
+        appenders.update { it + appender }
+    }
+
+    fun unregister(name: String): Boolean {
+        // `update`'s transform may run several times under contention; `removed` reflects the last
+        // (successful) attempt, which is the one that was actually published.
+        var removed = false
+        appenders.update { current ->
+            val next = current.filter { it.name != name }
+            removed = next.size != current.size
+            next
+        }
+        return removed
+    }
+
+    fun unregister(appender: Appender<*>): Boolean = unregister(appender.name)
+    fun unregister(clazz: KClass<*>): Boolean = unregister(clazz.toName())
+
+    fun unregisterAll() {
+        appenders.store(emptyList())
+    }
 }

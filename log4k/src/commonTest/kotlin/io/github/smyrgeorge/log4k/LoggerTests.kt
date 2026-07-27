@@ -63,7 +63,7 @@ class LoggerTests {
 
     @Test
     fun log_atLevelOff_isAlwaysDiscarded() = runTest {
-        val logger = SimpleLogger("test.gate.off", Level.INFO)
+        val logger = SimpleLogger("test.gate.off.filter", Level.INFO)
 
         // OFF is a filter level, not an event level: it must never pass the gate — not even on a
         // muted logger, where `OFF >= OFF` would otherwise hold.
@@ -74,7 +74,7 @@ class LoggerTests {
         logger.unmute()
 
         logger.log(Level.INFO, null, "marker", emptyArray(), null)
-        val first = appender.awaitEvent { it.logger == "test.gate.off" }
+        val first = appender.awaitEvent { it.logger == "test.gate.off.filter" }
         assertThat(first.message).isEqualTo("marker")
     }
 
