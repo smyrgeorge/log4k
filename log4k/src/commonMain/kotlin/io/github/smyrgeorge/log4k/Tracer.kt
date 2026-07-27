@@ -73,7 +73,9 @@ abstract class Tracer(
     ): T = span(name, emptyMap(), parent, f)
 
     /**
-     * Executes a function within the scope of a tracing span.
+     * Executes a function within the scope of a tracing span. The span is ended on every exit —
+     * a normal result, a thrown exception (recorded, then rethrown) and a non-local return from
+     * [f] alike.
      *
      * @param T The type of the result produced by the function.
      * @param name The name of the span.
@@ -89,12 +91,15 @@ abstract class Tracer(
         f: TracingEvent.Span.Local.() -> T
     ): T {
         val span = span(name, tags, parent).start()
-        return try {
-            f(span).also { span.end() }
+        var error: Throwable? = null
+        try {
+            return f(span)
         } catch (e: Throwable) {
+            error = e
             span.exception(e)
-            span.end(e)
             throw e
+        } finally {
+            span.end(error)
         }
     }
 
@@ -106,9 +111,17 @@ abstract class Tracer(
         /**
          * Generates a 16-character hexadecimal string representing a unique span identifier.
          *
+         * The identifier is guaranteed to be non-zero: W3C Trace Context and OpenTelemetry reserve
+         * the all-zero ID as the invalid/null sentinel. (This also keeps [traceId] valid, since a
+         * trace ID is invalid only when all 32 characters are zero.)
+         *
          * @return A 16-character hexadecimal string pad-started with zeros if necessary.
          */
-        fun spanId(): String = Random.nextLong().toULong().toString(16).padStart(16, '0')
+        fun spanId(): String {
+            var id = Random.nextLong()
+            while (id == 0L) id = Random.nextLong()
+            return id.toULong().toString(16).padStart(16, '0')
+        }
 
         /**
          * Generates a trace identifier by concatenating two unique span identifiers.

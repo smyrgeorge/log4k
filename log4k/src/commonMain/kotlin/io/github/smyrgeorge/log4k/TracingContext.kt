@@ -13,6 +13,18 @@ interface TracingContext {
     fun currentOrNull(): Span? = current
     fun current(): Span = currentOrNull() ?: error("No span found in current context.")
 
+    /**
+     * Restores [to] as the current span only if [expected] is still the current one. Used when a
+     * span closes: if a concurrent sibling has already replaced [current] with its own span, the
+     * finished span must not clobber it — the slot is left for the sibling to restore.
+     *
+     * The default implementation is a non-atomic check-then-set; implementations backed by atomic
+     * state (e.g. [SimpleCoroutinesTracingContext]) override it with a real compare-and-set.
+     */
+    fun restoreCurrent(expected: Span?, to: Span?) {
+        if (current === expected) current = to
+    }
+
     companion object {
         /**
          * Creates a new instance of `SimpleCoroutinesTracingContext` with the specified tracer and parent span.
@@ -89,14 +101,20 @@ interface TracingContext {
             ?: error("No tracer found for span '$name'.")
             val span = effectiveTracer.span(name, tags, parentSpan).start()
             context?.current = span
-            return try {
-                f(span).also { span.end() }
+            var error: Throwable? = null
+            try {
+                return f(span)
             } catch (e: Throwable) {
+                error = e
                 span.exception(e)
-                span.end(e)
                 throw e
             } finally {
-                context?.current = parentSpan
+                try {
+                    span.end(error)
+                } finally {
+                    // Compare-and-restore: never clobber a concurrent sibling's current span.
+                    context?.restoreCurrent(expected = span, to = parentSpan)
+                }
             }
         }
 

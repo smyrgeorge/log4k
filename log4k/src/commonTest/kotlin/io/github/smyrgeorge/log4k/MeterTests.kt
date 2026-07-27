@@ -139,6 +139,26 @@ class MeterTests {
     }
 
     @Test
+    fun timedMeasure_nonLocalReturn_stillRecordsDuration() = runTest {
+        val meter = SimpleMeter("test.meter", Level.INFO)
+        val timed = meter.timed("svc.nonlocal")
+
+        // A non-local return exits `compute` from inside the measured block, skipping both the
+        // normal path and the catches — the `finally` must still record the duration, keeping the
+        // calls and duration counts in sync.
+        fun compute(flag: Boolean): Int {
+            timed.measure {
+                if (flag) return 7
+            }
+            return 0
+        }
+
+        assertThat(compute(true)).isEqualTo(7)
+        assertThat(appender.awaitValue("svc.nonlocal.calls").value).isEqualTo(1L)
+        assertThat(appender.awaitValue("svc.nonlocal.duration")).isInstanceOf(MeteringEvent.Record::class)
+    }
+
+    @Test
     fun timedMeasure_cancellation_isRethrownWithoutCountingAnError() = runTest {
         val meter = SimpleMeter("test.meter", Level.INFO)
         val timed = meter.timed("svc.cancel")

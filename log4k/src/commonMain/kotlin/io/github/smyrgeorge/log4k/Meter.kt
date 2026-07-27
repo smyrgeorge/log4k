@@ -423,6 +423,8 @@ abstract class Meter(
          * Runs [f], recording a call, its duration (in milliseconds) and — if it throws — an error.
          * Each recorded value carries the bundle's [tags] as dimensions. The throwable is rethrown
          * after being counted. Being `inline`, this works for both regular and `suspend` functions.
+         * The duration is recorded on every exit — a normal result, a throw, and a non-local
+         * return from [f] alike.
          *
          * A [CancellationException] is rethrown *without* being counted as an error: coroutine
          * cancellation is part of normal control flow, not an application failure, and counting it
@@ -435,15 +437,15 @@ abstract class Meter(
         inline fun <T> measure(f: () -> T): T {
             calls.increment(1L, *tags)
             val mark = TimeSource.Monotonic.markNow()
-            return try {
-                f().also { duration.record(mark.elapsedNow().toDouble(DurationUnit.MILLISECONDS), *tags) }
+            try {
+                return f()
             } catch (e: CancellationException) {
-                duration.record(mark.elapsedNow().toDouble(DurationUnit.MILLISECONDS), *tags)
                 throw e
             } catch (e: Throwable) {
                 errors.increment(1L, *tags)
-                duration.record(mark.elapsedNow().toDouble(DurationUnit.MILLISECONDS), *tags)
                 throw e
+            } finally {
+                duration.record(mark.elapsedNow().toDouble(DurationUnit.MILLISECONDS), *tags)
             }
         }
     }

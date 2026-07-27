@@ -3,6 +3,7 @@ package io.github.smyrgeorge.log4k
 import assertk.assertThat
 import assertk.assertions.contains
 import assertk.assertions.doesNotContain
+import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
 import assertk.assertions.isInstanceOf
 import assertk.assertions.isNotEmpty
@@ -82,6 +83,103 @@ class TracerTests {
     }
 
     @Test
+    fun spanBlock_nonLocalReturn_stillEndsTheSpan() = runTest {
+        val tracer = SimpleTracer("test.tracer", Level.TRACE)
+
+        // A non-local return exits `compute` from inside the span block, skipping both the normal
+        // path and the catch — the `finally` must still end (and emit) the span.
+        fun compute(flag: Boolean): Int {
+            tracer.span("nonlocal-op") {
+                if (flag) return 7
+            }
+            return 0
+        }
+
+        assertThat(compute(true)).isEqualTo(7)
+        val received = appender.awaitSpan("nonlocal-op")
+        assertThat(received.status.code).isEqualTo(Code.OK)
+        assertThat(received.endAt).isNotNull()
+    }
+
+    @Test
+    fun traced_nonLocalReturn_endsTheSpanAndRestoresTheContext() = runTest {
+        val tracer = SimpleTracer("test.tracer", Level.TRACE)
+        val context = TracingContext.create(tracer)
+
+        fun compute(flag: Boolean): Int {
+            TracingContext.traced(context = context, parent = null, tracer = null, name = "traced-nonlocal") {
+                if (flag) return 7
+            }
+            return 0
+        }
+
+        assertThat(compute(true)).isEqualTo(7)
+        val received = appender.awaitSpan("traced-nonlocal")
+        assertThat(received.status.code).isEqualTo(Code.OK)
+        assertThat(received.endAt).isNotNull()
+        // The context's current span must be restored (back to the null root) as well.
+        assertThat(context.currentOrNull()).isNull()
+    }
+
+    @Test
+    fun exception_respectsSpanLifecycle() = runTest {
+        val tracer = SimpleTracer("test.tracer", Level.TRACE)
+
+        // On a never-started span the exception is ignored.
+        val unstarted = tracer.span("exc-unstarted")
+        unstarted.exception(IllegalStateException("early"))
+        assertThat(unstarted.events).isEmpty()
+
+        // On an open span it is recorded (exceptions bypass the level filter).
+        val open = tracer.span("exc-open").start()
+        open.exception(IllegalStateException("mid"))
+        assertThat(open.events.map { it.name }).contains(OpenTelemetryAttributes.EXCEPTION)
+
+        // After `end()` the span has already been handed to the appenders: a late exception must
+        // not mutate it anymore.
+        open.end()
+        open.exception(IllegalStateException("late"))
+        assertThat(open.events.size).isEqualTo(1)
+    }
+
+    @Test
+    fun startedSpan_endsAndEmits_evenIfTracerIsMutedMidFlight() = runTest {
+        val tracer = SimpleTracer("test.tracer", Level.TRACE)
+
+        val span = tracer.span("mid-flight-mute").start()
+        tracer.mute() // raises the tracer level to OFF while the span is in flight
+        span.end()
+
+        // The record/drop decision was made at start: the span still closes and is emitted,
+        // instead of being silently dropped and left half-open.
+        val received = appender.awaitSpan("mid-flight-mute")
+        assertThat(received.endAt).isNotNull()
+        assertThat(received.status.code).isEqualTo(Code.OK)
+    }
+
+    @Test
+    fun restoreCurrent_doesNotClobberAConcurrentSiblingSpan() = runTest {
+        val tracer = SimpleTracer("test.tracer", Level.TRACE)
+        val context = TracingContext.create(tracer)
+        val parent = tracer.span("ctx-parent").start()
+        context.current = parent
+
+        // Two siblings interleaving on one shared context: B replaces A as the current span.
+        val a = tracer.span("ctx-a", parent).start()
+        context.current = a
+        val b = tracer.span("ctx-b", parent).start()
+        context.current = b
+
+        // A finishes first: its compare-and-restore must not clobber B's slot...
+        context.restoreCurrent(expected = a, to = parent)
+        assertThat(context.currentOrNull()).isSameInstanceAs(b)
+
+        // ...and when B finishes, the parent is restored.
+        context.restoreCurrent(expected = b, to = parent)
+        assertThat(context.currentOrNull()).isSameInstanceAs(parent)
+    }
+
+    @Test
     fun spanBlock_whenBodyThrows_marksErrorRecordsExceptionAndRethrows() = runTest {
         val tracer = SimpleTracer("test.tracer", Level.TRACE)
         val boom = IllegalStateException("kaboom")
@@ -158,6 +256,15 @@ class TracerTests {
     @Test
     fun traceId_is32LowercaseHexChars() {
         assertThat(Tracer.traceId()).matches(Regex("[0-9a-f]{32}"))
+    }
+
+    @Test
+    fun ids_areNeverTheAllZeroInvalidSentinel() {
+        // W3C Trace Context / OpenTelemetry reserve all-zero IDs as the invalid/null sentinel.
+        repeat(100) {
+            assertThat(Tracer.spanId()).isNotEqualTo("0000000000000000")
+            assertThat(Tracer.traceId()).isNotEqualTo("0".repeat(32))
+        }
     }
 
     @Test

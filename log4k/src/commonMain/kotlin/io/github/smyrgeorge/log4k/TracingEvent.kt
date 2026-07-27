@@ -122,11 +122,14 @@ sealed interface TracingEvent {
              * Ends the current span, recording an optional error and updating the status accordingly.
              * This method will do nothing if the span hasn't started or is already closed.
              *
+             * The record/drop decision is made once, at [start]: a started span always ends and is
+             * emitted, even if the tracer was muted or its level raised mid-flight — the span must
+             * never be left half-open.
+             *
              * @param error Optional throwable error to record. If provided, the status will
              *              be set to `Status.Code.ERROR`, otherwise it will be `Status.Code.OK`.
              */
             fun end(error: Throwable? = null) {
-                if (!shouldStart()) return
                 if (closed || !started) return
                 endAt = Clock.System.now()
                 closed = true
@@ -139,16 +142,16 @@ sealed interface TracingEvent {
             }
 
             /**
-             * Records an event with the given name, level, and tags.
+             * Records an event with the given name, level, and tags. Recorded only while the span
+             * is open (started and not yet ended) and the event's level passes the span's level.
              *
              * @param name The name of the event.
              * @param level The logging level of the event, determining its severity.
              * @param tags A map of tags associated with the event, defaults to an empty map.
              */
             fun event(name: String, level: Level, tags: Tags = emptyMap()) {
-                if (!shouldStart()) return
-                if (!shouldLogEvent(level)) return
                 if (!started || closed) return
+                if (!shouldLogEvent(level)) return
                 val event = Event(
                     name = name,
                     tags = tags,
@@ -159,12 +162,15 @@ sealed interface TracingEvent {
 
             /**
              * https://opentelemetry.io/docs/specs/otel/trace/exceptions/
-             * Records an exception event with the given tags.
+             * Records an exception event with the given tags. Recorded only while the span is open
+             * (started and not yet ended) — in particular, never after [end] has already emitted
+             * the span to the appenders — but unlike [event] it is not subject to level filtering.
              *
              * @param error The throwable error to be recorded.
              * @param tags A map of additional tags to associate with the exception event.
              */
             fun exception(error: Throwable, tags: Tags = emptyMap()) {
+                if (!started || closed) return
                 val event = Event(
                     name = OpenTelemetryAttributes.EXCEPTION,
                     timestamp = Clock.System.now(),
