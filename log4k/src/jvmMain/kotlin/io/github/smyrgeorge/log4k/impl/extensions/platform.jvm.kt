@@ -10,4 +10,4 @@ internal actual fun KClass<*>.toName(): String =
 internal actual fun dispatcher(): CoroutineDispatcher = Dispatchers.IO
 internal actual fun thread(): String = Thread.currentThread().name
 internal actual fun threadId(): Int = Thread.currentThread().id.toInt()
-internal actual fun platformPrintlnError(message: String) = println(message)
+internal actual fun platformPrintlnError(message: String) = System.err.println(message)

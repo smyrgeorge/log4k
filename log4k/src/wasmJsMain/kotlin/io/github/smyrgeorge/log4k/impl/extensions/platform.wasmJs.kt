@@ -10,4 +10,8 @@ internal actual fun KClass<*>.toName(): String =
 internal actual fun dispatcher(): CoroutineDispatcher = Dispatchers.Unconfined
 internal actual fun thread(): String = "wasm"
 internal actual fun threadId(): Int = 0
-internal actual fun platformPrintlnError(message: String) = println(message)
+internal actual fun platformPrintlnError(message: String) = consoleError(message)
+
+@OptIn(ExperimentalWasmJsInterop::class)
+@JsFun("(message) => console.error(message)")
+private external fun consoleError(message: String)

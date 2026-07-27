@@ -19,7 +19,7 @@ class SimpleJsonConsoleLoggingAppender : Appender<LoggingEvent> {
             else println(message)
         }
 
-        private fun LoggingEvent.formatJson(): String {
+        internal fun LoggingEvent.formatJson(): String {
             val map = buildMap<String, Any?> {
                 if (id > 0) put("id", id)
                 put("level", level.name)

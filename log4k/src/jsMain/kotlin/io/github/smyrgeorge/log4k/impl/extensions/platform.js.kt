@@ -10,4 +10,4 @@ internal actual fun KClass<*>.toName(): String =
 internal actual fun dispatcher(): CoroutineDispatcher = Dispatchers.Unconfined
 internal actual fun thread(): String = "js-main"
 internal actual fun threadId(): Int = 0
-internal actual fun platformPrintlnError(message: String) = println(message)
+internal actual fun platformPrintlnError(message: String) = console.error(message)

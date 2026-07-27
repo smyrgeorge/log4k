@@ -14,10 +14,9 @@ class SimpleConsoleLoggingAppender : Appender<LoggingEvent> {
         fun LoggingEvent.print() {
             val message = format()
             println(message)
-            throwable?.printStackTrace()
         }
 
-        private fun LoggingEvent.format(colors: Boolean = true): String = buildString {
+        internal fun LoggingEvent.format(colors: Boolean = true): String = buildString {
             if (id > 0) append(id).append(' ')
             val span = span?.context?.spanId?.let { "[$it] " } ?: ""
             if (colors) append(span.purple()) else append(span)
@@ -32,6 +31,12 @@ class SimpleConsoleLoggingAppender : Appender<LoggingEvent> {
             if (colors) append(logger.cyan()) else append(logger)
             append(" - ")
             append(message.format(arguments))
+            // Keep the stack trace in the same string as its log line: printing it separately
+            // (e.g. via printStackTrace) goes to a different stream and gets detached/reordered.
+            throwable?.let {
+                appendLine()
+                append(it.stackTraceToString().trimEnd())
+            }
         }
 
         private const val ESC = "\u001B["
@@ -58,7 +63,7 @@ class SimpleConsoleLoggingAppender : Appender<LoggingEvent> {
                 append(this@compact)
                 return@buildString
             }
-            val res = parts.take(parts.size - 2).joinToString(".") { it.first().toString() }
+            val res = parts.take(parts.size - 2).joinToString(".") { it.firstOrNull()?.toString() ?: "" }
             append(res).append('.').append(parts.takeLast(2).joinToString("."))
         }
     }
