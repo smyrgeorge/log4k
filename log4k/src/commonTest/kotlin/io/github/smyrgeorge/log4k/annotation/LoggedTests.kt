@@ -31,6 +31,12 @@ private class LoggedFixture {
     fun silent(x: Int): Int = x - 1 // opted out
 
     fun boom(): Nothing = error("kaboom") // exception path -> ERROR line + rethrow
+
+    fun login(username: String, @Masked password: String): Boolean = password.isNotEmpty() // masked param
+
+    fun rotate(@Masked oldSecret: String, @Masked newSecret: String): Int = oldSecret.length + newSecret.length
+
+    fun handle(@Masked secret: Any, visible: Int): Int = visible + 1 // the masked value is never rendered
 }
 
 @Logged(tags = [Tag("layer", "service")])
@@ -148,6 +154,44 @@ class LoggedTests {
         fixture.overridden()
         val overridden = appender.awaitEvents(2) { it.message.contains("TaggedLoggedFixture.overridden") }
         assertThat(overridden[0].tags).isEqualTo(mapOf<String, Any>("layer" to "billing"))
+    }
+
+    @Test
+    fun masked_parameter_rendersPlaceholderInsteadOfTheValue() = runTest {
+        val result = LoggedFixture().login("alice", "hunter2")
+
+        assertThat(result).isEqualTo(true)
+        val events = appender.awaitEvents(2) { it.message.contains("LoggedFixture.login") }
+        // The unmasked parameter renders normally; the @Masked one renders as the placeholder.
+        assertThat(events[0].message).isEqualTo("→ LoggedFixture.login(username=alice, password=<MASKED>)")
+        // Masking is parameter-only: the exit line still renders the real result.
+        assertThat(events[1].message).startsWith("← LoggedFixture.login = true (")
+    }
+
+    @Test
+    fun masked_onEveryParameter_masksThemAll() = runTest {
+        LoggedFixture().rotate("old-secret", "new-secret")
+
+        val events = appender.awaitEvents(2) { it.message.contains("LoggedFixture.rotate") }
+        assertThat(events[0].message).isEqualTo("→ LoggedFixture.rotate(oldSecret=<MASKED>, newSecret=<MASKED>)")
+    }
+
+    @Test
+    fun masked_parameterValue_isNeverToStringed() = runTest {
+        var renders = 0
+        val secret = object {
+            override fun toString(): String {
+                renders++
+                return "leaked"
+            }
+        }
+
+        LoggedFixture().handle(secret, 1)
+
+        // The value must not be rendered at all — not even built and discarded.
+        assertThat(renders).isEqualTo(0)
+        val events = appender.awaitEvents(2) { it.message.contains("LoggedFixture.handle") }
+        assertThat(events[0].message).isEqualTo("→ LoggedFixture.handle(secret=<MASKED>, visible=1)")
     }
 
     @Test

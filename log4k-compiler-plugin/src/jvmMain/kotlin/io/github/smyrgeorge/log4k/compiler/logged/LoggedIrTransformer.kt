@@ -70,6 +70,9 @@ import org.jetbrains.kotlin.name.Name
  * `@Logged(tags = [Tag(k, v), …])` is materialized as the `tags` map argument (class-level tags are
  * added first, so a function's own tag with the same key wins).
  *
+ * A parameter annotated with `io.github.smyrgeorge.log4k.annotation.Masked` is rendered in the
+ * entry line as the literal `paramName=<MASKED>` instead of its value.
+ *
  * `Logger.logged` is `inline`, so both regular and `suspend` functions work: the moved body is
  * placed in an inline lambda and therefore keeps its original suspension context. The `Logger` is
  * resolved by [OfThisClassField]: a log4k `log: Logger` member is reused; otherwise (or if `log` is a
@@ -216,7 +219,12 @@ class LoggedIrTransformer(
         return arg.symbol.owner.name.asString()
     }
 
-    /** Builds the `paramName=value, …` string rendered inside the entry log's parentheses. */
+    /**
+     * Builds the `paramName=value, …` string rendered inside the entry log's parentheses.
+     *
+     * A parameter annotated with `@Masked` is rendered as the literal `paramName=<MASKED>` instead —
+     * its value is never read (and thus never `toString()`ed), so it cannot leak into the logs.
+     */
     private fun buildArgs(builder: DeclarationIrBuilder, function: IrFunction): IrExpression {
         val valueParams = function.regularParams()
         if (valueParams.isEmpty()) return builder.irString("")
@@ -227,8 +235,12 @@ class LoggedIrTransformer(
         )
         valueParams.forEachIndexed { index, param ->
             if (index > 0) concat.arguments.add(builder.irString(", "))
-            concat.arguments.add(builder.irString("${param.name.asString()}="))
-            concat.arguments.add(builder.irGet(param))
+            if (param.hasAnnotation(MASKED_ANNOTATION)) {
+                concat.arguments.add(builder.irString("${param.name.asString()}=$MASKED_VALUE"))
+            } else {
+                concat.arguments.add(builder.irString("${param.name.asString()}="))
+                concat.arguments.add(builder.irGet(param))
+            }
         }
         return concat
     }
@@ -268,5 +280,9 @@ class LoggedIrTransformer(
     companion object {
         private val LOGGED_ANNOTATION = FqName("io.github.smyrgeorge.log4k.annotation.Logged")
         private val NO_LOG_ANNOTATION = FqName("io.github.smyrgeorge.log4k.annotation.NoLog")
+        private val MASKED_ANNOTATION = FqName("io.github.smyrgeorge.log4k.annotation.Masked")
+
+        /** Rendered in place of a `@Masked` parameter's value in the entry log line. */
+        private const val MASKED_VALUE = "<MASKED>"
     }
 }

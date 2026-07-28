@@ -66,6 +66,15 @@ import io.github.smyrgeorge.log4k.Level
  * Class-level [tags] are added to every instrumented member's lines; a function's own tag with the
  * same key wins.
  *
+ * Sensitive parameters can be kept out of the entry line with [Masked] — they render as the literal
+ * `<MASKED>` instead of their value:
+ *
+ * ```kotlin
+ * @Logged
+ * fun login(username: String, @Masked password: String): Boolean { /* ... */ }
+ * // → login(username=alice, password=<MASKED>)
+ * ```
+ *
  * @property level The [Level] used for the entry/exit log lines. Defaults to [Level.INFO]. The
  *   failure log line is always emitted at [Level.ERROR].
  * @property tags Static key/value tags attached to every emitted log line. (Annotation parameters

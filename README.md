@@ -602,6 +602,9 @@ exception is rethrown. Both `suspend` and regular functions are supported (the w
 - **Dimensions** — `@Logged(tags = [Tag("component", "billing")])` attaches static tags to every emitted line (entry,
   exit and failure), so structured appenders receive them as fields. Class-level tags apply to every instrumented
   member, and a function's own tag with the same key wins.
+- **Masking** — `@Masked` on a parameter renders the literal `<MASKED>` in the entry line instead of the real value
+  (which is never `toString()`ed), keeping secrets out of the logs:
+  `fun login(username: String, @Masked password: String)` logs `→ login(username=alice, password=<MASKED>)`.
 - **Logger** — read from a `log: Logger` property on the enclosing class. If none exists — or `log` is a foreign type
   such as `org.slf4j.Logger` — the plugin synthesizes `private val _log_ = Logger.of(this::class)` under a distinct
   name, so it never clashes with the existing `log`.
