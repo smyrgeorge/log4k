@@ -14,6 +14,7 @@ val descriptions = mapOf(
     "log4k-compiler-plugin" to "Kotlin compiler plugin for log4k: compile-time @Logged, @Timed and @Traced instrumentation.",
     "log4k-gradle-plugin" to "Gradle plugin that wires the log4k Kotlin compiler plugin onto every Kotlin compilation.",
     "log4k-context" to "Context-parameter logging extensions for log4k: log lines automatically correlate with the TracingContext or Span in scope.",
+    "log4k-integrations" to "log4k appenders integrating with third-party observability services: Datadog Agent and OTLP trace publishing.",
     "log4k-slf4j" to "SLF4J 2.x provider backed by log4k: routes every org.slf4j.Logger call into log4k's logging pipeline.",
     "log4k-slf4j-appender" to "log4k appender that forwards logging events to SLF4J (Logback, Log4j2, ...).",
 )

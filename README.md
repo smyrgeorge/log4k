@@ -45,6 +45,7 @@ This project also tries to be fully compatible with `OpenTelemetry` standard.
         - [Using log4k on top of SLF4J (`log4k-slf4j-appender`)](#using-log4k-on-top-of-slf4j-log4k-slf4j-appender)
     - [Json Appender](#json-appender)
 - [Tracing API](#tracing-api)
+    - [Integrations (`log4k-integrations`)](#integrations-log4k-integrations)
 - [Metering API](#metering-api)
     - [Counter](#counter)
     - [UpDownCounter](#updowncounter)
@@ -398,6 +399,27 @@ In the examples above, we see two variations of the `Span` class:
 - **Span.Remote**: Represents a span created outside our application and propagated to us (e.g., from an HTTP call). It
   does not expose any methods and serves only as a reference to the parent remote span.
 
+### Integrations (`log4k-integrations`)
+
+To ship traces to an external backend, add the `log4k-integrations` module and register one of its appenders —
+they batch finished spans and publish them over HTTP (Ktor). `OtlpTracingAppender` speaks the vendor-neutral
+[OTLP/HTTP](https://opentelemetry.io/docs/specs/otlp/) protocol accepted by most backends (OpenTelemetry
+Collector, Jaeger, Grafana Tempo, ...), and provider-specific appenders sit alongside it — see the full list,
+setup details and span mappings in the [module's README](log4k-integrations/README.md).
+
+```kotlin
+// https://central.sonatype.com/artifact/io.github.smyrgeorge/log4k-integrations
+implementation("io.github.smyrgeorge:log4k-integrations:x.y.z")
+// Plus the Ktor engine for your platform, e.g. on the JVM:
+implementation("io.ktor:ktor-client-cio:3.x.x")
+```
+
+```kotlin
+RootLogger.Tracing.appenders.register(
+    OtlpTracingAppender(service = "my-service", env = "production") // localhost:4318
+)
+```
+
 ## Metering API
 
 A measurement captured at runtime.
@@ -714,9 +736,11 @@ The new span's **parent** (and the tracer that creates it) is resolved from what
 
 ### Tracing
 
-| Appender                       | Platform | Description                    |
-|--------------------------------|----------|--------------------------------|
-| `SimpleConsoleTracingAppender` | All      | Prints trace events to stdout. |
+| Appender                       | Platform              | Description                                                                                                                |
+|--------------------------------|-----------------------|----------------------------------------------------------------------------------------------------------------------------|
+| `SimpleConsoleTracingAppender` | All                   | Prints trace events to stdout.                                                                                             |
+| `OtlpTracingAppender`          | All except `wasmWasi` | Publishes finished spans in batches over OTLP/HTTP (OpenTelemetry Collector, Jaeger, Tempo, ...). In `log4k-integrations`. |
+| `DatadogTracingAppender`       | All except `wasmWasi` | Publishes finished spans in batches to a local Datadog Agent (APM intake). In `log4k-integrations`.                        |
 
 ### Metering
 

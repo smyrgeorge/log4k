@@ -43,7 +43,11 @@ kotlin {
                 nodejs()
             }
         },
-    )
+    ).mapNotNull { (target, enable) ->
+        // Ktor (the HTTP client used by log4k-integrations) does not support the wasmWasi target.
+        if (project.name == "log4k-integrations" && target == "wasmWasi") null
+        else target to enable
+    }.toMap()
 
     Utils.allTargets.forEach {
         println("Enabling target $it")

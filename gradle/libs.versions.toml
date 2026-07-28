@@ -13,6 +13,8 @@ dokka = "2.2.0"
 assertk = "0.28.1"
 # https://mvnrepository.com/artifact/org.slf4j/slf4j-api
 slf4j = "2.0.18"
+# https://github.com/ktorio/ktor
+ktor = "3.5.1"
 # https://developer.android.com/studio/releases/gradle-plugin
 android-gradle-plugin = "9.3.1"
 
@@ -28,6 +30,8 @@ kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-t
 kotlinx-serialisation-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialisation" }
 assertk = { module = "com.willowtreeapps.assertk:assertk", version.ref = "assertk" }
 slf4j = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
 
 [plugins]
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
