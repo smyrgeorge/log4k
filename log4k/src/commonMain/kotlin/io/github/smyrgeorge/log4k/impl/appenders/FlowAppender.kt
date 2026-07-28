@@ -5,6 +5,7 @@ import io.github.smyrgeorge.log4k.impl.extensions.dispatcher
 import io.github.smyrgeorge.log4k.impl.extensions.toName
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
@@ -29,7 +30,11 @@ abstract class FlowAppender<T, E> : Appender<E> {
     private val dispatcher: CoroutineDispatcher = dispatcher()
     private val channel: Channel<E> = Channel(capacity = Channel.UNLIMITED)
 
-    init {
+    // Started lazily on the first append instead of in `init`: an init-launched coroutine calls
+    // the subclass's `setup()` and races with the rest of the subclass's construction, so it can
+    // observe not-yet-assigned constructor properties (e.g. a batch size of 0). By the first
+    // append the instance is fully constructed, and `lazy` provides the happens-before edge.
+    private val pipeline: Job by lazy {
         FlowAppenderScope().launch(dispatcher) {
             setup(channel.receiveAsFlow())
                 .flowOn(dispatcher)
@@ -39,7 +44,11 @@ abstract class FlowAppender<T, E> : Appender<E> {
     }
 
     final override val name: String = this::class.toName()
-    final override suspend fun append(event: E): Unit = channel.send(event)
+
+    final override suspend fun append(event: E) {
+        pipeline // Touch to start the processing pipeline on first use.
+        channel.send(event)
+    }
 
     abstract fun setup(flow: Flow<E>): Flow<T>
     abstract suspend fun handle(event: T)
