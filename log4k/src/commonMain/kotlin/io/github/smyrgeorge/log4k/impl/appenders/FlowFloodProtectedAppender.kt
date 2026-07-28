@@ -14,7 +14,8 @@ import kotlin.time.Clock
  *
  * @param requestPerSecond The number of requests per second to allow before throttling occurs.
  * @param burstDurationMillis The duration in milliseconds for which bursts are allowed.
- * @param burstResetPeriodMillis The period in milliseconds after which the burst state resets. The default value is 5000 milliseconds.
+ * @param burstResetPeriodMillis The period in milliseconds after which the burst state resets. Must be at least
+ *                               [burstDurationMillis]. The default value is 5000 milliseconds.
  *
  * This class ensures that the flow of events does not exceed the specified rate and implements a burst logic to temporarily allow higher rates.
  * If the rate exceeds the allowed limits, excess events are dropped, and a logging event is generated to warn about the dropped events.
@@ -24,6 +25,17 @@ abstract class FlowFloodProtectedAppender<T>(
     private val burstDurationMillis: Int,
     private val burstResetPeriodMillis: Int = 5000,
 ) : FlowAppender<T, T>() {
+    init {
+        // Mirrors the operator's validation, but fails fast at construction time: the operator
+        // itself only runs when the pipeline starts, where a failure would kill the appender
+        // silently (it would keep accepting events and never process any).
+        require(requestPerSecond > 0) { "Requests per second must be greater than 0." }
+        require(burstDurationMillis > 0) { "Burst duration must be greater than 0." }
+        require(burstResetPeriodMillis >= burstDurationMillis) {
+            "Burst reset period must be greater than or equal to the burst duration."
+        }
+    }
+
     override fun setup(flow: Flow<T>): Flow<T> =
         flow.preventFloodingWithBurst(requestPerSecond, burstDurationMillis, burstResetPeriodMillis) { d, t ->
             LoggingEvent(

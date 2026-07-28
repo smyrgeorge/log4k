@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
+import kotlin.test.assertFailsWith
 
 /**
  * Tests for [FlowAppender], driven through small concrete subclasses. The appender processes
@@ -83,5 +84,17 @@ class FlowAppenderTests {
     fun name_isDerivedFromTheConcreteClass() {
         val appender = CapturingFlowAppender()
         assertThat(appender.name).contains("CapturingFlowAppender")
+    }
+
+    /** A subclass whose [setup] fails, e.g. because of an invalid configuration. */
+    private class BrokenSetupAppender : FlowAppender<Int, Int>() {
+        override fun setup(flow: Flow<Int>): Flow<Int> = error("invalid configuration")
+        override suspend fun handle(event: Int) = Unit
+    }
+
+    @Test
+    fun setupFailure_surfacesAtTheFirstAppend_insteadOfDyingSilently() = runTest {
+        val appender = BrokenSetupAppender()
+        assertFailsWith<IllegalStateException> { appender.append(1) }
     }
 }

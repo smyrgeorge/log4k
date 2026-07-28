@@ -736,6 +736,19 @@ Abstract classes for building custom appenders with async, coroutine-backed proc
 | `FlowFloodProtectedAppender` | Extends `FlowAppender` with rate-limiting to drop excess events and prevent flooding.                                                                                                    |
 | `BatchAppender`              | Extends `FlowAppender` to accumulate events into fixed-size batches before processing. Optionally takes a `timeout`, flushing a partial batch when it elapses before the batch fills up. |
 
+For example, `BatchAppender` is a good fit for shipping events over the network in bulk. With the optional `timeout`, a
+batch is emitted as soon as it reaches `size` items **or** when `timeout` has elapsed since the first item of the batch
+arrived — whichever comes first — so low-traffic periods don't hold events back indefinitely:
+
+```kotlin
+class MyBatchAppender(size: Int) : BatchAppender<LoggingEvent>(size, timeout = 5.seconds) {
+    override suspend fun handle(event: List<LoggingEvent>) {
+        // e.g. send the whole batch over the network with a single call.
+        println(event.joinToString(prefix = "[", postfix = "]"))
+    }
+}
+```
+
 ### Prevent log/trace flooding.
 
 _Log rate spikes are common and often go unnoticed. They could be an indication that something went terribly wrong or
@@ -771,9 +784,9 @@ repeat(1_000_000) {
 // # ...
 // # After some ~4k logs starts to drop.
 // 991339 2024-10-24T07:19:38.294933Z [native-1] - INFO  Main - 991224
-// 2024-10-24T07:19:38.295050Z [native-13] - WARN  FlowFloodProtectedAppender - Dropped 6556 log messages due to flooding (total dropped: 987299).
+// 2024-10-24T07:19:38.295050Z [native-13] - WARN  FlowFloodProtectedAppender - Dropped 6556 events due to flooding (total dropped: 987299).
 // 995897 2024-10-24T07:19:38.314454Z [native-1] - INFO  Main - 995782
-// 2024-10-24T07:19:38.315134Z [native-19] - WARN  FlowFloodProtectedAppender - Dropped 4557 log messages due to flooding (total dropped: 991856).
+// 2024-10-24T07:19:38.315134Z [native-19] - WARN  FlowFloodProtectedAppender - Dropped 4557 events due to flooding (total dropped: 991856).
 ```
 
 To tackle similar issues, we can apply dynamic rate-limiting based on system load or log severity, prioritizing critical

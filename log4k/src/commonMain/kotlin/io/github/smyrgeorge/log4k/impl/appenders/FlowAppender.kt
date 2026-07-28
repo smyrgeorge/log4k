@@ -35,8 +35,12 @@ abstract class FlowAppender<T, E> : Appender<E> {
     // observe not-yet-assigned constructor properties (e.g. a batch size of 0). By the first
     // append the instance is fully constructed, and `lazy` provides the happens-before edge.
     private val pipeline: Job by lazy {
+        // `setup` runs here (not inside the coroutine) so a failure — e.g. an invalid subclass
+        // configuration — propagates to the first `append` caller instead of silently killing
+        // the background pipeline while the appender keeps accepting events.
+        val processed = setup(channel.receiveAsFlow())
         FlowAppenderScope().launch(dispatcher) {
-            setup(channel.receiveAsFlow())
+            processed
                 .flowOn(dispatcher)
                 .onEach { event: T -> runCatching { handle(event) } }
                 .launchIn(this)

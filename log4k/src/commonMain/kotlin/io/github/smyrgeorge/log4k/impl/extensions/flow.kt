@@ -8,11 +8,11 @@ import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.flow.transform
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.selects.whileSelect
-import kotlin.time.Clock
 import kotlin.time.Duration
+import kotlin.time.TimeSource
 
 /**
  * Groups the flow into lists, emitting a batch as soon as it reaches [size] items
@@ -70,48 +70,80 @@ internal fun <T> Flow<T>.chunked(size: Int, timeout: Duration): Flow<List<T>> {
     }
 }
 
-internal inline fun <T> Flow<T>.preventFloodingWithBurst(
+/** Fixed origin for the limiter's monotonic timeline; the absolute values are meaningless, only deltas matter. */
+internal val rateLimiterTimeOrigin: TimeSource.Monotonic.ValueTimeMark = TimeSource.Monotonic.markNow()
+
+/**
+ * Rate-limits the flow to roughly [requestsPerSecond] by enforcing a minimum gap between
+ * emissions, while tolerating short spikes: the first too-fast event opens a *burst window* of
+ * [burstDurationMillis] during which everything is emitted. After the window closes, excess
+ * events are dropped (and counted) until the rate falls back under the limit. A new burst is
+ * allowed only once [burstResetPeriodMillis] has passed since the previous burst started —
+ * it must be at least [burstDurationMillis], otherwise a burst could be reset while still
+ * active, effectively disabling the protection.
+ *
+ * [onDropMessages] is invoked with the number of events dropped since the previous report and
+ * the cumulative total — on the next successful emission, and once more when the upstream
+ * completes with drops still pending.
+ *
+ * Timing uses a monotonic clock with millisecond granularity, so rates above 1000/s cannot be
+ * distinguished and are limited to one event per millisecond. [nowMillis] exists for tests.
+ */
+internal fun <T> Flow<T>.preventFloodingWithBurst(
     requestsPerSecond: Int,
     burstDurationMillis: Int,
     burstResetPeriodMillis: Int,
-    crossinline onDropMessages: (dropped: Int, totalDropped: Long) -> Unit =
+    nowMillis: () -> Long = { rateLimiterTimeOrigin.elapsedNow().inWholeMilliseconds },
+    onDropMessages: (dropped: Int, totalDropped: Long) -> Unit =
         { dropped, totalDropped -> println("Dropped $dropped events due to flooding (total: $totalDropped).") }
 ): Flow<T> {
     require(requestsPerSecond > 0) { "Requests per second must be greater than 0." }
     require(burstDurationMillis > 0) { "Burst duration must be greater than 0." }
+    require(burstResetPeriodMillis >= burstDurationMillis) {
+        "Burst reset period must be greater than or equal to the burst duration."
+    }
 
-    val windowMillis = 1000L / requestsPerSecond
-    var lastEmissionTime = 0L
-    var dropCounter = 0
-    var totalDropped = 0L
-    var startBurstTime: Long = 0
+    // A millisecond clock cannot space events closer than 1ms apart, so rates above 1000/s
+    // are capped there instead of degenerating to a zero-width window that admits everything.
+    val windowMillis = (1000L / requestsPerSecond).coerceAtLeast(1L)
 
-    return transform { value ->
-        val currentTime = Clock.System.now().toEpochMilliseconds()
-        if (currentTime - lastEmissionTime >= windowMillis) {
-            if (currentTime - startBurstTime > burstResetPeriodMillis) startBurstTime = 0
-            emit(value)
-            lastEmissionTime = currentTime
+    return flow {
+        // State lives inside the builder so every collection of the returned flow starts fresh.
+        var lastEmissionTime = -windowMillis // Guarantees the very first event passes.
+        var burstStartTime = -1L // -1 marks "no burst in progress".
+        var dropCounter = 0
+        var totalDropped = 0L
+
+        fun reportDrops() {
             if (dropCounter > 0) {
                 totalDropped += dropCounter
                 onDropMessages(dropCounter, totalDropped)
                 dropCounter = 0
             }
-        } else {
-            if (startBurstTime == 0L) startBurstTime = currentTime
-            if (currentTime - startBurstTime <= burstDurationMillis) {
-                // Allow all messages during the burst period.
+        }
+
+        collect { value ->
+            val currentTime = nowMillis()
+            if (currentTime - lastEmissionTime >= windowMillis) {
+                // Under the allowed rate. Also expire a past burst once its reset period elapses.
+                if (burstStartTime != -1L && currentTime - burstStartTime > burstResetPeriodMillis) burstStartTime = -1L
                 emit(value)
                 lastEmissionTime = currentTime
-                if (dropCounter > 0) {
-                    totalDropped += dropCounter
-                    onDropMessages(dropCounter, totalDropped)
-                    dropCounter = 0
-                }
+                reportDrops()
             } else {
-                // After burst period, start limiting.
-                dropCounter++
+                if (burstStartTime == -1L) burstStartTime = currentTime
+                if (currentTime - burstStartTime <= burstDurationMillis) {
+                    // Allow all messages during the burst period.
+                    emit(value)
+                    lastEmissionTime = currentTime
+                    reportDrops()
+                } else {
+                    // After the burst period, start limiting.
+                    dropCounter++
+                }
             }
         }
+        // Do not lose a pending drop count when the upstream completes.
+        reportDrops()
     }
 }
