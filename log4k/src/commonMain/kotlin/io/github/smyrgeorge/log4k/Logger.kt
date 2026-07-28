@@ -4,6 +4,7 @@ import io.github.smyrgeorge.log4k.TracingEvent.Span
 import io.github.smyrgeorge.log4k.impl.SimpleLoggerFactory
 import io.github.smyrgeorge.log4k.impl.Tags
 import io.github.smyrgeorge.log4k.impl.registry.CollectorRegistry
+import kotlinx.coroutines.CancellationException
 import kotlin.reflect.KClass
 import kotlin.time.Duration
 import kotlin.time.TimeSource
@@ -116,9 +117,15 @@ abstract class Logger(
      * Emitted lines:
      * - `"→ name(args)"` on entry, at [level].
      * - `"← name = result (duration)"` on normal completion, at [level] — or `"← name (duration)"`
-     *   when [f] exits through a non-local return (there is no result value to render then).
+     *   when [f] exits through a non-local return or is cancelled (there is no result value to
+     *   render on those paths).
      * - `"✗ name failed (duration)"` at [Level.ERROR] — with the throwable attached — if [f] throws;
      *   the throwable is then rethrown.
+     *
+     * A [CancellationException] is rethrown *without* the `"✗ failed"` ERROR line: coroutine
+     * cancellation is part of normal control flow, not an application error (mirrors [Tracer.span]
+     * and [Meter.Timed.measure]). The neutral `"← name (duration)"` completion line is still
+     * emitted, so the entry line is never left dangling.
      *
      * The entry/exit lines are built only when [level] is enabled, so a disabled logger costs no
      * string building — in particular, the result is not `toString()`ed. When it is rendered, it is
@@ -152,6 +159,10 @@ abstract class Logger(
                     log(level, span, tags, "← $name = $rendered (${mark.elapsedNow()})", emptyArray<Any?>(), null)
                 }
             }
+        } catch (e: CancellationException) {
+            // Cancellation is normal control flow, not a failure: no "✗ failed" ERROR line.
+            // `completed` stays false so the finally below emits the neutral completion line.
+            throw e
         } catch (e: Throwable) {
             completed = true
             log(Level.ERROR, span, tags, "✗ $name failed (${mark.elapsedNow()})", emptyArray<Any?>(), e)
@@ -166,11 +177,19 @@ abstract class Logger(
 
     /**
      * Emits the `"← name (duration)"` completion line for a [logged] block that exited through a
-     * non-local return (no result value exists on that path). A no-op when the block [completed]
-     * through the normal or exception path, or when [level] is disabled.
+     * non-local return or a [CancellationException] (no result value exists on those paths). A
+     * no-op when the block [completed] through the normal or exception path, or when [level] is
+     * disabled.
      */
     @PublishedApi
-    internal fun loggedCompletion(completed: Boolean, level: Level, span: Span?, tags: Tags, name: String, elapsed: Duration) {
+    internal fun loggedCompletion(
+        completed: Boolean,
+        level: Level,
+        span: Span?,
+        tags: Tags,
+        name: String,
+        elapsed: Duration
+    ) {
         if (completed || !isEnabled(level)) return
         log(level, span, tags, "← $name ($elapsed)", emptyArray<Any?>(), null)
     }

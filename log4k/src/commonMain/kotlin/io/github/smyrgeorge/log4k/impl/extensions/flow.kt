@@ -9,7 +9,7 @@ internal inline fun <T> Flow<T>.preventFloodingWithBurst(
     burstDurationMillis: Int,
     burstResetPeriodMillis: Int,
     crossinline onDropMessages: (dropped: Int, totalDropped: Long) -> Unit =
-        { dropped, totalDropped -> println("Dropped $dropped log messages due to flooding (total: $totalDropped).") }
+        { dropped, totalDropped -> println("Dropped $dropped events due to flooding (total: $totalDropped).") }
 ): Flow<T> {
     require(requestsPerSecond > 0) { "Requests per second must be greater than 0." }
     require(burstDurationMillis > 0) { "Burst duration must be greater than 0." }

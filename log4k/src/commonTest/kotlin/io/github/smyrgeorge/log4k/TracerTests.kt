@@ -364,6 +364,69 @@ class TracerTests {
         assertThat(names).doesNotContain("below")
     }
 
+    // --- Lazy tag-population lambdas -------------------------------------------------------------
+    // The `event`/`exception` overloads taking a tag-populating block must not invoke the block
+    // when the event would be dropped anyway (span not open, or level-filtered) — mirroring
+    // Logger.at, building the tags costs nothing when the event is filtered out.
+
+    @Test
+    fun eventLambda_isNotInvoked_beforeStartOrAfterEnd() {
+        val tracer = SimpleTracer("test.tracer", Level.TRACE)
+        var invoked = 0
+
+        val notStarted = tracer.span("lazy-not-started")
+        notStarted.event("e") { invoked++ }
+        assertThat(invoked).isEqualTo(0)
+
+        val ended = tracer.span("lazy-ended").start()
+        ended.end()
+        ended.event("e") { invoked++ }
+        assertThat(invoked).isEqualTo(0)
+    }
+
+    @Test
+    fun eventLambda_isNotInvokedWhenLevelFiltered_andInvokedWhenKept() = runTest {
+        val tracer = SimpleTracer("test.tracer", Level.INFO) // the span inherits the tracer level (INFO)
+        var filtered = 0
+        var kept = 0
+
+        tracer.span("lazy-event-gate") {
+            debug("below") { filtered++ }              // dropped: DEBUG < INFO — block must not run
+            info("at") { kept++; it["k"] = "v" }       // kept: block runs, tags recorded
+        }
+
+        assertThat(filtered).isEqualTo(0)
+        assertThat(kept).isEqualTo(1)
+        val span = appender.awaitSpan("lazy-event-gate")
+        val recorded = span.events.single { it.name == "at" }
+        assertThat(recorded.tags["k"]).isEqualTo("v")
+        assertThat(span.events.map { it.name }).doesNotContain("below")
+    }
+
+    @Test
+    fun exceptionLambda_isNotInvokedWhenTheSpanIsNotOpen() = runTest {
+        val tracer = SimpleTracer("test.tracer", Level.TRACE)
+        var invoked = 0
+
+        val notStarted = tracer.span("lazy-exc-not-started")
+        notStarted.exception(IllegalStateException("boom")) { invoked++ }
+        assertThat(invoked).isEqualTo(0)
+
+        val ended = tracer.span("lazy-exc-ended").start()
+        ended.end()
+        ended.exception(IllegalStateException("boom")) { invoked++ }
+        assertThat(invoked).isEqualTo(0)
+
+        // Open span: the block runs and its tags land on the recorded exception event.
+        tracer.span("lazy-exc-open") {
+            exception(IllegalStateException("boom")) { invoked++; it["extra"] = "x" }
+        }
+        assertThat(invoked).isEqualTo(1)
+        val span = appender.awaitSpan("lazy-exc-open")
+        val recorded = span.events.single { it.name == OpenTelemetryAttributes.EXCEPTION }
+        assertThat(recorded.tags["extra"]).isEqualTo("x")
+    }
+
     @Test
     fun exception_recordsOpenTelemetryAttributes() = runTest {
         val tracer = SimpleTracer("test.tracer", Level.TRACE)

@@ -33,7 +33,7 @@ abstract class FlowFloodProtectedAppender<T>(
                 tags = emptyMap(),
                 timestamp = Clock.System.now(),
                 logger = "internal.FlowFloodProtectedAppender",
-                message = "Dropped $d log messages due to flooding (total dropped: $t).",
+                message = "Dropped $d events due to flooding (total dropped: $t).",
                 arguments = emptyArray(),
                 thread = thread(),
                 throwable = null,

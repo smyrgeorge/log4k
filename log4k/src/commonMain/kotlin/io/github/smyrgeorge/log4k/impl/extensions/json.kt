@@ -13,7 +13,9 @@ internal fun primitive(value: Any): JsonPrimitive = when (value) {
     is ULong -> JsonPrimitive(value)
     is Boolean -> JsonPrimitive(value)
     is String -> JsonPrimitive(value)
-    else -> JsonPrimitive(value.toString())
+    // Rendered on the async appender coroutine: a throwing toString() must cost this value its
+    // rendering, not the whole log line (mirrors `String.format`'s argument rendering).
+    else -> JsonPrimitive(runCatching { value.toString() }.getOrElse { "<toString() failed>" })
 }
 
 internal fun List<*>.toJsonElement(): JsonElement {

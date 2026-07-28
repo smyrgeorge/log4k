@@ -75,6 +75,17 @@ class SimpleConsoleLoggingAppenderTests {
         assertThat(line).contains(" - count {} = 5")
     }
 
+    @Test
+    fun format_survivesAThrowingArgumentToString() {
+        // format() runs on the async appender coroutine, where a propagated exception would
+        // silently drop the whole line: the bad argument must only cost its own rendering.
+        val bad = object {
+            override fun toString(): String = error("toString boom")
+        }
+        val line = loggingEvent(message = "v={} ok={}", arguments = arrayOf(bad, "yes")).format(colors = false)
+        assertThat(line).contains(" - v=<toString() failed> ok=yes")
+    }
+
     // --- Logger-name compaction -------------------------------------------------------------------
 
     @Test

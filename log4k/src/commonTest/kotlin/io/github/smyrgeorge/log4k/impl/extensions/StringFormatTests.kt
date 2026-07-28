@@ -137,4 +137,29 @@ class StringFormatTests {
         // so the escape backslash survives — exactly like SLF4J.
         assertThat("{} \\{}".fmt("a")).isEqualTo("a \\{}")
     }
+
+    // Defensive argument rendering: substitution runs on the async appender coroutine, where a
+    // propagated exception would silently drop the whole log line — a misbehaving argument must
+    // only cost its own rendering (same convention as Logger.logged's result rendering).
+
+    private class ThrowsOnToString {
+        override fun toString(): String = error("toString boom")
+    }
+
+    @Test
+    fun throwingToString_rendersFallbackText_insteadOfFailingTheLine() {
+        assertThat("value: {}".fmt(ThrowsOnToString())).isEqualTo("value: <toString() failed>")
+    }
+
+    @Test
+    fun throwingToString_doesNotAffectTheOtherArguments() {
+        assertThat("{} and {}".fmt(ThrowsOnToString(), "ok")).isEqualTo("<toString() failed> and ok")
+    }
+
+    @Test
+    fun throwingToString_inDoubleEscapedPosition_rendersFallbackText() {
+        // The double-escape branch substitutes through its own append site; it must be
+        // equally defensive.
+        assertThat("dir: \\\\{}!".fmt(ThrowsOnToString())).isEqualTo("dir: \\<toString() failed>!")
+    }
 }

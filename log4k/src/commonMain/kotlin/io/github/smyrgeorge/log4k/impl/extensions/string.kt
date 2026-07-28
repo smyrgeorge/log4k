@@ -14,6 +14,10 @@ private const val ESCAPE = '\\'
  * - `\\{}` is an escaped *escape*: one backslash is emitted and the placeholder is substituted normally.
  * - Placeholders in excess of the arguments are left as literal `{}`; arguments in excess of the placeholders
  *   are ignored.
+ * - An argument whose `toString()` throws renders as `<toString() failed>` (the same convention as
+ *   [io.github.smyrgeorge.log4k.Logger.logged]'s result rendering). Substitution runs on the async
+ *   appender coroutine, where a propagated exception would silently drop the *whole* log line —
+ *   a misbehaving argument must only cost its own rendering.
  */
 internal fun String.format(args: Array<out Any?>): String {
     if (args.isEmpty()) return this
@@ -29,7 +33,7 @@ internal fun String.format(args: Array<out Any?>): String {
             if (isDoubleEscaped(j)) {
                 // "\\{}" — drop one backslash, then substitute as usual.
                 sb.appendRange(this, i, j - 1)
-                sb.append(args[used++])
+                sb.appendArgument(args[used++])
                 i = j + 2
             } else {
                 // "\{}" — emit a literal "{}" and keep the argument for the next placeholder.
@@ -40,7 +44,7 @@ internal fun String.format(args: Array<out Any?>): String {
             }
         } else {
             sb.appendRange(this, i, j)
-            sb.append(args[used++])
+            sb.appendArgument(args[used++])
             i = j + 2
         }
         if (used == args.size) break // All arguments consumed; the tail is copied below.
@@ -50,6 +54,11 @@ internal fun String.format(args: Array<out Any?>): String {
 
     sb.appendRange(this, i, length)
     return sb.toString()
+}
+
+/** Appends [arg] rendered defensively: a throwing `toString()` renders as `<toString() failed>`. */
+private fun StringBuilder.appendArgument(arg: Any?) {
+    append(runCatching { arg.toString() }.getOrElse { "<toString() failed>" })
 }
 
 /** True when the `{}` starting at [delimiterStart] is directly preceded by an escape character. */

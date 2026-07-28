@@ -123,6 +123,11 @@ object RootLogger {
      * log events.
      */
     object Logging {
+        /**
+         * The default level snapshotted by the factory when a logger is created. Changing it
+         * affects only loggers created from then on; adjust existing (cached) ones through
+         * [Logger.registry].
+         */
         var level: Level = Level.INFO
 
         @OptIn(ExperimentalAtomicApi::class)
@@ -142,6 +147,11 @@ object RootLogger {
      * different appenders that handle `TracingEvent`.
      */
     object Tracing {
+        /**
+         * The default level snapshotted by the factory when a tracer is created. Changing it
+         * affects only tracers created from then on; adjust existing (cached) ones through
+         * [Tracer.registry].
+         */
         var level: Level = Level.INFO
         val appenders = AppenderRegistry<TracingEvent>()
     }
@@ -153,6 +163,11 @@ object RootLogger {
      * metering events.
      */
     object Metering {
+        /**
+         * The default level snapshotted by the factory when a meter is created. Changing it
+         * affects only meters created from then on; adjust existing (cached) ones through
+         * [Meter.registry].
+         */
         var level: Level = Level.INFO
 
         @OptIn(ExperimentalAtomicApi::class)

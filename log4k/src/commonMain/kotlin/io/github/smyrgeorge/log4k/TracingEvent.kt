@@ -108,6 +108,18 @@ sealed interface TracingEvent {
             private var started: Boolean = false
             private var closed: Boolean = false
 
+            /** Whether the span is open (started and not yet ended) — the window in which events may be recorded. */
+            @PublishedApi
+            internal fun isOpen(): Boolean = started && !closed
+
+            /**
+             * Whether an event at [level] would be recorded right now: the span [isOpen] and
+             * [level] passes the span's level gate. Published so the inline tag-populating
+             * overloads can skip invoking their block entirely for a dropped event.
+             */
+            @PublishedApi
+            internal fun shouldRecordEvent(level: Level): Boolean = isOpen() && shouldLogEvent(level)
+
             /**
              * Starts the local span if it hasn't been started already and if the
              * conditions to start the span are met.
@@ -154,8 +166,7 @@ sealed interface TracingEvent {
              * @param tags A map of tags associated with the event, defaults to an empty map.
              */
             fun event(name: String, level: Level, tags: Tags = emptyMap()) {
-                if (!started || closed) return
-                if (!shouldLogEvent(level)) return
+                if (!shouldRecordEvent(level)) return
                 val event = Event(
                     name = name,
                     tags = tags,
@@ -174,7 +185,7 @@ sealed interface TracingEvent {
              * @param tags A map of additional tags to associate with the exception event.
              */
             fun exception(error: Throwable, tags: Tags = emptyMap()) {
-                if (!started || closed) return
+                if (!isOpen()) return
                 val event = Event(
                     name = OpenTelemetryAttributes.EXCEPTION,
                     timestamp = Clock.System.now(),
@@ -190,10 +201,14 @@ sealed interface TracingEvent {
             /**
              * Records an exception event with the given tags.
              *
+             * [f] is invoked only when the exception will actually be recorded (the span is open),
+             * so populating the tags costs nothing when the event would be dropped.
+             *
              * @param error The throwable error to be recorded.
              * @param f Function to populate a mutable map of additional tags to associate with the exception event.
              */
             fun exception(error: Throwable, f: (MutableTags) -> Unit) {
+                if (!isOpen()) return
                 mutableMapOf<String, Any>().also {
                     f(it)
                     exception(error, it)
@@ -214,7 +229,14 @@ sealed interface TracingEvent {
 
             fun event(name: String, tags: Tags = emptyMap()) = event(name, level, tags)
             inline fun event(name: String, f: (MutableTags) -> Unit) = event(name, level, f)
+
+            /**
+             * Records an event with tags populated by [f]. The block is invoked only when the event
+             * will actually be recorded (the span is open and [level] passes its gate) — mirroring
+             * [Logger.at], populating the tags costs nothing when the event is filtered out.
+             */
             inline fun event(name: String, level: Level, f: (MutableTags) -> Unit) {
+                if (!shouldRecordEvent(level)) return
                 mutableMapOf<String, Any>().also {
                     f(it)
                     event(name, level, it)

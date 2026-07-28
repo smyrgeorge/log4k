@@ -112,6 +112,19 @@ class SimpleJsonConsoleLoggingAppenderTests {
         assertThat(obj.getValue("tags").jsonObject.isEmpty()).isTrue()
     }
 
+    @Test
+    fun formatJson_survivesAThrowingTagValueToString() {
+        // Rendering happens on the async appender coroutine, where a propagated exception would
+        // silently drop the whole line: the bad tag value must only cost its own rendering.
+        val bad = object {
+            override fun toString(): String = error("toString boom")
+        }
+        val obj = parse(loggingEvent(tags = mapOf("bad" to bad, "good" to "v")).formatJson())
+        val tags = obj.getValue("tags").jsonObject
+        assertThat(tags.getValue("bad").jsonPrimitive.content).isEqualTo("<toString() failed>")
+        assertThat(tags.getValue("good").jsonPrimitive.content).isEqualTo("v")
+    }
+
     // --- Throwable rendering -------------------------------------------------------------------------
 
     @Test

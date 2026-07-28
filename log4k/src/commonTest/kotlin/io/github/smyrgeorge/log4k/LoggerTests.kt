@@ -18,6 +18,7 @@ import io.github.smyrgeorge.log4k.classic.trace
 import io.github.smyrgeorge.log4k.classic.warn
 import io.github.smyrgeorge.log4k.impl.SimpleLogger
 import io.github.smyrgeorge.log4k.utils.CapturingLoggingAppender
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -301,6 +302,44 @@ class LoggerTests {
         assertThat(events[1].level).isEqualTo(Level.ERROR)
         assertThat(events[1].message).startsWith("✗ compute failed (")
         assertThat(events[1].throwable).isSameInstanceAs(boom)
+    }
+
+    @Test
+    fun logged_cancellation_emitsNeutralCompletionInsteadOfErrorLine() = runTest {
+        val logger = SimpleLogger("test.logged.cancel", Level.TRACE)
+        val cancel = CancellationException("cancelled")
+
+        val thrown = assertFailsWith<CancellationException> {
+            logger.logged<Unit>(Level.INFO, null, emptyMap(), "compute", "") { throw cancel }
+        }
+
+        assertThat(thrown).isSameInstanceAs(cancel)
+        // Cancellation is normal control flow, not an application error (mirrors Tracer.span and
+        // Meter.Timed.measure): entry line, then the *neutral* completion line at the entry level —
+        // if the "✗ compute failed" ERROR line had been emitted, it would be events[1] here.
+        val events = appender.awaitEvents(2) { it.logger == "test.logged.cancel" }
+        assertThat(events[0].level).isEqualTo(Level.INFO)
+        assertThat(events[0].message).isEqualTo("→ compute()")
+        assertThat(events[1].level).isEqualTo(Level.INFO)
+        assertThat(events[1].message).startsWith("← compute (")
+        assertThat(events[1].throwable).isNull()
+    }
+
+    @Test
+    fun logged_cancellation_disabledLevel_emitsNothing() = runTest {
+        val logger = SimpleLogger("test.logged.cancel.disabled", Level.INFO)
+
+        assertFailsWith<CancellationException> {
+            // DEBUG < INFO: neither the entry nor the completion line may be emitted — and the
+            // cancellation must not surface through the ERROR path either.
+            logger.logged<Unit>(Level.DEBUG, null, emptyMap(), "compute", "") {
+                throw CancellationException("cancelled")
+            }
+        }
+
+        logger.log(Level.INFO, null, emptyMap(), "marker", emptyArray(), null)
+        val first = appender.awaitEvent { it.logger == "test.logged.cancel.disabled" }
+        assertThat(first.message).isEqualTo("marker")
     }
 
     @Test

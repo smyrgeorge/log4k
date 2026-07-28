@@ -25,7 +25,7 @@ import kotlin.coroutines.CoroutineContext
  * @property current The current span in the context, or `null` if no span is active.
  */
 @OptIn(ExperimentalAtomicApi::class)
-data class SimpleCoroutinesTracingContext(
+class SimpleCoroutinesTracingContext(
     override val tracer: Tracer? = null,
     override val parent: Span? = null,
 ) : TracingContext, CoroutineContext.Element {
@@ -40,7 +40,7 @@ data class SimpleCoroutinesTracingContext(
     }
 
     override fun toString(): String {
-        return "TracingContext(current=$current), parent=$parent)"
+        return "TracingContext(current=$current, parent=$parent)"
     }
 
     override val key: CoroutineContext.Key<SimpleCoroutinesTracingContext>

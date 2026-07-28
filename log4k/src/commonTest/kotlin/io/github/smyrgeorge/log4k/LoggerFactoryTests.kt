@@ -104,6 +104,22 @@ class LoggerFactoryTests {
     }
 
     @Test
+    fun simpleFactory_levelIsACreationTimeSnapshot_existingLoggersAreUnaffected() {
+        val saved = RootLogger.Logging.level
+        try {
+            RootLogger.Logging.level = Level.INFO
+            val existing = SimpleLoggerFactory().create("logger.factory.level.snapshot")
+
+            // Changing the root default afterwards must not reach the already-created logger —
+            // that one is adjusted through Logger.registry.setLevel(...) instead.
+            RootLogger.Logging.level = Level.DEBUG
+            assertThat(existing.level).isEqualTo(Level.INFO)
+        } finally {
+            RootLogger.Logging.level = saved
+        }
+    }
+
+    @Test
     fun get_forPreMutedName_returnsMutedInstance() {
         val name = "logger.factory.premuted"
         Logger.registry.mute(name)
