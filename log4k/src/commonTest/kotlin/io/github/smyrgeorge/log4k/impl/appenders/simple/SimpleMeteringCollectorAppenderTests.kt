@@ -1,6 +1,7 @@
 package io.github.smyrgeorge.log4k.impl.appenders.simple
 
 import assertk.assertThat
+import assertk.assertions.contains
 import assertk.assertions.isEqualTo
 import io.github.smyrgeorge.log4k.Level
 import io.github.smyrgeorge.log4k.Meter.Instrument.Kind
@@ -8,7 +9,11 @@ import io.github.smyrgeorge.log4k.MeteringEvent
 import io.github.smyrgeorge.log4k.RootLogger
 import io.github.smyrgeorge.log4k.impl.SimpleMeter
 import io.github.smyrgeorge.log4k.utils.CapturingMeteringAppender
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.yield
 import kotlin.test.Test
 
 /**
@@ -585,4 +590,68 @@ class SimpleMeteringCollectorAppenderTests {
             saved.forEach { RootLogger.Metering.appenders.register(it) }
         }
     }
+
+    // --- Numeric widening & concurrent scrapes ---------------------------------------------------
+
+    @Test
+    fun intFedCounter_widensToLong_insteadOfWrappingAtIntMax() = runTest {
+        val appender = SimpleMeteringCollectorAppender()
+        appender.create("big_hits", Kind.Counter)
+
+        appender.append(MeteringEvent.Increment(nextId(), "big_hits", emptyMap(), value = Int.MAX_VALUE))
+        appender.append(MeteringEvent.Increment(nextId(), "big_hits", emptyMap(), value = 1))
+
+        // 2147483648 = Int.MAX_VALUE + 1: the old Int accumulator wrapped to -2147483648.
+        assertThat(appender.toOpenMetricsLineFormatString()).contains("big_hits_total{} 2147483648")
+    }
+
+    @Test
+    fun intFedUpDownCounter_widensToLong_insteadOfWrappingAtIntMin() = runTest {
+        val appender = SimpleMeteringCollectorAppender()
+        appender.create("big_swing", Kind.UpDownCounter)
+
+        appender.append(MeteringEvent.Set(nextId(), "big_swing", emptyMap(), value = Int.MIN_VALUE))
+        appender.append(MeteringEvent.Decrement(nextId(), "big_swing", emptyMap(), value = 1))
+
+        // -2147483649 = Int.MIN_VALUE - 1: the old Int accumulator wrapped to +2147483647.
+        assertThat(appender.toOpenMetricsLineFormatString()).contains("big_swing{} -2147483649")
+    }
+
+    @Test
+    fun exposition_isRenderableWhileEventsAreBeingAppended() = runTest {
+        // Scrape-race regression: rendering used to iterate plain HashMaps that `append` mutates,
+        // so a scrape concurrent with the consumer could crash (ConcurrentModificationException)
+        // or observe a torn aggregate. With copy-on-write snapshots and immutable aggregates the
+        // renderer must always see a consistent state.
+        val appender = SimpleMeteringCollectorAppender()
+        appender.create("race_hits", Kind.Counter)
+        appender.create("race_lat", Kind.Histogram)
+
+        withContext(Dispatchers.Default) {
+            val writer = launch {
+                repeat(2_000) { i ->
+                    appender.append(MeteringEvent.Increment(nextId(), "race_hits", emptyMap(), value = 1))
+                    appender.append(MeteringEvent.Record(nextId(), "race_lat", emptyMap(), value = i))
+                }
+            }
+            // Render continuously while the writer folds events (yield keeps single-threaded
+            // targets fair). Every snapshot must be internally consistent: the histogram's
+            // `_bucket` and `_count` lines render the same immutable aggregate, so they can
+            // never disagree.
+            while (writer.isActive) {
+                val exposition = appender.toOpenMetricsLineFormatString()
+                assertThat(exposition.lineValue("race_lat_bucket")).isEqualTo(exposition.lineValue("race_lat_count"))
+                yield()
+            }
+            writer.join()
+        }
+
+        val exposition = appender.toOpenMetricsLineFormatString()
+        assertThat(exposition).contains("race_hits_total{} 2000")
+        assertThat(exposition).contains("race_lat_count{} 2000")
+    }
+
+    /** The value (the text after the last space) of the first exposition line starting with [prefix]. */
+    private fun String.lineValue(prefix: String): String? =
+        lineSequence().firstOrNull { it.startsWith(prefix) }?.substringAfterLast(' ')
 }

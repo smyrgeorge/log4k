@@ -6,6 +6,9 @@ import io.github.smyrgeorge.log4k.MeteringEvent
 import io.github.smyrgeorge.log4k.impl.Tags
 import io.github.smyrgeorge.log4k.impl.appenders.simple.SimpleMeteringCollectorAppender.Companion.promotingPlus
 import io.github.smyrgeorge.log4k.impl.extensions.toName
+import kotlin.concurrent.atomics.AtomicReference
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlin.concurrent.atomics.update
 import kotlin.time.Instant
 
 /**
@@ -14,64 +17,42 @@ import kotlin.time.Instant
  *
  * Incoming events are folded into a per-instrument-and-tag-set [Instrument] held in [registry]:
  * `CreateInstrument` registers an instrument's metadata (see [Instrument.Info]), while the value
- * events (`Set`/`Increment`/`Decrement`/`Record`) mutate the matching aggregate. The aggregation
+ * events (`Set`/`Increment`/`Decrement`/`Record`) produce an updated aggregate. The aggregation
  * model mirrors the OpenTelemetry instruments produced by [Meter].
+ *
+ * Both registries are copy-on-write snapshots behind [AtomicReference]s and every [Instrument] is
+ * immutable: `append` (running on the RootLogger consumer coroutine) publishes a fresh snapshot per
+ * event, so a scraping thread calling [toOpenMetricsLineFormatString] concurrently always renders a
+ * consistent snapshot — never a map being mutated underneath it, and never a torn aggregate (e.g. a
+ * histogram whose `count` was updated but whose `sum` was not).
  *
  * - OpenTelemetry metrics: https://opentelemetry.io/docs/specs/otel/metrics/api/
  * - OpenMetrics: https://github.com/prometheus/OpenMetrics/blob/main/specification/OpenMetrics.md
  */
+@OptIn(ExperimentalAtomicApi::class)
 class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
     override val name: String = this::class.toName()
 
     // The aggregated value per instrument-and-tag-set, keyed by the (name, tags) pair itself:
     // hash-based keys (Int hashes of name+tags) can collide and silently merge distinct series.
-    private val registry: MutableMap<Pair<String, Tags>, Instrument> = mutableMapOf()
+    private val registry: AtomicReference<Map<Pair<String, Tags>, Instrument>> = AtomicReference(emptyMap())
 
     // The metadata registered by `CreateInstrument`, keyed by instrument name.
-    private val instruments: MutableMap<String, Instrument.Info> = mutableMapOf()
+    private val instruments: AtomicReference<Map<String, Instrument.Info>> = AtomicReference(emptyMap())
 
     override suspend fun append(event: MeteringEvent) {
         when (event) {
-            is MeteringEvent.CreateInstrument -> {
-                if (instruments.containsKey(event.name)) return
-                Instrument.Info(
+            is MeteringEvent.CreateInstrument -> instruments.update { current ->
+                if (event.name in current) current
+                else current + (event.name to Instrument.Info(
                     name = event.name,
                     kind = event.kind,
                     unit = event.unit,
-                    description = event.description
-                ).also { instruments[event.name] = it }
+                    description = event.description,
+                ))
             }
 
-            is MeteringEvent.Set -> {
-                when (val instrument = event.instrument()) {
-                    is Instrument.Counter -> instrument.set(event)
-                    is Instrument.UpDownCounter -> instrument.set(event)
-                    else -> Unit
-                }
-            }
-
-            is MeteringEvent.Increment -> {
-                when (val instrument = event.instrument()) {
-                    is Instrument.Counter -> instrument.increment(event)
-                    is Instrument.UpDownCounter -> instrument.increment(event)
-                    else -> Unit
-                }
-            }
-
-            is MeteringEvent.Decrement -> {
-                when (val instrument = event.instrument()) {
-                    is Instrument.UpDownCounter -> instrument.decrement(event)
-                    else -> Unit
-                }
-            }
-
-            is MeteringEvent.Record -> {
-                when (val instrument = event.instrument()) {
-                    is Instrument.Gauge -> instrument.record(event)
-                    is Instrument.Histogram -> instrument.record(event)
-                    else -> Unit
-                }
-            }
+            is MeteringEvent.ValueEvent -> registry.update { current -> event.foldInto(current) }
         }
     }
 
@@ -83,6 +64,9 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
      * the mandatory `_total` suffix, units are appended to the family name (OpenMetrics requires the
      * unit to be a suffix of the name), and the exposition is terminated with `# EOF`.
      *
+     * Safe to call from any thread while events are being appended: the exposition is rendered from
+     * one immutable snapshot of the registry.
+     *
      * Sample timestamps are intentionally not emitted: Prometheus interprets explicitly-timestamped
      * samples relative to its own time window and drops stale ones, so — like most exporters — the
      * collector lets the scraper assign timestamps. This also keeps the output parseable by the
@@ -92,6 +76,7 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
      */
     fun toOpenMetricsLineFormatString(): String = buildString {
         registry
+            .load()
             .values
             .groupBy { it.openMetricsName() }
             .entries
@@ -106,71 +91,100 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
     }
 
     /**
-     * Converts a `MeteringEvent.ValueEvent` into an `Instrument`.
+     * Folds this value event into the [current] registry snapshot, returning the next snapshot.
      *
-     * This method checks for an existing instrument in the registry, keyed by the event's
-     * instrument name and tag-set. If it does not exist, it creates a new instrument based
-     * on the information provided in the event and adds it to the registry. The type of
-     * instrument created depends on the `kind` property of the event's associated instrument
-     * information.
-     *
-     * @return The existing or newly created `Instrument`, or null if the event's instrument
-     *         metadata is unknown or the event cannot be applied to instruments of that kind.
+     * The matching aggregate is looked up by the event's instrument name and tag-set; when absent,
+     * a zero-valued one is created from the metadata registered by `CreateInstrument`. The event is
+     * then applied to it, producing a *new* immutable aggregate that replaces the old one in the
+     * returned map. The [current] snapshot is returned unchanged when the event cannot be applied:
+     * unknown instrument metadata, or a mismatched event/kind combination (e.g. a `Record` against
+     * a counter) — which must not leave a phantom zero-valued series behind either.
      */
-    private fun MeteringEvent.ValueEvent.instrument(): Instrument? {
+    private fun MeteringEvent.ValueEvent.foldInto(
+        current: Map<Pair<String, Tags>, Instrument>,
+    ): Map<Pair<String, Tags>, Instrument> {
         val key: Pair<String, Tags> = name to tags
-        val existing: Instrument? = registry[key]
-        return if (existing == null) {
-            val info = instruments[name] ?: return null
-            // Only register an aggregate the event can actually be applied to: a mismatched
-            // event/kind combination (e.g. a `Record` against a counter) must not leave a
-            // phantom zero-valued series behind.
-            if (!appliesTo(info.kind)) return null
-            when (info.kind) {
-                Meter.Instrument.Kind.Counter -> Instrument.Counter(
-                    name = name,
-                    tags = tags,
-                    kind = info.kind,
-                    unit = info.unit,
-                    description = info.description,
-                    value = 0,
-                    updatedAt = timestamp
-                )
+        val existing: Instrument = current[key] ?: newInstrument() ?: return current
+        val next: Instrument = when (this) {
+            is MeteringEvent.Set -> when (existing) {
+                is Instrument.Counter -> existing.set(this)
+                is Instrument.UpDownCounter -> existing.set(this)
+                else -> return current
+            }
 
-                Meter.Instrument.Kind.UpDownCounter -> Instrument.UpDownCounter(
-                    name = name,
-                    tags = tags,
-                    kind = info.kind,
-                    unit = info.unit,
-                    description = info.description,
-                    value = 0,
-                    updatedAt = timestamp
-                )
+            is MeteringEvent.Increment -> when (existing) {
+                is Instrument.Counter -> existing.increment(this)
+                is Instrument.UpDownCounter -> existing.increment(this)
+                else -> return current
+            }
 
-                Meter.Instrument.Kind.Gauge -> Instrument.Gauge(
-                    name = name,
-                    tags = tags,
-                    kind = info.kind,
-                    unit = info.unit,
-                    description = info.description,
-                    value = 0,
-                    updatedAt = timestamp
-                )
+            is MeteringEvent.Decrement -> when (existing) {
+                is Instrument.UpDownCounter -> existing.decrement(this)
+                else -> return current
+            }
 
-                Meter.Instrument.Kind.Histogram -> Instrument.Histogram(
-                    name = name,
-                    tags = tags,
-                    kind = info.kind,
-                    unit = info.unit,
-                    description = info.description,
-                    value = 0,
-                    updatedAt = timestamp
-                )
-            }.also { registry[key] = it }
-        } else existing
+            is MeteringEvent.Record -> when (existing) {
+                is Instrument.Gauge -> existing.record(this)
+                is Instrument.Histogram -> existing.record(this)
+                else -> return current
+            }
+        }
+        return current + (key to next)
     }
 
-    /** Whether this event can be applied to an instrument of the given [kind] (mirrors the dispatch in [append]). */
+    /**
+     * Creates the zero-valued aggregate for this event's instrument, or `null` if the event's
+     * instrument metadata is unknown or the event cannot be applied to instruments of that kind.
+     */
+    private fun MeteringEvent.ValueEvent.newInstrument(): Instrument? {
+        val info = instruments.load()[name] ?: return null
+        // Only register an aggregate the event can actually be applied to: a mismatched
+        // event/kind combination (e.g. a `Record` against a counter) must not leave a
+        // phantom zero-valued series behind.
+        if (!appliesTo(info.kind)) return null
+        return when (info.kind) {
+            Meter.Instrument.Kind.Counter -> Instrument.Counter(
+                name = name,
+                tags = tags,
+                kind = info.kind,
+                unit = info.unit,
+                description = info.description,
+                value = 0,
+                updatedAt = timestamp
+            )
+
+            Meter.Instrument.Kind.UpDownCounter -> Instrument.UpDownCounter(
+                name = name,
+                tags = tags,
+                kind = info.kind,
+                unit = info.unit,
+                description = info.description,
+                value = 0,
+                updatedAt = timestamp
+            )
+
+            Meter.Instrument.Kind.Gauge -> Instrument.Gauge(
+                name = name,
+                tags = tags,
+                kind = info.kind,
+                unit = info.unit,
+                description = info.description,
+                value = 0,
+                updatedAt = timestamp
+            )
+
+            Meter.Instrument.Kind.Histogram -> Instrument.Histogram(
+                name = name,
+                tags = tags,
+                kind = info.kind,
+                unit = info.unit,
+                description = info.description,
+                updatedAt = timestamp
+            )
+        }
+    }
+
+    /** Whether this event can be applied to an instrument of the given [kind] (mirrors the dispatch in [foldInto]). */
     private fun MeteringEvent.ValueEvent.appliesTo(kind: Meter.Instrument.Kind): Boolean = when (this) {
         is MeteringEvent.Set, is MeteringEvent.Increment ->
             kind == Meter.Instrument.Kind.Counter || kind == Meter.Instrument.Kind.UpDownCounter
@@ -180,9 +194,10 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
     }
 
     /**
-     * The in-memory aggregate for a single instrument-and-tag-set, mirroring an OpenTelemetry
-     * instrument. Each implementation knows how to fold its value events and how to render itself
-     * as OpenMetrics.
+     * The **immutable** in-memory aggregate for a single instrument-and-tag-set, mirroring an
+     * OpenTelemetry instrument. Each implementation knows how to fold its value events — producing
+     * a new aggregate — and how to render itself as OpenMetrics. Immutability is what makes the
+     * copy-on-write registry snapshots safe to render from any thread.
      *
      * - OpenTelemetry instruments: https://opentelemetry.io/docs/specs/otel/metrics/api/#meter
      * - OpenMetrics: https://github.com/prometheus/OpenMetrics/blob/main/specification/OpenMetrics.md
@@ -193,8 +208,8 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
         val unit: String?
         val description: String?
         val tags: Tags?
-        var value: Number
-        var updatedAt: Instant?
+        val value: Number
+        val updatedAt: Instant?
 
         /** Orders series that share a name (one per tag-set) deterministically within a `# TYPE` block. */
         fun sortKey(): Int = tags.hashCode()
@@ -270,111 +285,87 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
         )
 
         /**
-         * Base for cumulative counter-style aggregates: the value is either overwritten ([set]) or
-         * increased ([increment]) as events arrive.
-         */
-        abstract class AbstractCounter(
-            override val name: String,
-            override val tags: Tags?,
-            override val kind: Meter.Instrument.Kind,
-            override val unit: String?,
-            override val description: String?,
-            override var value: Number,
-            override var updatedAt: Instant? = null,
-        ) : Instrument {
-            /** Overwrites the current value (used for the absolute `set` operation). */
-            fun set(event: MeteringEvent.Set) {
-                updatedAt = event.timestamp
-                value = event.value
-            }
-
-            /**
-             * Adds the event's value to the current one, promoting to the wider of the two numeric
-             * types: the accumulator is never coerced into a narrower event type, so mixed-type
-             * series neither truncate fractions nor overflow, and no event is silently dropped.
-             */
-            fun increment(event: MeteringEvent.Increment) {
-                updatedAt = event.timestamp
-                value = value.promotingPlus(event.value)
-            }
-        }
-
-        /**
-         * Base for last-value aggregates: each observation replaces the previous value. Used by
-         * [Gauge]; [Histogram] aggregates its observations differently and does not extend this.
-         */
-        abstract class AbstractRecorder(
-            override val name: String,
-            override val tags: Tags?,
-            override val kind: Meter.Instrument.Kind,
-            override val unit: String?,
-            override val description: String?,
-            override var value: Number,
-            override var updatedAt: Instant? = null,
-        ) : Instrument {
-            /** Replaces the current value with the latest observation. */
-            fun record(event: MeteringEvent.Record) {
-                updatedAt = event.timestamp
-                value = event.value
-            }
-        }
-
-        /**
-         * A monotonically increasing counter (only ever `set` or `increment`ed).
+         * A monotonically increasing counter: the value is either overwritten ([set]) or increased
+         * ([increment]) — each fold produces a new aggregate.
          *
          * - OpenTelemetry: https://opentelemetry.io/docs/specs/otel/metrics/api/#counter
          * - Prometheus: https://prometheus.io/docs/concepts/metric_types/#counter
          */
         class Counter(
-            name: String,
-            tags: Tags?,
-            kind: Meter.Instrument.Kind,
-            unit: String?,
-            description: String?,
-            value: Number,
-            updatedAt: Instant? = null,
-        ) : AbstractCounter(name, tags, kind, unit, description, value, updatedAt)
+            override val name: String,
+            override val tags: Tags?,
+            override val kind: Meter.Instrument.Kind,
+            override val unit: String?,
+            override val description: String?,
+            override val value: Number,
+            override val updatedAt: Instant? = null,
+        ) : Instrument {
+            /** Returns a copy with the value overwritten (used for the absolute `set` operation). */
+            fun set(event: MeteringEvent.Set): Counter =
+                Counter(name, tags, kind, unit, description, event.value, event.timestamp)
+
+            /**
+             * Returns a copy with the event's value added to the current one, promoting to the wider
+             * of the two numeric types; integral accumulation is widened to `Long`, so an `Int`-fed
+             * series does not wrap at 2^31 and no event is silently dropped.
+             */
+            fun increment(event: MeteringEvent.Increment): Counter =
+                Counter(name, tags, kind, unit, description, value.promotingPlus(event.value), event.timestamp)
+        }
 
         /**
-         * A counter that can also go down, adding [decrement] to the [AbstractCounter] operations.
+         * A counter that can also go down, adding [decrement] to the [Counter]-style operations.
          *
          * - OpenTelemetry: https://opentelemetry.io/docs/specs/otel/metrics/api/#updowncounter
          */
         class UpDownCounter(
-            name: String,
-            tags: Tags?,
-            kind: Meter.Instrument.Kind,
-            unit: String?,
-            description: String?,
-            value: Number,
-            updatedAt: Instant? = null,
-        ) : AbstractCounter(name, tags, kind, unit, description, value, updatedAt) {
-            /** Subtracts the event's value from the current one (same numeric promotion as [increment]). */
-            fun decrement(event: MeteringEvent.Decrement) {
-                updatedAt = event.timestamp
-                value = value.promotingMinus(event.value)
-            }
+            override val name: String,
+            override val tags: Tags?,
+            override val kind: Meter.Instrument.Kind,
+            override val unit: String?,
+            override val description: String?,
+            override val value: Number,
+            override val updatedAt: Instant? = null,
+        ) : Instrument {
+            /** Returns a copy with the value overwritten (used for the absolute `set` operation). */
+            fun set(event: MeteringEvent.Set): UpDownCounter =
+                UpDownCounter(name, tags, kind, unit, description, event.value, event.timestamp)
+
+            /** Returns a copy with the event's value added (same numeric promotion as [Counter.increment]). */
+            fun increment(event: MeteringEvent.Increment): UpDownCounter =
+                UpDownCounter(name, tags, kind, unit, description, value.promotingPlus(event.value), event.timestamp)
+
+            /** Returns a copy with the event's value subtracted (same numeric promotion as [increment]). */
+            fun decrement(event: MeteringEvent.Decrement): UpDownCounter =
+                UpDownCounter(name, tags, kind, unit, description, value.promotingMinus(event.value), event.timestamp)
         }
 
         /**
-         * A gauge that tracks the latest recorded value (it can arbitrarily rise and fall).
+         * A gauge that tracks the latest recorded value (it can arbitrarily rise and fall): each
+         * observation produces a new aggregate carrying the latest value.
          *
          * - OpenTelemetry: https://opentelemetry.io/docs/specs/otel/metrics/api/#gauge
          * - Prometheus: https://prometheus.io/docs/concepts/metric_types/#gauge
          */
         class Gauge(
-            name: String,
-            tags: Tags?,
-            kind: Meter.Instrument.Kind,
-            unit: String?,
-            description: String?,
-            value: Number,
-            updatedAt: Instant? = null,
-        ) : AbstractRecorder(name, tags, kind, unit, description, value, updatedAt)
+            override val name: String,
+            override val tags: Tags?,
+            override val kind: Meter.Instrument.Kind,
+            override val unit: String?,
+            override val description: String?,
+            override val value: Number,
+            override val updatedAt: Instant? = null,
+        ) : Instrument {
+            /** Returns a copy carrying the latest observation. */
+            fun record(event: MeteringEvent.Record): Gauge =
+                Gauge(name, tags, kind, unit, description, event.value, event.timestamp)
+        }
 
         /**
          * Aggregates sampled observations into a running `count` and `sum`. Unlike a gauge (which
-         * keeps only the last value), a histogram accumulates every recorded value.
+         * keeps only the last value), a histogram accumulates every recorded value. Because the
+         * aggregate is immutable, a rendered snapshot can never observe a `count` without its
+         * matching `sum`.
          *
          * - OpenTelemetry: https://opentelemetry.io/docs/specs/otel/metrics/api/#histogram
          * - Prometheus: https://prometheus.io/docs/concepts/metric_types/#histogram
@@ -385,19 +376,16 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
             override val kind: Meter.Instrument.Kind,
             override val unit: String?,
             override val description: String?,
-            override var value: Number,
-            override var updatedAt: Instant? = null,
+            val count: Long = 0,
+            val sum: Double = 0.0,
+            override val updatedAt: Instant? = null,
         ) : Instrument {
-            // Running aggregates over the observed values.
-            private var count: Long = 0
-            private var sum: Double = 0.0
+            // Keep the interface's `value` in sync with the observation count.
+            override val value: Number get() = count
 
-            fun record(event: MeteringEvent.Record) {
-                updatedAt = event.timestamp
-                count += 1
-                sum += event.value.toDouble()
-                value = count // keep the interface's `value` in sync with the observation count.
-            }
+            /** Returns a copy with the observation folded into the running `count`/`sum`. */
+            fun record(event: MeteringEvent.Record): Histogram =
+                Histogram(name, tags, kind, unit, description, count + 1, sum + event.value.toDouble(), event.timestamp)
 
             /**
              * A histogram is exposed as its cumulative `+Inf` bucket plus the mandatory `_sum` and
@@ -455,19 +443,20 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
         /** Escapes a label value: `\` becomes `\\`, `"` becomes `\"` and a line feed becomes `\n`. */
         private fun String.escapeLabelValue(): String = replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n")
 
-        /** `true` for the integral types no wider than `Int` (`Byte`, `Short`, `Int`). */
-        private val Number.isSmallIntegral: Boolean
-            get() = this is Int || this is Short || this is Byte
+        /** `true` for the integral types (`Byte`, `Short`, `Int`, `Long`). */
+        private val Number.isIntegral: Boolean
+            get() = this is Long || this is Int || this is Short || this is Byte
 
         /**
          * Adds [other] to this number, promoting the result to the wider of the two numeric types
-         * (`Double` > `Float` > `Long` > `Int`); unknown [Number] implementations fold via `Double`.
+         * (`Double` > `Float` > `Long`). Integral accumulation is always widened to `Long`, so an
+         * `Int`-fed series does not silently wrap at 2^31. (A `Long` accumulator still overflows at
+         * 2^63, which is not guarded.) Unknown [Number] implementations fold via `Double`.
          */
         private fun Number.promotingPlus(other: Number): Number = when {
             this is Double || other is Double -> toDouble() + other.toDouble()
             this is Float || other is Float -> toFloat() + other.toFloat()
-            this is Long || other is Long -> toLong() + other.toLong()
-            isSmallIntegral && other.isSmallIntegral -> toInt() + other.toInt()
+            isIntegral && other.isIntegral -> toLong() + other.toLong()
             else -> toDouble() + other.toDouble()
         }
 
@@ -475,8 +464,7 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
         private fun Number.promotingMinus(other: Number): Number = when {
             this is Double || other is Double -> toDouble() - other.toDouble()
             this is Float || other is Float -> toFloat() - other.toFloat()
-            this is Long || other is Long -> toLong() - other.toLong()
-            isSmallIntegral && other.isSmallIntegral -> toInt() - other.toInt()
+            isIntegral && other.isIntegral -> toLong() - other.toLong()
             else -> toDouble() - other.toDouble()
         }
     }
