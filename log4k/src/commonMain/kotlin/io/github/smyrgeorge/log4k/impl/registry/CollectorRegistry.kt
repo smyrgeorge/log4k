@@ -29,6 +29,27 @@ class CollectorRegistry<T> where T : CollectorRegistry.Collector {
         collectors.update { it + (collector.name to collector) }
     }
 
+    /**
+     * Atomically returns the collector registered under [name], creating and registering the one
+     * produced by [create] when absent.
+     *
+     * Unlike a plain `get(name) ?: create().also(::register)` — a non-atomic check-then-act — this
+     * guarantees that every concurrent caller receives the *same* instance: under a race [create]
+     * may run more than once, but only one instance is ever published and returned; the losers are
+     * discarded before anyone can hold on to them. (A never-published instance could otherwise keep
+     * logging forever at its construction-time level, unreachable by `setLevel`/`mute`.)
+     */
+    fun getOrRegister(name: String, create: () -> T): T {
+        get(name)?.let { return it }
+        val created = create()
+        if (isMuted(name)) created.mute() // same treatment as register()
+        while (true) {
+            val current = collectors.load()
+            current[name]?.let { return it }
+            if (collectors.compareAndSet(current, current + (name to created))) return created
+        }
+    }
+
     fun setLevel(clazz: KClass<*>, level: Level): Unit = setLevel(clazz.toName(), level)
     fun setLevel(name: String, level: Level) {
         get(name)?.level = level

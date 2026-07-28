@@ -10,6 +10,8 @@ import assertk.assertions.isTrue
 import io.github.smyrgeorge.log4k.Level
 import io.github.smyrgeorge.log4k.impl.extensions.toName
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
@@ -183,6 +185,60 @@ class CollectorRegistryTests {
             assertThat(registry.get("c-$i")).isNotNull()
             assertThat(registry.isMuted("c-$i")).isFalse()
         }
+    }
+
+    // --- registry: getOrRegister ----------------------------------------------------------------
+
+    @Test
+    fun getOrRegister_returnsTheExistingCollector_withoutInvokingCreate() {
+        val registry = CollectorRegistry<FakeCollector>()
+        val existing = FakeCollector("a")
+        registry.register(existing)
+        var created = 0
+
+        val got = registry.getOrRegister("a") { created++; FakeCollector("a") }
+
+        assertThat(got).isSameInstanceAs(existing)
+        assertThat(created).isEqualTo(0)
+    }
+
+    @Test
+    fun getOrRegister_whenAbsent_registersAndReturnsTheCreatedInstance() {
+        val registry = CollectorRegistry<FakeCollector>()
+
+        val created = registry.getOrRegister("a") { FakeCollector("a") }
+
+        assertThat(registry.get("a")).isSameInstanceAs(created)
+    }
+
+    @Test
+    fun getOrRegister_forPreMutedName_mutesTheCreatedCollector() {
+        val registry = CollectorRegistry<FakeCollector>()
+        registry.mute("a") // no collector yet -> only the mute set records it
+
+        val created = registry.getOrRegister("a") { FakeCollector("a", Level.INFO) }
+
+        assertThat(created.isMuted()).isTrue()
+        assertThat(created.level).isEqualTo(Level.OFF)
+    }
+
+    @Test
+    fun getOrRegister_underConcurrency_everyCallerReceivesTheSameInstance() = runTest {
+        // The old `get() ?: create().also(::register)` check-then-act let two racing callers keep
+        // two *different* instances — the unpublished one forever unreachable by setLevel/mute.
+        // The CAS loop must hand every caller the single published winner (create may still run
+        // more than once under the race, but the losers are discarded before anyone can keep them).
+        val registry = CollectorRegistry<FakeCollector>()
+
+        val results = withContext(Dispatchers.Default) {
+            (1..64).map {
+                async { registry.getOrRegister("shared") { FakeCollector("shared") } }
+            }.awaitAll()
+        }
+
+        val winner = registry.get("shared")
+        assertThat(winner).isNotNull()
+        results.forEach { assertThat(it).isSameInstanceAs(winner!!) }
     }
 
     // --- Collector default mute/unmute ---------------------------------------------------------

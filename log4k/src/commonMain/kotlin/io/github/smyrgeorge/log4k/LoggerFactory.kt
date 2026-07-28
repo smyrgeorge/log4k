@@ -13,11 +13,5 @@ import kotlin.reflect.KClass
 abstract class LoggerFactory {
     abstract fun create(name: String): Logger
     fun get(clazz: KClass<*>): Logger = get(clazz.toName())
-    fun get(name: String): Logger {
-        val existing = Logger.registry.get(name)
-        if (existing != null) return existing
-        return create(name).also {
-            Logger.registry.register(it)
-        }
-    }
+    fun get(name: String): Logger = Logger.registry.getOrRegister(name) { create(name) }
 }
