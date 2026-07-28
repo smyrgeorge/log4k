@@ -729,12 +729,12 @@ The new span's **parent** (and the tracer that creates it) is resolved from what
 
 Abstract classes for building custom appenders with async, coroutine-backed processing.
 
-| Appender                     | Description                                                                            |
-|------------------------------|----------------------------------------------------------------------------------------|
-| `FlowAppender`               | Base class. Processes events asynchronously via a Kotlin Flow.                         |
-| `FlowBufferedAppender`       | Extends `FlowAppender` with configurable buffering and overflow strategy.              |
-| `FlowFloodProtectedAppender` | Extends `FlowAppender` with rate-limiting to drop excess events and prevent flooding.  |
-| `BatchAppender`              | Extends `FlowAppender` to accumulate events into fixed-size batches before processing. |
+| Appender                     | Description                                                                                                                                                                              |
+|------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `FlowAppender`               | Base class. Processes events asynchronously via a Kotlin Flow.                                                                                                                           |
+| `FlowBufferedAppender`       | Extends `FlowAppender` with configurable buffering and overflow strategy.                                                                                                                |
+| `FlowFloodProtectedAppender` | Extends `FlowAppender` with rate-limiting to drop excess events and prevent flooding.                                                                                                    |
+| `BatchAppender`              | Extends `FlowAppender` to accumulate events into fixed-size batches before processing. Optionally takes a `timeout`, flushing a partial batch when it elapses before the batch fills up. |
 
 ### Prevent log/trace flooding.
 
