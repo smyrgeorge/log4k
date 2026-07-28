@@ -38,6 +38,7 @@ This project also tries to be fully compatible with `OpenTelemetry` standard.
 - [Architecture](#architecture)
 - [Logging API](#logging-api)
     - [Tags](#tags)
+    - [Builder DSL](#builder-dsl)
     - [Context Parameters Support](#context-parameters-support)
     - [SLF4J Integration](#slf4j-integration)
         - [Using SLF4J on top of log4k (`log4k-slf4j`)](#using-slf4j-on-top-of-log4k-log4k-slf4j)
@@ -200,6 +201,41 @@ Tags are aimed at structured sinks: the `SimpleJsonConsoleLoggingAppender` emits
 direction, the `log4k-slf4j` provider turns fluent-API `addKeyValue(...)` pairs into event tags). The
 plain-text console appenders deliberately keep the log line tag-free. The compiler plugin can attach
 static tags as well — see [`@Logged`](#logging-logged).
+
+### Builder DSL
+
+Every level also has a builder-style entry point — `atTrace`, `atDebug`, `atInfo`, `atWarn`, `atError`
+(plus the generic `at(level)`) — that assembles the whole event in a single block. The generic
+`at(level)` is a member of `Logger`, while the level-named shorthands are extension functions living
+in the `io.github.smyrgeorge.log4k.impl.extensions` package:
+
+```kotlin
+log.atWarn {
+    message = "foo $bar"
+    cause = exception
+    tags = buildMap {
+        put("foo", 1)
+        put("bar", "x")
+        put("obj", Pair(2, 3))
+    }
+}
+```
+
+The block configures a `LoggingEvent.Builder` whose properties map one-to-one onto the parameters of
+`Logger.log(level, span, tags, message, arguments, throwable)`: `message` is the log message, `cause`
+becomes the event's throwable, and `tags` become the event's [tags](#tags). A `span` (for trace
+correlation) and message `arguments` can be set the same way. Everything is optional — unset
+properties fall back to their defaults (empty message/tags/arguments, no cause, no span).
+
+The functions are `inline` and the block only runs when the level is enabled, so — like the lazy
+lambda API — a filtered-out event costs neither the message interpolation nor the tags allocation:
+
+```kotlin
+log.atDebug {
+    message = "expensive: ${costly()}" // evaluated only if DEBUG logs are enabled
+    tags = mapOf("key" to "value")
+}
+```
 
 ### Context Parameters Support
 

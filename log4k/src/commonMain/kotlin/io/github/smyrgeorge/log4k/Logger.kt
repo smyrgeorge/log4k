@@ -75,6 +75,38 @@ abstract class Logger(
     fun Level.enabled(): Boolean = this != Level.OFF && ordinal >= level.ordinal
 
     /**
+     * Logs an event at the given [level] using the builder-style DSL.
+     *
+     * The [f] block configures a fresh [LoggingEvent.Builder]; its properties map one-to-one onto
+     * the parameters of [log], which is invoked once the block returns:
+     *
+     * ```kotlin
+     * log.at(Level.WARN) {
+     *     message = "foo $bar"
+     *     cause = exception
+     *     tags = buildMap(capacity = 3) {
+     *         put("foo", 1)
+     *         put("bar", "x")
+     *         put("obj", Pair(2, 3))
+     *     }
+     * }
+     * ```
+     *
+     * The block is executed only when [level] is enabled for this logger, so building the message,
+     * tags, or any other property costs nothing when the event is filtered out. Level-named
+     * shorthands (`atTrace`, `atDebug`, `atInfo`, `atWarn`, `atError`) are available as extension
+     * functions in the `io.github.smyrgeorge.log4k.impl.extensions` package.
+     *
+     * @param level The logging level of the event.
+     * @param f The block that configures the event's [LoggingEvent.Builder].
+     */
+    inline fun at(level: Level, f: LoggingEvent.Builder.() -> Unit) {
+        if (!level.enabled()) return
+        val builder = LoggingEvent.Builder().apply(f)
+        log(level, builder.span, builder.tags, builder.message, builder.arguments, builder.cause)
+    }
+
+    /**
      * Executes [f] while emitting entry/exit log lines around it, and an error line if it throws.
      *
      * This is the runtime helper the `log4k-compiler-plugin` generates a call to when a function is

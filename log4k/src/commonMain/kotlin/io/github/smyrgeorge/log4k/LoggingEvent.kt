@@ -28,4 +28,24 @@ class LoggingEvent(
     val arguments: Array<out Any?>,
     val thread: String,
     val throwable: Throwable?,
-)
+) {
+    /**
+     * Mutable receiver of the builder-style logging DSL — [Logger.at] and its level-named extension
+     * shorthands (`atTrace`, `atDebug`, `atInfo`, `atWarn`, `atError` in the
+     * `io.github.smyrgeorge.log4k.impl.extensions` package). A fresh instance backs every
+     * invocation, and each property maps onto one parameter of [Logger.log]:
+     *
+     * @property message The log message to be recorded ([Logger.log]'s `message`).
+     * @property cause An optional throwable associated with the event ([Logger.log]'s `throwable`).
+     * @property tags Structured key-value dimensions attached to the event ([Logger.log]'s `tags`).
+     * @property span An optional span that can be used for tracing the context ([Logger.log]'s `span`).
+     * @property arguments Additional arguments parameterizing the message ([Logger.log]'s `arguments`).
+     */
+    class Builder {
+        var message: String = ""
+        var cause: Throwable? = null
+        var tags: Tags = emptyMap()
+        var span: TracingEvent.Span? = null
+        var arguments: Array<out Any?> = emptyArray()
+    }
+}
