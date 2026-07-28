@@ -1,10 +1,8 @@
 package io.github.smyrgeorge.log4k.impl.appenders.simple
 
 import io.github.smyrgeorge.log4k.Appender
-import io.github.smyrgeorge.log4k.Level
 import io.github.smyrgeorge.log4k.LoggingEvent
 import io.github.smyrgeorge.log4k.impl.extensions.format
-import io.github.smyrgeorge.log4k.impl.extensions.platformPrintlnError
 import io.github.smyrgeorge.log4k.impl.extensions.toJsonElement
 import io.github.smyrgeorge.log4k.impl.extensions.toName
 
@@ -15,8 +13,7 @@ class SimpleJsonConsoleLoggingAppender : Appender<LoggingEvent> {
     companion object {
         fun LoggingEvent.printJson() {
             val message = formatJson()
-            if (level == Level.ERROR) platformPrintlnError(message)
-            else println(message)
+            println(message)
         }
 
         internal fun LoggingEvent.formatJson(): String {
