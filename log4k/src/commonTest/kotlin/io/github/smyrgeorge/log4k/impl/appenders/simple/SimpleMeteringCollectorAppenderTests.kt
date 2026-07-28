@@ -258,8 +258,8 @@ class SimpleMeteringCollectorAppenderTests {
 
     @Test
     fun distinctSeriesWithCollidingHashKeysAreNotMerged() = runTest {
-        // "Aa" and "BB" have identical string hash codes, so a registry keyed by the Int hash
-        // `"$name.${tags.hashCode()}".hashCode()` (`MeteringEvent.key()`) folded both counters
+        // "Aa" and "BB" have identical string hash codes, so a registry keyed by an Int hash of
+        // name+tags (as the since-removed `MeteringEvent.key()` did) folded both counters
         // into one series. The (name, tags) composite key must keep them apart.
         val appender = SimpleMeteringCollectorAppender()
 

@@ -3,6 +3,7 @@ package io.github.smyrgeorge.log4k
 import io.github.smyrgeorge.log4k.TracingEvent.Span
 import io.github.smyrgeorge.log4k.impl.SimpleCoroutinesTracingContext
 import io.github.smyrgeorge.log4k.impl.Tags
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.currentCoroutineContext
 
 interface TracingContext {
@@ -79,6 +80,11 @@ interface TracingContext {
          * span from [tracer]. The span is started, ended, and — if [f] throws — marked failed (the
          * exception is recorded and rethrown).
          *
+         * A [CancellationException] is rethrown *without* being recorded as a failure: coroutine
+         * cancellation is part of normal control flow, not an application error (mirrors
+         * [Tracer.span] and [Meter.Timed.measure]). The span still ends normally so it is never
+         * left half-open.
+         *
          * @param context a [TracingContext] in scope, if any; its current span becomes the parent and
          *   the new span becomes its current span for the duration of [f].
          * @param parent a [Span] in scope, if any, used as the parent when there is no [context].
@@ -104,6 +110,8 @@ interface TracingContext {
             var error: Throwable? = null
             try {
                 return f(span)
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Throwable) {
                 error = e
                 span.exception(e)

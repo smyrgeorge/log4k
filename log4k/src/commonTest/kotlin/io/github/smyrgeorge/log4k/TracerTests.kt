@@ -16,6 +16,7 @@ import io.github.smyrgeorge.log4k.TracingEvent.Span.Status.Code
 import io.github.smyrgeorge.log4k.impl.OpenTelemetryAttributes
 import io.github.smyrgeorge.log4k.impl.SimpleTracer
 import io.github.smyrgeorge.log4k.utils.CapturingTracingAppender
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -424,5 +425,112 @@ class TracerTests {
         assertThat(names).contains("i")
         assertThat(names).contains("w")
         assertThat(names).contains("e")
+    }
+
+    // --- Mute / OFF gating of new spans ---------------------------------------------------------
+
+    @Test
+    fun mutedTracer_doesNotStartNorEmitNewSpans_andUnmuteRestores() = runTest {
+        val tracer = SimpleTracer("test.tracer", Level.INFO)
+
+        // A span created while the tracer is muted snapshots OFF as its level: it must neither
+        // start nor be emitted (before the fix, `OFF >= OFF` started — and emitted — it).
+        tracer.mute()
+        val muted = tracer.span("muted-span").start()
+        assertThat(muted.startAt).isNull()
+        muted.end()
+
+        // After unmuting, new spans flow again — and must be the first we see from this test,
+        // proving the muted span produced nothing before them.
+        tracer.unmute()
+        val after = tracer.span("unmuted-span").start()
+        after.end()
+
+        val first = appender.awaitEvent {
+            it is TracingEvent.Span && (it.name == "muted-span" || it.name == "unmuted-span")
+        } as TracingEvent.Span
+        assertThat(first.name).isEqualTo("unmuted-span")
+    }
+
+    @Test
+    fun offLevelTracer_neverStartsNorEmitsSpans() = runTest {
+        val off = SimpleTracer("test.tracer.off", Level.OFF)
+
+        val span = off.span("off-span").start()
+        assertThat(span.startAt).isNull()
+        span.end()
+        span.event("ignored") // must be a no-op on a never-started span
+
+        // A marker from a healthy tracer must be the first span we see.
+        SimpleTracer("test.tracer.marker", Level.INFO).span("off-marker") { }
+
+        val first = appender.awaitEvent {
+            it is TracingEvent.Span && (it.name == "off-span" || it.name == "off-marker")
+        } as TracingEvent.Span
+        assertThat(first.name).isEqualTo("off-marker")
+        assertThat(span.events).isEmpty()
+    }
+
+    // --- Cancellation is not a failure ----------------------------------------------------------
+
+    @Test
+    fun spanBlock_cancellation_endsSpanWithoutRecordingAFailure() = runTest {
+        val tracer = SimpleTracer("test.tracer", Level.TRACE)
+
+        assertFailsWith<CancellationException> {
+            tracer.span<Unit>("cancel-op") { throw CancellationException("cancelled") }
+        }
+
+        // Cancellation is normal control flow (mirrors Meter.Timed.measure): the span still ends —
+        // never left half-open — but carries no exception event and no ERROR status.
+        val received = appender.awaitSpan("cancel-op")
+        assertThat(received.endAt).isNotNull()
+        assertThat(received.status.code).isEqualTo(Code.OK)
+        assertThat(received.status.error).isNull()
+        assertThat(received.events).isEmpty()
+    }
+
+    @Test
+    fun traced_cancellation_endsSpanWithoutFailure_andRestoresTheContext() = runTest {
+        val tracer = SimpleTracer("test.tracer", Level.TRACE)
+        val context = TracingContext.create(tracer)
+
+        assertFailsWith<CancellationException> {
+            TracingContext.traced<Unit>(context = context, parent = null, tracer = null, name = "traced-cancel") {
+                throw CancellationException("cancelled")
+            }
+        }
+
+        val received = appender.awaitSpan("traced-cancel")
+        assertThat(received.endAt).isNotNull()
+        assertThat(received.status.code).isEqualTo(Code.OK)
+        assertThat(received.events).isEmpty()
+        // The context's current span must be restored (back to the null root) as well.
+        assertThat(context.currentOrNull()).isNull()
+    }
+
+    // --- Lazy-tag event helpers -----------------------------------------------------------------
+
+    @Test
+    fun levelNamedEventHelpers_populateTheEventTags() = runTest {
+        val tracer = SimpleTracer("test.tracer", Level.TRACE)
+
+        // The lambda receives the event's MutableTags to populate (this did not even compile while
+        // the helpers were typed `(Tags) -> Unit`).
+        tracer.span("evt-tags") {
+            trace("t") { it["k"] = "vt" }
+            debug("d") { it["k"] = "vd" }
+            info("i") { it["k"] = "vi" }
+            warn("w") { it["k"] = "vw" }
+            error("e") { it["k"] = "ve" }
+        }
+
+        val span = appender.awaitSpan("evt-tags")
+        val byName = span.events.associate { it.name to it.tags }
+        assertThat(byName["t"]).isEqualTo(mapOf<String, Any>("k" to "vt"))
+        assertThat(byName["d"]).isEqualTo(mapOf<String, Any>("k" to "vd"))
+        assertThat(byName["i"]).isEqualTo(mapOf<String, Any>("k" to "vi"))
+        assertThat(byName["w"]).isEqualTo(mapOf<String, Any>("k" to "vw"))
+        assertThat(byName["e"]).isEqualTo(mapOf<String, Any>("k" to "ve"))
     }
 }

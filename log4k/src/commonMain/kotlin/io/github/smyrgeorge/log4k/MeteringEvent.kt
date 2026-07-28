@@ -15,8 +15,6 @@ sealed interface MeteringEvent {
     val name: String
     val timestamp: Instant
 
-    fun key(): Int
-
     data class CreateInstrument(
         override val id: Long,
         override val name: String,
@@ -24,14 +22,11 @@ sealed interface MeteringEvent {
         val unit: String?,
         val description: String?,
         override val timestamp: Instant = Clock.System.now(),
-    ) : MeteringEvent {
-        override fun key(): Int = name.hashCode()
-    }
+    ) : MeteringEvent
 
     sealed interface ValueEvent : MeteringEvent {
         val tags: Tags
         val value: Number
-        override fun key(): Int = "$name.${tags.hashCode()}".hashCode()
     }
 
     data class Set(

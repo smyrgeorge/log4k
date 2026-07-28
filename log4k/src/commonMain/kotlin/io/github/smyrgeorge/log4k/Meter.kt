@@ -165,12 +165,15 @@ abstract class Meter(
         }
 
         /**
-         * Initializes the instrument by creating a metering event if the meter is not muted.
-         * This method checks if the meter is muted and, if not, creates a `CreateInstrument`
-         * metering event with the instrument's details, then logs the event using the RootLogger.
+         * Initializes the instrument by emitting a `CreateInstrument` metering event with the
+         * instrument's details through the RootLogger.
+         *
+         * The event is emitted even when the meter is muted: it is *metadata*, not a measurement.
+         * Muting gates the value events only — a collector must still learn about the instrument,
+         * otherwise every value recorded after an unmute would be silently dropped for the
+         * instrument's whole lifetime.
          */
         private fun init() {
-            if (meter.isMuted()) return
             MeteringEvent.CreateInstrument(
                 id = RootLogger.Metering.id(),
                 name = name,

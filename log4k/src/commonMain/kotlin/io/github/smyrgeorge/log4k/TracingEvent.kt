@@ -96,10 +96,14 @@ sealed interface TracingEvent {
         ) {
 
             private fun shouldStart(): Boolean =
-                !context.isRemote && level.ordinal >= context.tracer.level.ordinal
+                !context.isRemote
+                        && level != Level.OFF
+                        && level.ordinal >= context.tracer.level.ordinal
 
             private fun shouldLogEvent(level: Level): Boolean =
-                !context.isRemote && level.ordinal >= this.level.ordinal
+                !context.isRemote
+                        && level != Level.OFF
+                        && level.ordinal >= this.level.ordinal
 
             private var started: Boolean = false
             private var closed: Boolean = false
@@ -196,11 +200,11 @@ sealed interface TracingEvent {
                 }
             }
 
-            inline fun trace(name: String, f: (Tags) -> Unit) = event(name, Level.TRACE, f)
-            inline fun debug(name: String, f: (Tags) -> Unit) = event(name, Level.DEBUG, f)
-            inline fun info(name: String, f: (Tags) -> Unit) = event(name, Level.INFO, f)
-            inline fun warn(name: String, f: (Tags) -> Unit) = event(name, Level.WARN, f)
-            inline fun error(name: String, f: (Tags) -> Unit) = event(name, Level.ERROR, f)
+            inline fun trace(name: String, f: (MutableTags) -> Unit) = event(name, Level.TRACE, f)
+            inline fun debug(name: String, f: (MutableTags) -> Unit) = event(name, Level.DEBUG, f)
+            inline fun info(name: String, f: (MutableTags) -> Unit) = event(name, Level.INFO, f)
+            inline fun warn(name: String, f: (MutableTags) -> Unit) = event(name, Level.WARN, f)
+            inline fun error(name: String, f: (MutableTags) -> Unit) = event(name, Level.ERROR, f)
 
             fun trace(name: String, tags: Tags = emptyMap()) = event(name, Level.TRACE, tags)
             fun debug(name: String, tags: Tags = emptyMap()) = event(name, Level.DEBUG, tags)

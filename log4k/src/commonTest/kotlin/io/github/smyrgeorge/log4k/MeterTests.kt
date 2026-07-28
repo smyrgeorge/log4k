@@ -1,6 +1,7 @@
 package io.github.smyrgeorge.log4k
 
 import assertk.assertThat
+import assertk.assertions.contains
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
 import assertk.assertions.isInstanceOf
@@ -9,6 +10,7 @@ import assertk.assertions.isNotSameInstanceAs
 import assertk.assertions.isSameInstanceAs
 import io.github.smyrgeorge.log4k.Meter.Instrument.Kind
 import io.github.smyrgeorge.log4k.impl.SimpleMeter
+import io.github.smyrgeorge.log4k.impl.appenders.simple.SimpleMeteringCollectorAppender
 import io.github.smyrgeorge.log4k.utils.CapturingMeteringAppender
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.test.runTest
@@ -200,30 +202,54 @@ class MeterTests {
     }
 
     @Test
-    fun mutedMeter_suppressesInstrumentCreationAndValueEvents() = runTest {
+    fun mutedMeter_emitsInstrumentMetadata_butSuppressesValueEvents() = runTest {
         val meter = SimpleMeter("test.meter", Level.INFO)
 
-        // While muted, neither the instrument creation nor the increment should emit anything.
+        // Muting gates the *measurements*, not the metadata: the CreateInstrument event is emitted
+        // even while muted (a collector must learn about the instrument, or every value recorded
+        // after an unmute would be dropped forever), while the increment emits nothing.
         meter.mute()
         val muted = meter.counter<Long>("muted.count")
         muted.increment(5L)
 
-        // After unmuting, a marker instrument does emit — and must be the first event of each kind we
-        // see among this test's instruments, proving the muted operations produced nothing before it.
+        val created = appender.awaitCreate("muted.count")
+        assertThat(created.kind).isEqualTo(Kind.Counter)
+
+        // After unmuting, a marker value must be the first value event we see among this test's
+        // instruments, proving the muted increment produced nothing before it.
         meter.unmute()
         val marker = meter.counter<Long>("marker.count")
         marker.increment(9L)
-
-        val firstCreate = appender.awaitEvent {
-            it is MeteringEvent.CreateInstrument && (it.name == "muted.count" || it.name == "marker.count")
-        }
-        assertThat(firstCreate.name).isEqualTo("marker.count")
 
         val firstValue = appender.awaitEvent {
             it is MeteringEvent.ValueEvent && (it.name == "muted.count" || it.name == "marker.count")
         }
         assertThat(firstValue.name).isEqualTo("marker.count")
         assertThat((firstValue as MeteringEvent.ValueEvent).value).isEqualTo(9L)
+    }
+
+    @Test
+    fun instrumentCreatedWhileMuted_reportsValuesAfterUnmute() = runTest {
+        // End-to-end regression: an instrument constructed during a muted window must still produce
+        // series once the meter is unmuted. Before the fix its CreateInstrument was skipped, so the
+        // collector silently dropped every later value event for the instrument's whole lifetime.
+        val collector = SimpleMeteringCollectorAppender()
+        // Register the collector BEFORE the capturing appender: appenders receive each event in
+        // registration order, so awaiting on the capturing appender proves the collector saw it too.
+        RootLogger.Metering.appenders.unregisterAll()
+        RootLogger.Metering.appenders.register(collector)
+        RootLogger.Metering.appenders.register(appender)
+
+        val meter = SimpleMeter("test.meter.mutedcreate", Level.INFO)
+        meter.mute()
+        val counter = meter.counter<Long>("revived_requests")
+        meter.unmute()
+        counter.increment(5L)
+
+        appender.awaitValue("revived_requests")
+        val exposition = collector.toOpenMetricsLineFormatString()
+        assertThat(exposition).contains("# TYPE revived_requests counter")
+        assertThat(exposition).contains("revived_requests_total{} 5")
     }
 
     // --- Value events: set / record / negative handling ----------------------------------------

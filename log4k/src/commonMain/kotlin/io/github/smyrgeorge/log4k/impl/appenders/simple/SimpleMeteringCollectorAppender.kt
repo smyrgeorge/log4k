@@ -24,7 +24,7 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
     override val name: String = this::class.toName()
 
     // The aggregated value per instrument-and-tag-set, keyed by the (name, tags) pair itself:
-    // hash-based keys (e.g. `MeteringEvent.key()`) can collide and silently merge distinct series.
+    // hash-based keys (Int hashes of name+tags) can collide and silently merge distinct series.
     private val registry: MutableMap<Pair<String, Tags>, Instrument> = mutableMapOf()
 
     // The metadata registered by `CreateInstrument`, keyed by instrument name.

@@ -3,6 +3,7 @@ package io.github.smyrgeorge.log4k
 import io.github.smyrgeorge.log4k.impl.SimpleTracerFactory
 import io.github.smyrgeorge.log4k.impl.Tags
 import io.github.smyrgeorge.log4k.impl.registry.CollectorRegistry
+import kotlinx.coroutines.CancellationException
 import kotlin.random.Random
 import kotlin.reflect.KClass
 
@@ -77,6 +78,11 @@ abstract class Tracer(
      * a normal result, a thrown exception (recorded, then rethrown) and a non-local return from
      * [f] alike.
      *
+     * A [CancellationException] is rethrown *without* being recorded as a failure: coroutine
+     * cancellation is part of normal control flow, not an application error, and marking the span
+     * failed would skew error rates for cancelled operations (mirrors [Meter.Timed.measure]). The
+     * span still ends normally so it is never left half-open.
+     *
      * @param T The type of the result produced by the function.
      * @param name The name of the span.
      * @param tags Optional tags to associate with the span.
@@ -94,6 +100,8 @@ abstract class Tracer(
         var error: Throwable? = null
         try {
             return f(span)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Throwable) {
             error = e
             span.exception(e)
