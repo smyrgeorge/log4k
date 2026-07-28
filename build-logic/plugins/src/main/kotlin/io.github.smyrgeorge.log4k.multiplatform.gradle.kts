@@ -29,7 +29,13 @@ kotlin {
         "js" to {
             js {
                 browser()
-                nodejs()
+                nodejs {
+                    testTask {
+                        // Mocha's default per-test timeout is 2s, which flakes on loaded CI
+                        // runners; kotlinx-coroutines' runTest guards against genuine hangs.
+                        useMocha { timeout = "30s" }
+                    }
+                }
             }
         },
         "wasmJs" to {
