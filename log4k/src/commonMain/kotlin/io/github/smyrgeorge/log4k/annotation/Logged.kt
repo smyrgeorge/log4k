@@ -56,11 +56,25 @@ import io.github.smyrgeorge.log4k.Level
  * or inherited (fake-override) member. Individual functions can opt out with [NoLog], and a
  * function's own `@Logged` overrides the class-level defaults (e.g. its [level]).
  *
+ * Static tags can be attached to every emitted line via [tags]:
+ *
+ * ```kotlin
+ * @Logged(tags = [Tag("component", "billing")])
+ * fun compute(x: Int): Int = x * x // entry/exit/error lines carry tags = {component=billing}
+ * ```
+ *
+ * Class-level [tags] are added to every instrumented member's lines; a function's own tag with the
+ * same key wins.
+ *
  * @property level The [Level] used for the entry/exit log lines. Defaults to [Level.INFO]. The
  *   failure log line is always emitted at [Level.ERROR].
+ * @property tags Static key/value tags attached to every emitted log line. (Annotation parameters
+ *   cannot be a `Map`, so tags are expressed as an array of [Tag] and materialized into the
+ *   event's `tags` at compile time.)
  */
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.BINARY)
 annotation class Logged(
     val level: Level = Level.INFO,
+    val tags: Array<Tag> = [],
 )

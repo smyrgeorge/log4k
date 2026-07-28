@@ -95,6 +95,23 @@ class SimpleJsonConsoleLoggingAppenderTests {
         assertThat(obj.getValue("thread").jsonPrimitive.content).isEqualTo("th\"read")
     }
 
+    // --- Tags ----------------------------------------------------------------------------------------
+
+    @Test
+    fun formatJson_includesTagsAsAnObject() {
+        val obj = parse(loggingEvent(tags = mapOf("tenant" to "acme", "attempt" to 2)).formatJson())
+        val tags = obj.getValue("tags").jsonObject
+        assertThat(tags.getValue("tenant").jsonPrimitive.content).isEqualTo("acme")
+        assertThat(tags.getValue("attempt").jsonPrimitive.content).isEqualTo("2")
+        assertThat(tags.getValue("attempt").jsonPrimitive.isString).isFalse() // numbers stay numbers
+    }
+
+    @Test
+    fun formatJson_rendersEmptyTagsAsAnEmptyObject() {
+        val obj = parse(loggingEvent().formatJson())
+        assertThat(obj.getValue("tags").jsonObject.isEmpty()).isTrue()
+    }
+
     // --- Throwable rendering -------------------------------------------------------------------------
 
     @Test

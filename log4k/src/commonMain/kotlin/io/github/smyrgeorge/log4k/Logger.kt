@@ -2,6 +2,7 @@ package io.github.smyrgeorge.log4k
 
 import io.github.smyrgeorge.log4k.TracingEvent.Span
 import io.github.smyrgeorge.log4k.impl.SimpleLoggerFactory
+import io.github.smyrgeorge.log4k.impl.Tags
 import io.github.smyrgeorge.log4k.impl.registry.CollectorRegistry
 import kotlin.reflect.KClass
 import kotlin.time.Duration
@@ -25,6 +26,8 @@ abstract class Logger(
      *
      * @param level The logging level of the event.
      * @param span An optional span that can be used for tracing the context.
+     * @param tags Structured key-value dimensions attached to the event, kept separate from the
+     *             message text (mirroring the tags carried by tracing spans and metering events).
      * @param message The log message to be recorded.
      * @param arguments Additional arguments to be included in the log event.
      * @param throwable An optional throwable associated with the log event.
@@ -32,12 +35,13 @@ abstract class Logger(
     fun log(
         level: Level,
         span: Span?,
+        tags: Tags,
         message: String,
         arguments: Array<out Any?>,
-        throwable: Throwable?
+        throwable: Throwable?,
     ) {
         if (!level.enabled()) return
-        val event = toLoggingEvent(level, span, message, arguments, throwable)
+        val event = toLoggingEvent(level, span, tags, message, arguments, throwable)
         RootLogger.log(event)
     }
 
@@ -46,6 +50,7 @@ abstract class Logger(
      *
      * @param level The logging level of the event.
      * @param span An optional span that can be used for tracing the context.
+     * @param tags Structured key-value dimensions attached to the event.
      * @param message The log message to be recorded.
      * @param arguments Additional arguments to be included in the log event.
      * @param throwable An optional throwable associated with the log event.
@@ -54,9 +59,10 @@ abstract class Logger(
     abstract fun toLoggingEvent(
         level: Level,
         span: Span?,
+        tags: Tags,
         message: String,
         arguments: Array<out Any?>,
-        throwable: Throwable?
+        throwable: Throwable?,
     ): LoggingEvent
 
     /**
@@ -89,6 +95,7 @@ abstract class Logger(
      * @param T The type of the result produced by [f].
      * @param level The level used for the entry/exit lines.
      * @param span The span (if any) to attach to every emitted line, correlating the logs with a trace.
+     * @param tags Structured key-value dimensions attached to every emitted line.
      * @param name The (already formatted) name of the instrumented function.
      * @param args The (already formatted) argument list rendered inside the entry line's parentheses.
      * @param f The block to execute.
@@ -97,11 +104,12 @@ abstract class Logger(
     inline fun <T> logged(
         level: Level,
         span: Span?,
+        tags: Tags,
         name: String,
         args: String,
         f: () -> T
     ): T {
-        if (isEnabled(level)) log(level, span, "→ $name($args)", emptyArray<Any?>(), null)
+        if (isEnabled(level)) log(level, span, tags, "→ $name($args)", emptyArray<Any?>(), null)
         val mark = TimeSource.Monotonic.markNow()
         var completed = false
         try {
@@ -109,18 +117,18 @@ abstract class Logger(
                 completed = true
                 if (isEnabled(level)) {
                     val rendered = runCatching { result.toString() }.getOrElse { "<toString() failed>" }
-                    log(level, span, "← $name = $rendered (${mark.elapsedNow()})", emptyArray<Any?>(), null)
+                    log(level, span, tags, "← $name = $rendered (${mark.elapsedNow()})", emptyArray<Any?>(), null)
                 }
             }
         } catch (e: Throwable) {
             completed = true
-            log(Level.ERROR, span, "✗ $name failed (${mark.elapsedNow()})", emptyArray<Any?>(), e)
+            log(Level.ERROR, span, tags, "✗ $name failed (${mark.elapsedNow()})", emptyArray<Any?>(), e)
             throw e
         } finally {
             // Must stay a single unconditional call: the compiler does not re-emit a conditional
             // `finally` block on the non-local-return path of an inlined lambda (the condition
             // lives inside the helper instead). Mirrors the `span {}`/`measure` helpers' shape.
-            loggedCompletion(completed, level, span, name, mark.elapsedNow())
+            loggedCompletion(completed, level, span, tags, name, mark.elapsedNow())
         }
     }
 
@@ -130,9 +138,9 @@ abstract class Logger(
      * through the normal or exception path, or when [level] is disabled.
      */
     @PublishedApi
-    internal fun loggedCompletion(completed: Boolean, level: Level, span: Span?, name: String, elapsed: Duration) {
+    internal fun loggedCompletion(completed: Boolean, level: Level, span: Span?, tags: Tags, name: String, elapsed: Duration) {
         if (completed || !isEnabled(level)) return
-        log(level, span, "← $name ($elapsed)", emptyArray<Any?>(), null)
+        log(level, span, tags, "← $name ($elapsed)", emptyArray<Any?>(), null)
     }
 
     companion object {

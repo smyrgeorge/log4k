@@ -12,20 +12,22 @@ class SimpleLogger(name: String, level: Level) : Logger(name, level) {
     override fun toLoggingEvent(
         level: Level,
         span: Span?,
+        tags: Tags,
         message: String,
         arguments: Array<out Any?>,
-        throwable: Throwable?
+        throwable: Throwable?,
     ): LoggingEvent {
         return LoggingEvent(
             id = RootLogger.Logging.id(),
             level = level,
             span = span,
+            tags = tags,
             timestamp = Clock.System.now(),
             logger = name,
             message = message,
             arguments = arguments,
             thread = thread(),
-            throwable = throwable
+            throwable = throwable,
         )
     }
 }

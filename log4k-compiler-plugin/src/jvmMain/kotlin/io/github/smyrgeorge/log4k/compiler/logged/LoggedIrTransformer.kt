@@ -1,6 +1,7 @@
 package io.github.smyrgeorge.log4k.compiler.logged
 
 import io.github.smyrgeorge.log4k.compiler.ir.Log4kIrFunctionExpression
+import io.github.smyrgeorge.log4k.compiler.ir.utils.AnnotationTagsBuilder
 import io.github.smyrgeorge.log4k.compiler.ir.utils.LOG4K_PACKAGE
 import io.github.smyrgeorge.log4k.compiler.ir.utils.OfThisClassField
 import io.github.smyrgeorge.log4k.compiler.ir.utils.buildInlineLambda
@@ -10,6 +11,7 @@ import io.github.smyrgeorge.log4k.compiler.ir.utils.qualifiedName
 import io.github.smyrgeorge.log4k.compiler.ir.utils.receiverOrContextOf
 import io.github.smyrgeorge.log4k.compiler.ir.utils.regularParams
 import io.github.smyrgeorge.log4k.compiler.ir.utils.reportError
+import io.github.smyrgeorge.log4k.compiler.ir.utils.resolveTags
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.DeclarationFinder
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
@@ -60,10 +62,13 @@ import org.jetbrains.kotlin.name.Name
  *
  * the body is replaced with (conceptually):
  * ```kotlin
- * fun compute(x: Int): Int = log.logged(Level.INFO, span = null, "UserService.compute", "x=$x") {
+ * fun compute(x: Int): Int = log.logged(Level.INFO, span = null, tags = emptyMap(), "UserService.compute", "x=$x") {
  *     /* body */
  * }
  * ```
+ *
+ * `@Logged(tags = [Tag(k, v), …])` is materialized as the `tags` map argument (class-level tags are
+ * added first, so a function's own tag with the same key wins).
  *
  * `Logger.logged` is `inline`, so both regular and `suspend` functions work: the moved body is
  * placed in an inline lambda and therefore keeps its original suspension context. The `Logger` is
@@ -80,10 +85,13 @@ class LoggedIrTransformer(
     private val messageCollector: MessageCollector,
 ) : IrElementTransformerVoidWithContext() {
 
-    // The `inline fun <T> Logger.logged(level, span, name, args, f)` member helper.
+    // The `inline fun <T> Logger.logged(level, span, tags, name, args, f)` member helper.
     private val loggedFunction: IrSimpleFunctionSymbol? = finder.findFunctions(
         CallableId(ClassId(LOG4K_PACKAGE, FqName("Logger"), false), Name.identifier("logged")),
-    ).firstOrNull { symbol -> symbol.owner.regularParams().size == 5 }
+    ).firstOrNull { symbol -> symbol.owner.regularParams().size == 6 }
+
+    // Materializes `@Logged(tags = [...])` as the `tags: Map<String, Any>` argument.
+    private val tagsBuilder = AnnotationTagsBuilder(pluginContext, finder, messageCollector)
 
     // Reuses a log4k `log: Logger` member, or synthesizes `private val _log_ = Logger.of(this::class)`.
     private val loggerField: OfThisClassField? =
@@ -139,7 +147,7 @@ class LoggedIrTransformer(
 
         val dispatchParam = loggedFn.owner.dispatchReceiverParam()
         val regular = loggedFn.owner.regularParams()
-        if (dispatchParam == null || regular.size != 5) {
+        if (dispatchParam == null || regular.size != 6) {
             messageCollector.reportError(
                 function,
                 "log4k-compiler-plugin: could not resolve the expected `Logger.logged` signature — " +
@@ -149,9 +157,10 @@ class LoggedIrTransformer(
         }
         val levelParam = regular[0]
         val spanParam = regular[1]
-        val nameParam = regular[2]
-        val argsParam = regular[3]
-        val fParam = regular[4]
+        val tagsParam = regular[2]
+        val nameParam = regular[3]
+        val argsParam = regular[4]
+        val fParam = regular[5]
 
         // Resolve (or synthesize) the `log: Logger` to call `logged` on. Errors are reported inside.
         val loggerAccess = loggerField?.access(function) ?: return
@@ -172,10 +181,13 @@ class LoggedIrTransformer(
             function = lambda,
         )
 
+        val tags = function.resolveTags(LOGGED_ANNOTATION)
+        val tagsArg = tagsBuilder.buildMap(builder, function, tags, tagsParam.type, "@Logged") ?: return
         val call = builder.irCall(loggedFn, returnType, listOf(returnType)).apply {
             arguments[dispatchParam] = loggerAccess
             arguments[levelParam] = resolveLevel(function)
             arguments[spanParam] = buildSpan(builder, function, spanParam.type)
+            arguments[tagsParam] = tagsArg
             arguments[nameParam] = builder.irString(function.qualifiedName())
             arguments[argsParam] = buildArgs(builder, function)
             arguments[fParam] = lambdaExpression

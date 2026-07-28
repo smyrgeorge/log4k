@@ -10,6 +10,7 @@ import io.github.smyrgeorge.log4k.compiler.ir.utils.qualifiedName
 import io.github.smyrgeorge.log4k.compiler.ir.utils.receiverOrContextOf
 import io.github.smyrgeorge.log4k.compiler.ir.utils.regularParams
 import io.github.smyrgeorge.log4k.compiler.ir.utils.reportError
+import io.github.smyrgeorge.log4k.compiler.ir.utils.resolveTags
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.DeclarationFinder
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
@@ -28,10 +29,8 @@ import org.jetbrains.kotlin.ir.declarations.IrParameterKind
 import org.jetbrains.kotlin.ir.declarations.IrValueParameter
 import org.jetbrains.kotlin.ir.expressions.IrBlockBody
 import org.jetbrains.kotlin.ir.expressions.IrConst
-import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrStatementOrigin
-import org.jetbrains.kotlin.ir.expressions.IrVararg
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.IrSimpleFunctionSymbol
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
@@ -187,7 +186,7 @@ class TraceIrTransformer(
         )
 
         // 1b. Materialize `@Traced(tags = [...])` as `this.tags.put(k, v)` at the start of the lambda.
-        val tags = resolveTags(function)
+        val tags = function.resolveTags(TRACED_ANNOTATION)
         if (tags.isNotEmpty()) {
             val tagsGetter = spanTagsGetter
             val putFn = mutableMapPut
@@ -237,24 +236,6 @@ class TraceIrTransformer(
 
         // Default: "ClassName.functionName" (or just "functionName" for top-level functions).
         return function.qualifiedName()
-    }
-
-    /** Reads the `@Traced(tags = [Tag(k, v), …])` array into (key, value) pairs. */
-    private fun resolveTags(function: IrFunction): List<Pair<String, String>> {
-        // Class-level tags come first so a function's own tags override them (later puts win).
-        val classTags = tagsOf(function.parentClassOrNull?.getAnnotation(TRACED_ANNOTATION))
-        val functionTags = tagsOf(function.getAnnotation(TRACED_ANNOTATION))
-        return classTags + functionTags
-    }
-
-    private fun tagsOf(annotation: IrConstructorCall?): List<Pair<String, String>> {
-        val tagsArg = annotation?.arguments?.getOrNull(1) as? IrVararg ?: return emptyList()
-        return tagsArg.elements.mapNotNull { element ->
-            val tag = element as? IrConstructorCall ?: return@mapNotNull null
-            val key = (tag.arguments.getOrNull(0) as? IrConst)?.value as? String
-            val value = (tag.arguments.getOrNull(1) as? IrConst)?.value as? String
-            if (key != null && value != null) key to value else null
-        }
     }
 
     /** Builds `<receiver>.tags.put(key, value)`. */

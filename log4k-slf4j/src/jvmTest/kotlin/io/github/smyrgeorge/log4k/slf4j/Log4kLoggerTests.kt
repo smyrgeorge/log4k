@@ -60,6 +60,37 @@ class Log4kLoggerTests {
     private fun logger(name: String, level: Level = Level.TRACE): Slf4jLogger =
         LoggerFactory.getLogger(name).also { CoreLogger.registry.setLevel(name, level) }
 
+    // --- Fluent API: key-value pairs become tags -------------------------------------------------
+
+    @Test
+    fun fluentKeyValuePairs_becomeTags() = runTest {
+        val boom = IllegalStateException("boom")
+
+        logger("slf4j.fluent.tags").atInfo()
+            .setMessage("user {} logged in")
+            .addArgument("alice")
+            .addKeyValue("tenant", "acme")
+            .addKeyValue("attempt", 2)
+            .setCause(boom)
+            .log()
+
+        // The fluent event is routed through `LoggingEventAware.log`, so the key-value pairs are
+        // preserved as log4k tags instead of being flattened into the message text.
+        val event = appender.awaitEvent { it.logger == "slf4j.fluent.tags" }
+        assertThat(event.message).isEqualTo("user {} logged in")
+        assertThat(event.arguments.toList()).containsExactly("alice")
+        assertThat(event.tags).isEqualTo(mapOf("tenant" to "acme", "attempt" to 2))
+        assertThat(event.throwable).isSameInstanceAs(boom)
+    }
+
+    @Test
+    fun classicCalls_carryNoTags() = runTest {
+        logger("slf4j.classic.notags").info("m")
+
+        val event = appender.awaitEvent { it.logger == "slf4j.classic.notags" }
+        assertThat(event.tags).isEqualTo(emptyMap<String, Any>())
+    }
+
     // --- Level mapping -------------------------------------------------------------------------
 
     @Test

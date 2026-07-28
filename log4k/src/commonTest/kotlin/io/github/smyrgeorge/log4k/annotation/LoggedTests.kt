@@ -24,10 +24,21 @@ private class LoggedFixture {
     @Logged(level = Level.DEBUG)
     fun quiet(x: Int): Int = x + 1 // per-function level override
 
+    @Logged(tags = [Tag("component", "billing")])
+    fun tagged(x: Int): Int = x + 2 // entry/exit lines carry tags = {component=billing}
+
     @NoLog
     fun silent(x: Int): Int = x - 1 // opted out
 
     fun boom(): Nothing = error("kaboom") // exception path -> ERROR line + rethrow
+}
+
+@Logged(tags = [Tag("layer", "service")])
+private class TaggedLoggedFixture {
+    fun plain(): Int = 1 // class-level tags apply
+
+    @Logged(tags = [Tag("layer", "billing")])
+    fun overridden(): Int = 2 // a function tag with the same key wins over the class-level one
 }
 
 @NoLog
@@ -107,6 +118,36 @@ class LoggedTests {
             it.message.contains("SilencedLoggedFixture.ignored") || it.message.contains("LoggedFixture.compute")
         }
         assertThat(first.message).isEqualTo("→ LoggedFixture.compute(x=3)")
+    }
+
+    @Test
+    fun logged_tags_areAttachedToEveryEmittedLine() = runTest {
+        LoggedFixture().tagged(1)
+
+        val events = appender.awaitEvents(2) { it.message.contains("LoggedFixture.tagged") }
+        assertThat(events[0].tags).isEqualTo(mapOf<String, Any>("component" to "billing"))
+        assertThat(events[1].tags).isEqualTo(mapOf<String, Any>("component" to "billing"))
+    }
+
+    @Test
+    fun logged_untagged_carriesEmptyTags() = runTest {
+        LoggedFixture().compute(4)
+
+        val events = appender.awaitEvents(2) { it.message.contains("LoggedFixture.compute") }
+        assertThat(events[0].tags).isEqualTo(emptyMap<String, Any>())
+    }
+
+    @Test
+    fun logged_classLevelTags_applyAndFunctionTagsWin() = runTest {
+        val fixture = TaggedLoggedFixture()
+
+        fixture.plain()
+        val plain = appender.awaitEvents(2) { it.message.contains("TaggedLoggedFixture.plain") }
+        assertThat(plain[0].tags).isEqualTo(mapOf<String, Any>("layer" to "service"))
+
+        fixture.overridden()
+        val overridden = appender.awaitEvents(2) { it.message.contains("TaggedLoggedFixture.overridden") }
+        assertThat(overridden[0].tags).isEqualTo(mapOf<String, Any>("layer" to "billing"))
     }
 
     @Test

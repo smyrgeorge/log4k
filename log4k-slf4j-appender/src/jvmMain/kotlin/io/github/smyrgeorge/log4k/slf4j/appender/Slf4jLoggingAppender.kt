@@ -28,9 +28,9 @@ import org.slf4j.event.Level as Slf4jLevel
  * arguments: log4k's `{}` placeholder rules deliberately mirror SLF4J's `MessageFormatter`, so
  * substitution can be left to the backend, and structured encoders (JSON, logstash, …) keep the
  * individual arguments instead of receiving a pre-flattened string. A [Throwable] on the event becomes
- * the SLF4J cause, and when the event is span-correlated the span's `traceId`/`spanId` are attached as
- * key-value pairs. Events at [Level.OFF] are dropped, and levels disabled in the backend cost only a
- * no-op builder.
+ * the SLF4J cause, the event's tags are attached as key-value pairs, and when the event is
+ * span-correlated the span's `traceId`/`spanId` are attached as key-value pairs as well. Events at
+ * [Level.OFF] are dropped, and levels disabled in the backend cost only a no-op builder.
  *
  * Two gates apply in this setup: log4k's own logger levels decide whether an event is published at all,
  * and the backend's configuration decides whether the forwarded call is written. Keep the log4k side at
@@ -61,6 +61,7 @@ public class Slf4jLoggingAppender : Appender<LoggingEvent> {
         var builder = loggers.computeIfAbsent(event.logger, LoggerFactory::getLogger).atLevel(level)
         event.arguments.forEach { builder = builder.addArgument(it) }
         event.throwable?.let { builder = builder.setCause(it) }
+        event.tags.forEach { (key, value) -> builder = builder.addKeyValue(key, value) }
         event.span?.context?.let {
             builder = builder.addKeyValue("traceId", it.traceId)
             builder = builder.addKeyValue("spanId", it.spanId)

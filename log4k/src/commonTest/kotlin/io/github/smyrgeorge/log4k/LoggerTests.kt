@@ -68,12 +68,12 @@ class LoggerTests {
         // OFF is a filter level, not an event level: it must never pass the gate — not even on a
         // muted logger, where `OFF >= OFF` would otherwise hold.
         assertThat(logger.isEnabled(Level.OFF)).isFalse()
-        logger.log(Level.OFF, null, "should never appear", emptyArray(), null)
+        logger.log(Level.OFF, null, emptyMap(), "should never appear", emptyArray(), null)
         logger.mute()
-        logger.log(Level.OFF, null, "should never appear either", emptyArray(), null)
+        logger.log(Level.OFF, null, emptyMap(), "should never appear either", emptyArray(), null)
         logger.unmute()
 
-        logger.log(Level.INFO, null, "marker", emptyArray(), null)
+        logger.log(Level.INFO, null, emptyMap(), "marker", emptyArray(), null)
         val first = appender.awaitEvent { it.logger == "test.gate.off.filter" }
         assertThat(first.message).isEqualTo("marker")
     }
@@ -82,8 +82,8 @@ class LoggerTests {
     fun log_belowThreshold_emitsNoEvent() = runTest {
         val logger = SimpleLogger("test.gate.below", Level.INFO)
 
-        logger.log(Level.DEBUG, null, "debug msg", emptyArray(), null) // suppressed
-        logger.log(Level.INFO, null, "marker", emptyArray(), null)     // emitted
+        logger.log(Level.DEBUG, null, emptyMap(), "debug msg", emptyArray(), null) // suppressed
+        logger.log(Level.INFO, null, emptyMap(), "marker", emptyArray(), null)     // emitted
 
         // If DEBUG had not been gated, it would have been the first event from this logger.
         val first = appender.awaitEvent { it.logger == "test.gate.below" }
@@ -95,7 +95,7 @@ class LoggerTests {
     fun log_atThreshold_emitsEvent() = runTest {
         val logger = SimpleLogger("test.gate.at", Level.INFO)
 
-        logger.log(Level.INFO, null, "info msg", emptyArray(), null)
+        logger.log(Level.INFO, null, emptyMap(), "info msg", emptyArray(), null)
 
         val event = appender.awaitEvent { it.logger == "test.gate.at" }
         assertThat(event.level).isEqualTo(Level.INFO)
@@ -106,7 +106,7 @@ class LoggerTests {
     fun log_aboveThreshold_emitsEvent() = runTest {
         val logger = SimpleLogger("test.gate.above", Level.INFO)
 
-        logger.log(Level.ERROR, null, "boom", emptyArray(), null)
+        logger.log(Level.ERROR, null, emptyMap(), "boom", emptyArray(), null)
 
         val event = appender.awaitEvent { it.logger == "test.gate.above" }
         assertThat(event.level).isEqualTo(Level.ERROR)
@@ -117,8 +117,8 @@ class LoggerTests {
         val off = SimpleLogger("test.gate.off", Level.OFF)
         val marker = SimpleLogger("test.gate.off.marker", Level.INFO)
 
-        off.log(Level.ERROR, null, "boom", emptyArray(), null) // suppressed (OFF)
-        marker.log(Level.INFO, null, "marker", emptyArray(), null)
+        off.log(Level.ERROR, null, emptyMap(), "boom", emptyArray(), null) // suppressed (OFF)
+        marker.log(Level.INFO, null, emptyMap(), "marker", emptyArray(), null)
 
         // The OFF logger must have emitted nothing before the marker.
         val first = appender.awaitEvent {
@@ -145,7 +145,7 @@ class LoggerTests {
         val ex = RuntimeException("x")
         val span = Tracer.of("t").span(id = "sid", traceId = "tid", name = "s")
 
-        logger.log(Level.WARN, span, "msg {}", arrayOf<Any?>("a", 1), ex)
+        logger.log(Level.WARN, span, mapOf("tenant" to "acme"), "msg {}", arrayOf<Any?>("a", 1), ex)
 
         val event = appender.awaitEvent { it.logger == "my.logger" }
         assertThat(event.level).isEqualTo(Level.WARN)
@@ -153,13 +153,24 @@ class LoggerTests {
         assertThat(event.arguments.toList()).containsExactly("a", 1)
         assertThat(event.throwable).isSameInstanceAs(ex)
         assertThat(event.span).isSameInstanceAs(span)
+        assertThat(event.tags).isEqualTo(mapOf<String, Any>("tenant" to "acme"))
+    }
+
+    @Test
+    fun log_withoutTags_leavesThemEmpty() = runTest {
+        val logger = SimpleLogger("test.tags.empty", Level.TRACE)
+
+        logger.log(Level.INFO, null, emptyMap(), "m", emptyArray(), null)
+
+        val event = appender.awaitEvent { it.logger == "test.tags.empty" }
+        assertThat(event.tags).isEqualTo(emptyMap())
     }
 
     @Test
     fun log_withoutSpanOrThrowable_leavesThemNull() = runTest {
         val logger = SimpleLogger("test.nulls", Level.TRACE)
 
-        logger.log(Level.INFO, null, "m", emptyArray(), null)
+        logger.log(Level.INFO, null, emptyMap(), "m", emptyArray(), null)
 
         val event = appender.awaitEvent { it.logger == "test.nulls" }
         assertThat(event.span).isNull()
@@ -192,6 +203,29 @@ class LoggerTests {
         val event = appender.awaitEvent { it.logger == "test.classic.args" }
         assertThat(event.message).isEqualTo("user {} logged in from {}")
         assertThat(event.arguments.toList()).containsExactly("alice", "127.0.0.1")
+    }
+
+    @Test
+    fun classicApi_carriesTags_viaTheTagsFirstOverload() = runTest {
+        val logger = SimpleLogger("test.classic.tags", Level.TRACE)
+
+        // Tags lead the call (like the span-first overloads), keeping the vararg message args last.
+        logger.info(mapOf("tenant" to "acme", "attempt" to 2), "user {} logged in", "alice")
+
+        val event = appender.awaitEvent { it.logger == "test.classic.tags" }
+        assertThat(event.arguments.toList()).containsExactly("alice")
+        assertThat(event.tags).isEqualTo(mapOf("tenant" to "acme", "attempt" to 2))
+    }
+
+    @Test
+    fun classicApi_carriesTags_inTheLazyMessageOverload() = runTest {
+        val logger = SimpleLogger("test.classic.tags.lazy", Level.TRACE)
+
+        logger.info(mapOf("tenant" to "acme")) { "lazy message" }
+
+        val event = appender.awaitEvent { it.logger == "test.classic.tags.lazy" }
+        assertThat(event.message).isEqualTo("lazy message")
+        assertThat(event.tags).isEqualTo(mapOf<String, Any>("tenant" to "acme"))
     }
 
     @Test
@@ -240,7 +274,7 @@ class LoggerTests {
     fun logged_normalCompletion_emitsEntryThenExitAndReturnsResult() = runTest {
         val logger = SimpleLogger("test.logged.ok", Level.TRACE)
 
-        val result = logger.logged(Level.INFO, null, "compute", "1, 2") { 42 }
+        val result = logger.logged(Level.INFO, null, emptyMap(), "compute", "1, 2") { 42 }
 
         assertThat(result).isEqualTo(42)
         val events = appender.awaitEvents(2) { it.logger == "test.logged.ok" }
@@ -257,7 +291,7 @@ class LoggerTests {
         val boom = IllegalStateException("boom")
 
         val thrown = assertFailsWith<IllegalStateException> {
-            logger.logged<Unit>(Level.INFO, null, "compute", "") { throw boom }
+            logger.logged<Unit>(Level.INFO, null, emptyMap(), "compute", "") { throw boom }
         }
 
         assertThat(thrown).isSameInstanceAs(boom)
@@ -274,11 +308,26 @@ class LoggerTests {
         val logger = SimpleLogger("test.logged.span", Level.TRACE)
         val span = Tracer.of("t").span(id = "sid", traceId = "tid", name = "s")
 
-        logger.logged(Level.INFO, span, "compute", "") { }
+        logger.logged(Level.INFO, span, emptyMap(), "compute", "") { }
 
         val events = appender.awaitEvents(2) { it.logger == "test.logged.span" }
         assertThat(events[0].span).isSameInstanceAs(span)
         assertThat(events[1].span).isSameInstanceAs(span)
+    }
+
+    @Test
+    fun logged_propagatesTagsToEveryEmittedLine() = runTest {
+        val logger = SimpleLogger("test.logged.tags", Level.TRACE)
+        val tags = mapOf("component" to "billing")
+
+        logger.logged(Level.INFO, null, tags, "compute", "") { 1 }
+        assertFailsWith<IllegalStateException> {
+            logger.logged<Unit>(Level.INFO, null, tags, "compute", "") { error("boom") }
+        }
+
+        // Entry, exit, entry, error: all four lines carry the tags.
+        val events = appender.awaitEvents(4) { it.logger == "test.logged.tags" }
+        events.forEach { assertThat(it.tags).isEqualTo(tags) }
     }
 
     @Test
@@ -294,11 +343,11 @@ class LoggerTests {
 
         // DEBUG < INFO: the lines must not be emitted, and no string (in particular the result's
         // toString()) may be built for them.
-        val result = logger.logged(Level.DEBUG, null, "compute", "") { instance }
+        val result = logger.logged(Level.DEBUG, null, emptyMap(), "compute", "") { instance }
 
         assertThat(result).isSameInstanceAs(instance)
         assertThat(renders).isEqualTo(0)
-        logger.log(Level.INFO, null, "marker", emptyArray(), null)
+        logger.log(Level.INFO, null, emptyMap(), "marker", emptyArray(), null)
         val first = appender.awaitEvent { it.logger == "test.logged.disabled" }
         assertThat(first.message).isEqualTo("marker")
     }
@@ -312,7 +361,7 @@ class LoggerTests {
 
         // The block succeeded; a throwing toString() while rendering the exit line must not
         // turn that success into a failure.
-        val result = logger.logged(Level.INFO, null, "compute", "") { instance }
+        val result = logger.logged(Level.INFO, null, emptyMap(), "compute", "") { instance }
 
         assertThat(result).isSameInstanceAs(instance)
         val events = appender.awaitEvents(2) { it.logger == "test.logged.badstring" }
@@ -327,7 +376,7 @@ class LoggerTests {
         // and the catch — the `finally` must still emit a completion line (without a result value)
         // so the entry line is never left dangling.
         fun compute(flag: Boolean): Int {
-            logger.logged(Level.INFO, null, "compute", "") {
+            logger.logged(Level.INFO, null, emptyMap(), "compute", "") {
                 if (flag) return 7
             }
             return 0
@@ -354,7 +403,7 @@ class LoggerTests {
         RootLogger.Logging.appenders.register(appender)
 
         val logger = SimpleLogger("test.appender.isolation", Level.INFO)
-        logger.log(Level.INFO, null, "survives", emptyArray(), null)
+        logger.log(Level.INFO, null, emptyMap(), "survives", emptyArray(), null)
 
         val event = appender.awaitEvent { it.logger == "test.appender.isolation" }
         assertThat(event.message).isEqualTo("survives")
@@ -494,7 +543,7 @@ class LoggerTests {
         val boom = IllegalStateException("boom")
 
         assertFailsWith<IllegalStateException> {
-            logger.logged<Unit>(Level.INFO, null, "op", "") { throw boom }
+            logger.logged<Unit>(Level.INFO, null, emptyMap(), "op", "") { throw boom }
         }
 
         // The entry/exit lines are at INFO (< WARN, suppressed); the failure line is at ERROR (emitted).
@@ -508,7 +557,7 @@ class LoggerTests {
     fun logged_whenEntryExitLevelBelowThreshold_normalCompletionEmitsNothing() = runTest {
         val logger = SimpleLogger("test.logged.gated.ok", Level.WARN)
 
-        val result = logger.logged(Level.INFO, null, "op", "") { 7 }
+        val result = logger.logged(Level.INFO, null, emptyMap(), "op", "") { 7 }
 
         assertThat(result).isEqualTo(7)
         // Both entry and exit are at INFO (< WARN), so nothing is emitted; a WARN marker comes first.

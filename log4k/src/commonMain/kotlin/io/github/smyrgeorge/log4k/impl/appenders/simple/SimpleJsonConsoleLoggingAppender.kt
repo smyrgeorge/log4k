@@ -20,7 +20,7 @@ class SimpleJsonConsoleLoggingAppender : Appender<LoggingEvent> {
         }
 
         internal fun LoggingEvent.formatJson(): String {
-            val map = buildMap<String, Any?> {
+            val map = buildMap {
                 if (id > 0) put("id", id)
                 put("level", level.name)
                 put("span_id", span?.context?.spanId)
@@ -28,6 +28,7 @@ class SimpleJsonConsoleLoggingAppender : Appender<LoggingEvent> {
                 put("timestamp", timestamp)
                 put("logger", logger)
                 put("message", message.format(arguments))
+                put("tags", tags)
                 put("thread", thread)
                 put("throwable", throwable?.stackTraceToString())
             }

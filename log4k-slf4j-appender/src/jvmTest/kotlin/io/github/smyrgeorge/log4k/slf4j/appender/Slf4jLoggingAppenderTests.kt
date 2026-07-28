@@ -18,6 +18,7 @@ import io.github.smyrgeorge.log4k.LoggingEvent
 import io.github.smyrgeorge.log4k.RootLogger
 import io.github.smyrgeorge.log4k.Tracer
 import io.github.smyrgeorge.log4k.TracingEvent
+import io.github.smyrgeorge.log4k.impl.Tags
 import io.github.smyrgeorge.log4k.impl.appenders.simple.SimpleConsoleLoggingAppender
 import io.github.smyrgeorge.log4k.slf4j.Log4kILoggerFactory
 import io.github.smyrgeorge.log4k.slf4j.appender.utils.CapturingSlf4jLoggerFactory
@@ -74,7 +75,8 @@ class Slf4jLoggingAppenderTests {
         arguments: Array<out Any?> = emptyArray(),
         throwable: Throwable? = null,
         span: TracingEvent.Span? = null,
-    ) = log(level, span, message, arguments, throwable)
+        tags: Tags = emptyMap(),
+    ) = log(level, span, tags, message, arguments, throwable)
 
     // --- Wiring --------------------------------------------------------------------------------
 
@@ -182,6 +184,26 @@ class Slf4jLoggingAppenderTests {
         assertThat(captured.throwable).isSameInstanceAs(boom)
         assertThat(captured.message).isEqualTo("failed for {}")
         assertThat(captured.arguments).containsExactly(7)
+    }
+
+    // --- Tags ----------------------------------------------------------------------------------
+
+    @Test
+    fun tags_becomeKeyValuePairs() = runTest {
+        logger("appender.tags").log(
+            level = Level.INFO,
+            span = null,
+            message = "m",
+            arguments = emptyArray(),
+            throwable = null,
+            tags = mapOf("tenant" to "acme", "attempt" to 2),
+        )
+
+        val captured = Slf4jCapture.await { it.logger == "appender.tags" }
+        assertThat(captured.keyValues).containsExactly(
+            "tenant" to "acme",
+            "attempt" to 2,
+        )
     }
 
     // --- Span correlation ------------------------------------------------------------------------

@@ -1,5 +1,6 @@
 package io.github.smyrgeorge.log4k
 
+import io.github.smyrgeorge.log4k.impl.Tags
 import kotlin.time.Instant
 
 /**
@@ -8,6 +9,7 @@ import kotlin.time.Instant
  * @property id A unique identifier for the logging event.
  * @property level The severity level of the event. It indicates the importance of the log entry.
  * @property span An optional tracing span associated with the log entry, which can be used for distributed tracing.
+ * @property tags Structured key-value dimensions attached to the logging event.
  * @property timestamp The time at which the logging event was created.
  * @property logger The name of the logger that captured the event. Typically, this corresponds to the class or component name.
  * @property message The main logging message or content associated with the event.
@@ -19,6 +21,7 @@ class LoggingEvent(
     val id: Long,
     val level: Level,
     val span: TracingEvent.Span?,
+    val tags: Tags,
     val timestamp: Instant,
     val logger: String,
     val message: String,

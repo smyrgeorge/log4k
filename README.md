@@ -37,6 +37,7 @@ This project also tries to be fully compatible with `OpenTelemetry` standard.
         - [The `classic` escape hatch (`log4k-context`)](#the-classic-escape-hatch-log4k-context)
 - [Architecture](#architecture)
 - [Logging API](#logging-api)
+    - [Tags](#tags)
     - [Context Parameters Support](#context-parameters-support)
     - [SLF4J Integration](#slf4j-integration)
         - [Using SLF4J on top of log4k (`log4k-slf4j`)](#using-slf4j-on-top-of-log4k-log4k-slf4j)
@@ -182,6 +183,23 @@ log.debug { "ignore + ${5}" } // Will be evaluated only if DEBUG logs are enable
 log.error { e.message }
 log.error(e) { e.message } // e: Throwable
 ```
+
+### Tags
+
+Like tracing spans and metering events, every `LoggingEvent` can carry **tags** — structured key/value
+dimensions kept separate from the message text. Following the same convention as the span overloads,
+tags lead the call (`(span?, tags?, msg, args...)`):
+
+```kotlin
+log.info(mapOf("tenant" to "acme", "attempt" to 2), "user {} logged in", "alice")
+log.warn(mapOf("tenant" to "acme")) { "lazy message" } // lazy variant
+```
+
+Tags are aimed at structured sinks: the `SimpleJsonConsoleLoggingAppender` emits them as a nested
+`"tags"` object, and the `log4k-slf4j-appender` forwards them as SLF4J key-value pairs (in the opposite
+direction, the `log4k-slf4j` provider turns fluent-API `addKeyValue(...)` pairs into event tags). The
+plain-text console appenders deliberately keep the log line tag-free. The compiler plugin can attach
+static tags as well — see [`@Logged`](#logging-logged).
 
 ### Context Parameters Support
 
@@ -545,6 +563,9 @@ exception is rethrown. Both `suspend` and regular functions are supported (the w
 
 - **Level** — `@Logged(level = Level.DEBUG)`; the entry/exit lines use it (default `INFO`), the failure line is always
   `ERROR`.
+- **Dimensions** — `@Logged(tags = [Tag("component", "billing")])` attaches static tags to every emitted line (entry,
+  exit and failure), so structured appenders receive them as fields. Class-level tags apply to every instrumented
+  member, and a function's own tag with the same key wins.
 - **Logger** — read from a `log: Logger` property on the enclosing class. If none exists — or `log` is a foreign type
   such as `org.slf4j.Logger` — the plugin synthesizes `private val _log_ = Logger.of(this::class)` under a distinct
   name, so it never clashes with the existing `log`.

@@ -3,6 +3,7 @@ package io.github.smyrgeorge.log4k.utils
 import io.github.smyrgeorge.log4k.Level
 import io.github.smyrgeorge.log4k.LoggingEvent
 import io.github.smyrgeorge.log4k.TracingEvent
+import io.github.smyrgeorge.log4k.impl.Tags
 import kotlin.time.Instant
 
 /**
@@ -13,6 +14,7 @@ fun loggingEvent(
     id: Long = 1,
     level: Level = Level.INFO,
     span: TracingEvent.Span? = null,
+    tags: Tags = emptyMap(),
     timestamp: Instant = Instant.fromEpochSeconds(0),
     logger: String = "test.logger",
     message: String = "hello {}",
@@ -23,6 +25,7 @@ fun loggingEvent(
     id = id,
     level = level,
     span = span,
+    tags = tags,
     timestamp = timestamp,
     logger = logger,
     message = message,
