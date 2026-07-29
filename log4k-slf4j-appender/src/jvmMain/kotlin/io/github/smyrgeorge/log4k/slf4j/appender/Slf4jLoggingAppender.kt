@@ -5,7 +5,6 @@ import io.github.smyrgeorge.log4k.Level
 import io.github.smyrgeorge.log4k.LoggingEvent
 import io.github.smyrgeorge.log4k.RootLogger
 import io.github.smyrgeorge.log4k.impl.appenders.simple.SimpleConsoleLoggingAppender
-import io.github.smyrgeorge.log4k.slf4j.appender.Slf4jLoggingAppender.Companion.install
 import org.slf4j.ILoggerFactory
 import org.slf4j.LoggerFactory
 import java.util.concurrent.ConcurrentHashMap
@@ -39,7 +38,12 @@ import org.slf4j.event.Level as Slf4jLevel
  * Because delivery goes through `RootLogger`'s asynchronous queue, the backend observes the forwarding
  * coroutine, not the original call site: caller-location patterns (`%class`, `%line`), `%thread`, and the
  * backend timestamp refer to the moment of forwarding. The original values remain available on the
- * [LoggingEvent] (`thread`, `timestamp`) for custom bridges that need full fidelity.
+ * [LoggingEvent] (`thread`, `timestamp`) for custom bridges that need full fidelity. When the event
+ * carries a compile-time [io.github.smyrgeorge.log4k.SourceLocation] (injected by the `log4k-compiler-plugin`),
+ * the **real** source location survives the bridge as key-value pairs named after
+ * logstash-logback-encoder's caller-data fields — `caller_file_name` / `caller_line_number` /
+ * `caller_method_name` — so a JSON backend renders it exactly like Logback's own caller data, even
+ * though the backend's `%class`/`%line` cannot see past the forwarding coroutine.
  *
  * This appender must never run while SLF4J itself is backed by log4k (the `log4k-slf4j` provider):
  * every forwarded event would be routed straight back into log4k, endlessly. Construction fails fast
@@ -65,6 +69,15 @@ public class Slf4jLoggingAppender : Appender<LoggingEvent> {
         event.span?.context?.let {
             builder = builder.addKeyValue("traceId", it.traceId)
             builder = builder.addKeyValue("spanId", it.spanId)
+        }
+        event.callSite?.let {
+            // logstash-logback-encoder's caller-data field names, so a JSON backend renders the
+            // forwarded call site exactly like Logback's own caller data.
+            builder = builder.addKeyValue("caller_file_name", it.file)
+            builder = builder.addKeyValue("caller_line_number", it.line)
+            it.function.substringAfterLast('.').takeIf(String::isNotBlank)?.let { method ->
+                builder = builder.addKeyValue("caller_method_name", method)
+            }
         }
         builder.log(event.message)
     }

@@ -5,6 +5,7 @@ import assertk.assertions.contains
 import assertk.assertions.doesNotContain
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
+import io.github.smyrgeorge.log4k.SourceLocation
 import io.github.smyrgeorge.log4k.Level
 import io.github.smyrgeorge.log4k.Tracer
 import io.github.smyrgeorge.log4k.impl.appenders.simple.SimpleConsoleLoggingAppender.Companion.format
@@ -49,6 +50,15 @@ class SimpleConsoleLoggingAppenderTests {
             val line = loggingEvent(level = level).format(colors = false)
             assertThat(line).contains(" - ${level.name} test.logger - ")
         }
+    }
+
+    @Test
+    fun format_ignoresTheCallSite_keepingTheLineClean() {
+        // The call site stays on the event (for the JSON appender and the SLF4J bridge); the
+        // plain-text console line deliberately does not render it.
+        val line = loggingEvent(callSite = SourceLocation(file = "Api.kt", line = 42, function = "Api.handle"))
+            .format(colors = false)
+        assertThat(line).isEqualTo("1 1970-01-01T00:00:00Z [main] - INFO test.logger - hello world")
     }
 
     // --- Message formatting ----------------------------------------------------------------------

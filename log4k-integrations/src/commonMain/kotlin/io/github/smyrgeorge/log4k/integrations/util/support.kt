@@ -5,7 +5,7 @@ import kotlin.time.Instant
 
 /**
  * The spans of the batch that can actually be reported: started and ended. Anything else
- * (e.g. a remote context carrier) has no timing information.
+ * (e.g., a remote context carrier) has no timing information.
  */
 internal fun List<TracingEvent>.finishedSpans(): List<TracingEvent.Span> =
     filterIsInstance<TracingEvent.Span>().filter { it.startAt != null && it.endAt != null }

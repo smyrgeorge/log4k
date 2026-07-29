@@ -2,6 +2,7 @@ package io.github.smyrgeorge.log4k.annotation
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
+import assertk.assertions.isGreaterThan
 import assertk.assertions.isSameInstanceAs
 import assertk.assertions.startsWith
 import io.github.smyrgeorge.log4k.Appender
@@ -14,6 +15,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
+import kotlin.test.assertNotNull
 
 // --- Fixtures instrumented by the log4k-compiler-plugin (wired onto the test compilations) --------
 
@@ -92,6 +94,30 @@ class LoggedTests {
         assertThat(events[0].message).isEqualTo("→ LoggedFixture.compute(x=5)")
         assertThat(events[1].level).isEqualTo(Level.INFO)
         assertThat(events[1].message).startsWith("← LoggedFixture.compute = 25 (")
+    }
+
+    @Test
+    fun logged_linesCarryTheDeclarationCallSite() = runTest {
+        // `compute` is instrumented by the class-level @Logged: the call site must still point at
+        // the function's own declaration in this file, and be identical on the entry and exit lines.
+        LoggedFixture().compute(3)
+
+        val events = appender.awaitEvents(2) { it.message.contains("LoggedFixture.compute") }
+        val site = assertNotNull(events[0].callSite)
+        assertThat(site.file).isEqualTo("LoggedTests.kt")
+        assertThat(site.function).isEqualTo("LoggedFixture.compute")
+        assertThat(site.line).isGreaterThan(0)
+        assertThat(events[1].callSite).isEqualTo(site)
+    }
+
+    @Test
+    fun logged_failureLineCarriesTheDeclarationCallSite() = runTest {
+        assertFailsWith<IllegalStateException> { LoggedFixture().boom() }
+
+        val event = appender.awaitEvent { it.message.startsWith("✗ LoggedFixture.boom") }
+        val site = assertNotNull(event.callSite)
+        assertThat(site.file).isEqualTo("LoggedTests.kt")
+        assertThat(site.function).isEqualTo("LoggedFixture.boom")
     }
 
     @Test

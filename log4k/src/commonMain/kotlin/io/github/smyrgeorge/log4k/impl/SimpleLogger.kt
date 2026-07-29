@@ -1,5 +1,6 @@
 package io.github.smyrgeorge.log4k.impl
 
+import io.github.smyrgeorge.log4k.SourceLocation
 import io.github.smyrgeorge.log4k.Level
 import io.github.smyrgeorge.log4k.Logger
 import io.github.smyrgeorge.log4k.LoggingEvent
@@ -16,6 +17,7 @@ class SimpleLogger(name: String, level: Level) : Logger(name, level) {
         message: String,
         arguments: Array<out Any?>,
         throwable: Throwable?,
+        callSite: SourceLocation?,
     ): LoggingEvent {
         return LoggingEvent(
             id = RootLogger.Logging.id(),
@@ -28,6 +30,7 @@ class SimpleLogger(name: String, level: Level) : Logger(name, level) {
             arguments = arguments,
             thread = thread(),
             throwable = throwable,
+            callSite = callSite,
         )
     }
 }

@@ -1,12 +1,15 @@
 package io.github.smyrgeorge.log4k.compiler.logged
 
-import io.github.smyrgeorge.log4k.compiler.ir.Log4kIrFunctionExpression
 import io.github.smyrgeorge.log4k.compiler.ir.utils.AnnotationTagsBuilder
-import io.github.smyrgeorge.log4k.compiler.ir.utils.LOG4K_PACKAGE
+import io.github.smyrgeorge.log4k.compiler.ir.utils.LevelSymbols
 import io.github.smyrgeorge.log4k.compiler.ir.utils.OfThisClassField
-import io.github.smyrgeorge.log4k.compiler.ir.utils.buildInlineLambda
+import io.github.smyrgeorge.log4k.compiler.ir.utils.TracingSymbols
+import io.github.smyrgeorge.log4k.compiler.ir.utils.buildInlineLambdaExpression
 import io.github.smyrgeorge.log4k.compiler.ir.utils.dispatchReceiverParam
-import io.github.smyrgeorge.log4k.compiler.ir.utils.isClassLevelEligible
+import io.github.smyrgeorge.log4k.compiler.ir.utils.findLog4kFunction
+import io.github.smyrgeorge.log4k.compiler.ir.utils.findSourceLocationConstructor
+import io.github.smyrgeorge.log4k.compiler.ir.utils.irSourceLocation
+import io.github.smyrgeorge.log4k.compiler.ir.utils.isInstrumentationTarget
 import io.github.smyrgeorge.log4k.compiler.ir.utils.qualifiedName
 import io.github.smyrgeorge.log4k.compiler.ir.utils.receiverOrContextOf
 import io.github.smyrgeorge.log4k.compiler.ir.utils.regularParams
@@ -24,27 +27,19 @@ import org.jetbrains.kotlin.ir.builders.irGet
 import org.jetbrains.kotlin.ir.builders.irNull
 import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.builders.irString
-import org.jetbrains.kotlin.ir.declarations.IrEnumEntry
 import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.expressions.IrConstructorCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrGetEnumValue
-import org.jetbrains.kotlin.ir.expressions.IrStatementOrigin
-import org.jetbrains.kotlin.ir.expressions.impl.IrGetEnumValueImpl
 import org.jetbrains.kotlin.ir.expressions.impl.IrStringConcatenationImpl
-import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
+import org.jetbrains.kotlin.ir.symbols.IrConstructorSymbol
 import org.jetbrains.kotlin.ir.symbols.IrSimpleFunctionSymbol
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.types.IrType
-import org.jetbrains.kotlin.ir.types.defaultType
-import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.getAnnotation
 import org.jetbrains.kotlin.ir.util.hasAnnotation
 import org.jetbrains.kotlin.ir.util.parentClassOrNull
-import org.jetbrains.kotlin.name.CallableId
-import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
-import org.jetbrains.kotlin.name.Name
 
 /**
  * Rewrites the body of every function annotated with
@@ -62,10 +57,16 @@ import org.jetbrains.kotlin.name.Name
  *
  * the body is replaced with (conceptually):
  * ```kotlin
- * fun compute(x: Int): Int = log.logged(Level.INFO, span = null, tags = emptyMap(), "UserService.compute", "x=$x") {
- *     /* body */
- * }
+ * fun compute(x: Int): Int =
+ *     log.logged(Level.INFO, span = null, tags = emptyMap(), "UserService.compute", "x=$x",
+ *                SourceLocation("UserService.kt", 6, "UserService.compute")) {
+ *         /* body */
+ *     }
  * ```
+ *
+ * The `SourceLocation` describes the instrumented function's **declaration** (its file, line, and
+ * `ClassName.functionName`) — also when the annotation sits on the class — so every emitted line is
+ * attributed to the annotated function.
  *
  * `@Logged(tags = [Tag(k, v), …])` is materialized as the `tags` map argument (class-level tags are
  * added first, so a function's own tag with the same key wins).
@@ -88,10 +89,16 @@ class LoggedIrTransformer(
     private val messageCollector: MessageCollector,
 ) : IrElementTransformerVoidWithContext() {
 
-    // The `inline fun <T> Logger.logged(level, span, tags, name, args, f)` member helper.
-    private val loggedFunction: IrSimpleFunctionSymbol? = finder.findFunctions(
-        CallableId(ClassId(LOG4K_PACKAGE, FqName("Logger"), false), Name.identifier("logged")),
-    ).firstOrNull { symbol -> symbol.owner.regularParams().size == 6 }
+    // The `inline fun <T> Logger.logged(level, span, tags, name, args[, callSite], f)` member helper —
+    // the call-site-aware 7-parameter overload is preferred; the 6-parameter one is the fallback for
+    // an older log4k runtime.
+    private val loggedFunction: IrSimpleFunctionSymbol? =
+        finder.findLog4kFunction("Logger", "logged", regularParams = 7)
+            ?: finder.findLog4kFunction("Logger", "logged", regularParams = 6)
+
+    // `SourceLocation(file, line, function)` — describes the instrumented function's declaration on the
+    // emitted lines. Absent on an older log4k runtime; the lines then carry no location.
+    private val sourceLocationConstructor: IrConstructorSymbol? = finder.findSourceLocationConstructor()
 
     // Materializes `@Logged(tags = [...])` as the `tags: Map<String, Any>` argument.
     private val tagsBuilder = AnnotationTagsBuilder(pluginContext, finder, messageCollector)
@@ -100,57 +107,31 @@ class LoggedIrTransformer(
     private val loggerField: OfThisClassField? =
         OfThisClassField.of(pluginContext, finder, messageCollector, "Logger", "@Logged", "log", "_log_")
 
-    // `Level` enum + its entries, to materialize the `@Logged(level = …)` argument.
-    private val levelClassSymbol: IrClassSymbol? =
-        finder.findClass(ClassId(LOG4K_PACKAGE, Name.identifier("Level")))
-    private val levelEntries: Map<String, IrEnumEntry> = levelClassSymbol?.owner?.declarations
-        ?.filterIsInstance<IrEnumEntry>()?.associateBy { it.name.asString() } ?: emptyMap()
+    // The `Level` enum, to materialize the `@Logged(level = …)` argument.
+    private val levels: LevelSymbols? = LevelSymbols.of(finder)
 
-    // `TracingContext` + `currentOrNull()` — used to correlate the logs with the active span.
-    private val tracingContextSymbol: IrClassSymbol? =
-        finder.findClass(ClassId(LOG4K_PACKAGE, Name.identifier("TracingContext")))
-    private val currentOrNullFunction: IrSimpleFunctionSymbol? = finder.findFunctions(
-        CallableId(ClassId(LOG4K_PACKAGE, FqName("TracingContext"), false), Name.identifier("currentOrNull")),
-    ).firstOrNull()
-
-    // `TracingEvent.Span` — a span in scope (e.g. a `Span.Local` receiver) is attached directly.
-    private val spanClassSymbol: IrClassSymbol? =
-        finder.findClass(ClassId(LOG4K_PACKAGE, FqName("TracingEvent.Span"), false))
+    // `TracingContext` + `currentOrNull()`, and `TracingEvent.Span` — used to correlate the
+    // emitted log lines with the active span (see [buildSpan]).
+    private val tracing = TracingSymbols.of(finder)
 
     // The log4k logging API must be on the classpath for the plugin to do anything.
-    val isReady: Boolean = loggedFunction != null && loggerField != null && levelClassSymbol != null
+    val isReady: Boolean = loggedFunction != null && loggerField != null && levels != null
 
     override fun visitFunctionNew(declaration: IrFunction): IrStatement {
-        if (shouldInstrument(declaration)) instrument(declaration)
+        // @NoLog on the function — or on its class (a per-class kill switch) — overrides any @Logged.
+        if (declaration.isInstrumentationTarget(LOGGED_ANNOTATION, NO_LOG_ANNOTATION)) instrument(declaration)
         return super.visitFunctionNew(declaration)
     }
 
     /** Attaches every synthesized `_log_` field to its class. Must run after the module transform. */
     fun commit() = loggerField?.commit()
 
-    private fun shouldInstrument(function: IrFunction): Boolean {
-        if (function.body == null) return false
-
-        val enclosingClass = function.parentClassOrNull
-        // @NoLog on the function — or on its class (a per-class kill switch) — disables logging,
-        // overriding any @Logged.
-        if (function.hasAnnotation(NO_LOG_ANNOTATION)) return false
-        if (enclosingClass?.hasAnnotation(NO_LOG_ANNOTATION) == true) return false
-
-        // Explicit @Logged on the function.
-        if (function.hasAnnotation(LOGGED_ANNOTATION)) return true
-
-        // Class-level @Logged: instrument every eligible public member function.
-        if (enclosingClass == null || !enclosingClass.hasAnnotation(LOGGED_ANNOTATION)) return false
-        return function.isClassLevelEligible()
-    }
-
     private fun instrument(function: IrFunction) {
         val loggedFn = loggedFunction ?: return
 
         val dispatchParam = loggedFn.owner.dispatchReceiverParam()
         val regular = loggedFn.owner.regularParams()
-        if (dispatchParam == null || regular.size != 6) {
+        if (dispatchParam == null || regular.size !in 6..7) {
             messageCollector.reportError(
                 function,
                 "log4k-compiler-plugin: could not resolve the expected `Logger.logged` signature — " +
@@ -163,7 +144,8 @@ class LoggedIrTransformer(
         val tagsParam = regular[2]
         val nameParam = regular[3]
         val argsParam = regular[4]
-        val fParam = regular[5]
+        val callSiteParam = if (regular.size == 7) regular[5] else null
+        val fParam = regular.last()
 
         // Resolve (or synthesize) the `log: Logger` to call `logged` on. Errors are reported inside.
         val loggerAccess = loggerField?.access(function) ?: return
@@ -172,18 +154,9 @@ class LoggedIrTransformer(
         val returnType = function.returnType
 
         // 1. Build the inline lambda `{ <original body> }` (a plain `() -> T`).
-        val lambda = pluginContext.buildInlineLambda(function, returnType)
+        val lambdaExpression = pluginContext.buildInlineLambdaExpression(function, returnType)
 
         // 2. `log.logged<returnType>(level, span, "name", "args", <lambda>)`.
-        val functionType = pluginContext.irBuiltIns.functionN(0).symbol.typeWith(returnType)
-        val lambdaExpression = Log4kIrFunctionExpression(
-            startOffset = function.startOffset,
-            endOffset = function.endOffset,
-            type = functionType,
-            origin = IrStatementOrigin.LAMBDA,
-            function = lambda,
-        )
-
         val tags = function.resolveTags(LOGGED_ANNOTATION)
         val tagsArg = tagsBuilder.buildMap(builder, function, tags, tagsParam.type, "@Logged") ?: return
         val call = builder.irCall(loggedFn, returnType, listOf(returnType)).apply {
@@ -193,6 +166,14 @@ class LoggedIrTransformer(
             arguments[tagsParam] = tagsArg
             arguments[nameParam] = builder.irString(function.qualifiedName())
             arguments[argsParam] = buildArgs(builder, function)
+            callSiteParam?.let { param ->
+                // The **declaration** of the instrumented function — the line of the annotated
+                // function itself (also when the annotation sits on the class) — so every emitted
+                // line is attributed to it. Falls back to `null` for synthetic declarations.
+                arguments[param] = sourceLocationConstructor?.let {
+                    builder.irSourceLocation(it, currentFile, function.startOffset, function.qualifiedName())
+                } ?: builder.irNull(param.type)
+            }
             arguments[fParam] = lambdaExpression
         }
 
@@ -205,13 +186,11 @@ class LoggedIrTransformer(
         val name = levelName(function.getAnnotation(LOGGED_ANNOTATION))
             ?: levelName(function.parentClassOrNull?.getAnnotation(LOGGED_ANNOTATION))
             ?: "INFO"
-        val entry = levelEntries[name] ?: levelEntries.getValue("INFO")
-        return IrGetEnumValueImpl(
-            function.startOffset,
-            function.endOffset,
-            levelClassSymbol!!.defaultType,
-            entry.symbol
-        )
+        val levels = levels
+            ?: error("log4k-compiler-plugin: `Level` not resolved — guarded by `isReady`.")
+        return levels.get(name, function.startOffset, function.endOffset)
+            ?: levels.get("INFO", function.startOffset, function.endOffset)
+            ?: error("log4k-compiler-plugin: the `Level` enum has no INFO entry.")
     }
 
     private fun levelName(annotation: IrConstructorCall?): String? {
@@ -257,22 +236,13 @@ class LoggedIrTransformer(
         spanType: IrType,
     ): IrExpression {
         // 1. A TracingContext in scope -> its current span.
-        val contextSymbol = tracingContextSymbol
-        val currentFn = currentOrNullFunction
-        if (contextSymbol != null && currentFn != null) {
-            val contextParam = function.receiverOrContextOf(contextSymbol)
-            if (contextParam != null) {
-                return builder.irCall(currentFn).apply {
-                    currentFn.owner.dispatchReceiverParam()?.let { arguments[it] = builder.irGet(contextParam) }
-                }
-            }
+        val contextParam = tracing.tracingContext?.let { function.receiverOrContextOf(it) }
+        if (contextParam != null) {
+            tracing.irCurrentOrNull(builder, builder.irGet(contextParam))?.let { return it }
         }
-        // 2. A TracingEvent.Span in scope (e.g. a `Span.Local` receiver) -> attach it directly.
-        val spanSymbol = spanClassSymbol
-        if (spanSymbol != null) {
-            val spanParam = function.receiverOrContextOf(spanSymbol)
-            if (spanParam != null) return builder.irGet(spanParam)
-        }
+        // 2. A TracingEvent.Span in scope (e.g., a `Span.Local` receiver) -> attach it directly.
+        val spanParam = tracing.span?.let { function.receiverOrContextOf(it) }
+        if (spanParam != null) return builder.irGet(spanParam)
         // 3. Nothing in scope.
         return builder.irNull(spanType)
     }

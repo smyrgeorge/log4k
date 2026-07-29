@@ -5,6 +5,7 @@ import assertk.assertions.contains
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
 import assertk.assertions.isTrue
+import io.github.smyrgeorge.log4k.SourceLocation
 import io.github.smyrgeorge.log4k.Level
 import io.github.smyrgeorge.log4k.Tracer
 import io.github.smyrgeorge.log4k.impl.appenders.simple.SimpleJsonConsoleLoggingAppender.Companion.formatJson
@@ -61,6 +62,25 @@ class SimpleJsonConsoleLoggingAppenderTests {
         val obj = parse(loggingEvent(span = span).formatJson())
         assertThat(obj.getValue("span_id").jsonPrimitive.content).isEqualTo("span-9")
         assertThat(obj.getValue("trace_id").jsonPrimitive.content).isEqualTo("trace-9")
+    }
+
+    @Test
+    fun formatJson_includesTheCallSite_whenPresent() {
+        // The field names follow logstash-logback-encoder's caller data, so log4k JSON lines look
+        // exactly like Logback-based JSON logs; the method is the bare name.
+        val obj = parse(loggingEvent(callSite = SourceLocation(file = "Api.kt", line = 42, function = "Api.handle")).formatJson())
+        assertThat(obj.getValue("caller_method_name").jsonPrimitive.content).isEqualTo("handle")
+        assertThat(obj.getValue("caller_file_name").jsonPrimitive.content).isEqualTo("Api.kt")
+        assertThat(obj.getValue("caller_line_number").jsonPrimitive.content).isEqualTo("42")
+        assertThat(obj.getValue("caller_line_number").jsonPrimitive.isString).isFalse() // a JSON number
+    }
+
+    @Test
+    fun formatJson_omitsTheCallSite_whenAbsent() {
+        val obj = parse(loggingEvent().formatJson())
+        assertThat(obj.containsKey("caller_file_name")).isFalse()
+        assertThat(obj.containsKey("caller_line_number")).isFalse()
+        assertThat(obj.containsKey("caller_method_name")).isFalse()
     }
 
     @Test

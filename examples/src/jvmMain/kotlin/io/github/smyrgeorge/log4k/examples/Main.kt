@@ -5,4 +5,5 @@ fun main() {
     TracedCompilerPlugin.run()
     TimedCompilerPlugin.run()
     LoggedCompilerPlugin.run()
+    CallSiteCompilerPlugin.run()
 }

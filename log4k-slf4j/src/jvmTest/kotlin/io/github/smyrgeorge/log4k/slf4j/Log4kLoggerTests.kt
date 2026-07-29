@@ -9,12 +9,14 @@ import assertk.assertions.isNull
 import assertk.assertions.isSameInstanceAs
 import assertk.assertions.isTrue
 import io.github.smyrgeorge.log4k.Appender
+import io.github.smyrgeorge.log4k.SourceLocation
 import io.github.smyrgeorge.log4k.Level
 import io.github.smyrgeorge.log4k.LoggingEvent
 import io.github.smyrgeorge.log4k.RootLogger
 import io.github.smyrgeorge.log4k.slf4j.utils.CapturingLoggingAppender
 import kotlinx.coroutines.test.runTest
 import org.slf4j.LoggerFactory
+import org.slf4j.MDC
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -28,10 +30,10 @@ import org.slf4j.Logger as Slf4jLogger
  * `Logger.log` (level gate included) -> `RootLogger` queue -> appender.
  *
  * Delivery is asynchronous, so the tests run inside [runTest] and suspend on `awaitEvent(...)` until the
- * event in question has been appended. Suppression ("no event") cases are proven deterministically by
+ * event in question has been appended. Suppression ("no event") cases are proven deterministic by
  * ordering against a marker log rather than with a timeout.
  *
- * Every test uses its own logger name, because the log4k logger registry is process-wide and shared with
+ * Every test uses its own logger name because the log4k logger registry is process-wide and shared with
  * the core API.
  */
 class Log4kLoggerTests {
@@ -39,7 +41,7 @@ class Log4kLoggerTests {
     private lateinit var appender: CapturingLoggingAppender
 
     // RootLogger registers a default console appender. Detach whatever is there, install only our
-    // capturing appender for the test (which also keeps the build output clean), and restore afterwards.
+    // capturing appender for the test (which also keeps the build output clean), and restore afterward.
     private var saved: List<Appender<LoggingEvent>> = emptyList()
 
     @BeforeTest
@@ -88,7 +90,119 @@ class Log4kLoggerTests {
         logger("slf4j.classic.notags").info("m")
 
         val event = appender.awaitEvent { it.logger == "slf4j.classic.notags" }
-        assertThat(event.tags).isEqualTo(emptyMap<String, Any>())
+        assertThat(event.tags).isEqualTo(emptyMap())
+    }
+
+    // --- Call-site recovery (OpenTelemetry code attributes) ----------------------------------------
+
+    @Test
+    fun fluentCodeKeyValuePairs_becomeTheCallSite_andAreConsumedFromTags() = runTest {
+        logger("slf4j.callsite.kvp").atInfo()
+            .setMessage("m")
+            .addKeyValue("code.file.path", "Api.kt")
+            .addKeyValue("code.line.number", 42)
+            .addKeyValue("code.function.name", "Api.handle")
+            .addKeyValue("tenant", "acme")
+            .log()
+
+        val event = appender.awaitEvent { it.logger == "slf4j.callsite.kvp" }
+        assertThat(event.callSite).isEqualTo(SourceLocation(file = "Api.kt", line = 42, function = "Api.handle"))
+        // The code-location pairs are represented structurally on the event, not duplicated as tags.
+        assertThat(event.tags).isEqualTo(mapOf<String, Any>("tenant" to "acme"))
+    }
+
+    @Test
+    fun mdcCodeKeys_becomeTheCallSite_onTheClassicPath() = runTest {
+        try {
+            MDC.put("code.file.path", "Service.kt")
+            MDC.put("code.line.number", "7")
+            MDC.put("code.function.name", "Service.run")
+
+            logger("slf4j.callsite.mdc").info("m")
+        } finally {
+            MDC.clear()
+        }
+
+        val event = appender.awaitEvent { it.logger == "slf4j.callsite.mdc" }
+        assertThat(event.callSite).isEqualTo(SourceLocation(file = "Service.kt", line = 7, function = "Service.run"))
+    }
+
+    @Test
+    fun mdcCodeKeys_becomeTheCallSite_onTheFluentPath() = runTest {
+        try {
+            MDC.put("code.file.path", "Service.kt")
+            MDC.put("code.line.number", "9")
+
+            logger("slf4j.callsite.mdc.fluent").atInfo().setMessage("m").addKeyValue("tenant", "acme").log()
+        } finally {
+            MDC.clear()
+        }
+
+        // No code-location key-value pairs on the event -> the MDC is the fallback; the ordinary
+        // key-value pair still becomes a tag.
+        val event = appender.awaitEvent { it.logger == "slf4j.callsite.mdc.fluent" }
+        assertThat(event.callSite).isEqualTo(SourceLocation(file = "Service.kt", line = 9, function = ""))
+        assertThat(event.tags).isEqualTo(mapOf<String, Any>("tenant" to "acme"))
+    }
+
+    @Test
+    fun legacyCodeKeys_areAccepted_andNamespaceJoinsTheFunction() = runTest {
+        try {
+            MDC.put("code.filepath", "Legacy.kt")
+            MDC.put("code.lineno", "11")
+            MDC.put("code.function", "handle")
+            MDC.put("code.namespace", "com.acme.Legacy")
+
+            logger("slf4j.callsite.legacy").info("m")
+        } finally {
+            MDC.clear()
+        }
+
+        val event = appender.awaitEvent { it.logger == "slf4j.callsite.legacy" }
+        assertThat(event.callSite)
+            .isEqualTo(SourceLocation(file = "Legacy.kt", line = 11, function = "com.acme.Legacy.handle"))
+    }
+
+    @Test
+    fun logstashCallerKeys_areAccepted() = runTest {
+        // The caller-data field names produced by logstash-logback-encoder (and by log4k's own
+        // SLF4J appender). The class joins the method as its simple name.
+        try {
+            MDC.put("caller_file_name", "AbstractEventHandler.kt")
+            MDC.put("caller_line_number", "97")
+            MDC.put("caller_method_name", "setupExchange")
+            MDC.put("caller_class_name", "gr.hd360.infra.AbstractEventHandler")
+
+            logger("slf4j.callsite.logstash").info("m")
+        } finally {
+            MDC.clear()
+        }
+
+        val event = appender.awaitEvent { it.logger == "slf4j.callsite.logstash" }
+        assertThat(event.callSite).isEqualTo(
+            SourceLocation(file = "AbstractEventHandler.kt", line = 97, function = "AbstractEventHandler.setupExchange")
+        )
+    }
+
+    @Test
+    fun withoutCodeAttributes_theCallSiteIsNull() = runTest {
+        logger("slf4j.callsite.none").info("m")
+
+        val event = appender.awaitEvent { it.logger == "slf4j.callsite.none" }
+        assertThat(event.callSite).isNull()
+    }
+
+    @Test
+    fun codeAttributesWithoutAFile_buildNoCallSite_andStayTags() = runTest {
+        // `code.file.path` is required; a lone function attribute is kept as an ordinary tag.
+        logger("slf4j.callsite.nofile").atInfo()
+            .setMessage("m")
+            .addKeyValue("code.function.name", "Api.handle")
+            .log()
+
+        val event = appender.awaitEvent { it.logger == "slf4j.callsite.nofile" }
+        assertThat(event.callSite).isNull()
+        assertThat(event.tags).isEqualTo(mapOf<String, Any>("code.function.name" to "Api.handle"))
     }
 
     // --- Level mapping -------------------------------------------------------------------------

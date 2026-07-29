@@ -1,5 +1,6 @@
 package io.github.smyrgeorge.log4k.utils
 
+import io.github.smyrgeorge.log4k.SourceLocation
 import io.github.smyrgeorge.log4k.Level
 import io.github.smyrgeorge.log4k.LoggingEvent
 import io.github.smyrgeorge.log4k.TracingEvent
@@ -21,6 +22,7 @@ fun loggingEvent(
     arguments: Array<out Any?> = arrayOf("world"),
     thread: String = "main",
     throwable: Throwable? = null,
+    callSite: SourceLocation? = null,
 ): LoggingEvent = LoggingEvent(
     id = id,
     level = level,
@@ -32,4 +34,5 @@ fun loggingEvent(
     arguments = arguments,
     thread = thread,
     throwable = throwable,
+    callSite = callSite,
 )

@@ -1,13 +1,12 @@
 package io.github.smyrgeorge.log4k.compiler.timed
 
-import io.github.smyrgeorge.log4k.compiler.ir.Log4kIrFunctionExpression
 import io.github.smyrgeorge.log4k.compiler.ir.utils.AnnotationTagsBuilder
-import io.github.smyrgeorge.log4k.compiler.ir.utils.LOG4K_PACKAGE
 import io.github.smyrgeorge.log4k.compiler.ir.utils.OfThisClassField
-import io.github.smyrgeorge.log4k.compiler.ir.utils.buildInlineLambda
+import io.github.smyrgeorge.log4k.compiler.ir.utils.buildInlineLambdaExpression
 import io.github.smyrgeorge.log4k.compiler.ir.utils.dispatchReceiverParam
-import io.github.smyrgeorge.log4k.compiler.ir.utils.isClassLevelEligible
-import io.github.smyrgeorge.log4k.compiler.ir.utils.qualifiedName
+import io.github.smyrgeorge.log4k.compiler.ir.utils.findLog4kFunction
+import io.github.smyrgeorge.log4k.compiler.ir.utils.instrumentationName
+import io.github.smyrgeorge.log4k.compiler.ir.utils.isInstrumentationTarget
 import io.github.smyrgeorge.log4k.compiler.ir.utils.regularParams
 import io.github.smyrgeorge.log4k.compiler.ir.utils.reportError
 import io.github.smyrgeorge.log4k.compiler.ir.utils.resolveTags
@@ -22,18 +21,9 @@ import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.builders.irString
 import org.jetbrains.kotlin.ir.declarations.IrFunction
-import org.jetbrains.kotlin.ir.expressions.IrConst
-import org.jetbrains.kotlin.ir.expressions.IrStatementOrigin
 import org.jetbrains.kotlin.ir.symbols.IrSimpleFunctionSymbol
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
-import org.jetbrains.kotlin.ir.types.typeWith
-import org.jetbrains.kotlin.ir.util.getAnnotation
-import org.jetbrains.kotlin.ir.util.hasAnnotation
-import org.jetbrains.kotlin.ir.util.parentClassOrNull
-import org.jetbrains.kotlin.name.CallableId
-import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
-import org.jetbrains.kotlin.name.Name
 
 /**
  * Rewrites the body of every function annotated with
@@ -56,7 +46,7 @@ import org.jetbrains.kotlin.name.Name
  * The `Meter` is resolved by [OfThisClassField]: a `meter: Meter` member is reused; otherwise
  * `private val _meter_ = Meter.of(this::class)` is synthesized (created once per class). `Meter.timed`
  * caches its instrument bundle by name, and `Meter.Timed.measure` is `inline`, so both regular and
- * `suspend` functions work: the moved body is placed in an inline lambda and therefore keeps its
+ * `suspend` function work: the moved body is placed in an inline lambda and therefore keeps its
  * original suspension context.
  */
 @OptIn(UnsafeDuringIrConstructionAPI::class)
@@ -71,46 +61,28 @@ class TimedIrTransformer(
         OfThisClassField.of(pluginContext, finder, messageCollector, "Meter", "@Timed", "meter", "_meter_")
 
     // `Meter.timed(name, vararg tags): Meter.Timed` — returns the (cached) instrument bundle.
-    private val meterTimedFunction: IrSimpleFunctionSymbol? = finder.findFunctions(
-        CallableId(ClassId(LOG4K_PACKAGE, FqName("Meter"), false), Name.identifier("timed")),
-    ).firstOrNull { symbol -> symbol.owner.regularParams().size == 2 }
+    private val meterTimedFunction: IrSimpleFunctionSymbol? =
+        finder.findLog4kFunction("Meter", "timed", regularParams = 2)
 
     // Materializes `@Timed(tags = [...])` as the `vararg tags: Pair<String, Any>` metric dimensions.
     private val tagsBuilder = AnnotationTagsBuilder(pluginContext, finder, messageCollector)
 
     // `Meter.Timed.measure(f)` — the inline helper that records the metrics around the body.
-    private val measureFunction: IrSimpleFunctionSymbol? = finder.findFunctions(
-        CallableId(ClassId(LOG4K_PACKAGE, FqName("Meter.Timed"), false), Name.identifier("measure")),
-    ).firstOrNull()
+    private val measureFunction: IrSimpleFunctionSymbol? =
+        finder.findLog4kFunction("Meter.Timed", "measure", regularParams = 1)
 
     // The log4k metering API must be on the classpath for the plugin to do anything.
     val isReady: Boolean =
         meterField != null && meterTimedFunction != null && measureFunction != null
 
     override fun visitFunctionNew(declaration: IrFunction): IrStatement {
-        if (shouldInstrument(declaration)) instrument(declaration)
+        // @NoTime on the function — or on its class (a per-class kill switch) — overrides any @Timed.
+        if (declaration.isInstrumentationTarget(TIMED_ANNOTATION, NO_TIME_ANNOTATION)) instrument(declaration)
         return super.visitFunctionNew(declaration)
     }
 
     /** Attaches every synthesized `_meter_` field to its class. Must run after the module transform. */
     fun commit() = meterField?.commit()
-
-    private fun shouldInstrument(function: IrFunction): Boolean {
-        if (function.body == null) return false
-
-        val enclosingClass = function.parentClassOrNull
-        // @NoTime on the function — or on its class (a per-class kill switch) — disables metrics,
-        // overriding any @Timed.
-        if (function.hasAnnotation(NO_TIME_ANNOTATION)) return false
-        if (enclosingClass?.hasAnnotation(NO_TIME_ANNOTATION) == true) return false
-
-        // Explicit @Timed on the function.
-        if (function.hasAnnotation(TIMED_ANNOTATION)) return true
-
-        // Class-level @Timed: instrument every eligible public member function.
-        if (enclosingClass == null || !enclosingClass.hasAnnotation(TIMED_ANNOTATION)) return false
-        return function.isClassLevelEligible()
-    }
 
     private fun instrument(function: IrFunction) {
         val timedFn = meterTimedFunction ?: return
@@ -123,13 +95,15 @@ class TimedIrTransformer(
         val returnType = function.returnType
 
         // 1. Build the inline lambda `{ <original body> }` (a plain `() -> T`).
-        val lambda = pluginContext.buildInlineLambda(function, returnType)
+        val lambdaExpression = pluginContext.buildInlineLambdaExpression(function, returnType)
 
         // 2. `meter.timed("name", *tags).measure<returnType> { <lambda> }`.
         val timedRegular = timedFn.owner.regularParams()
         val timed = builder.irCall(timedFn).apply {
             timedFn.owner.dispatchReceiverParam()?.let { arguments[it] = meterAccess }
-            timedRegular.getOrNull(0)?.let { arguments[it] = builder.irString(resolveName(function)) }
+            timedRegular.getOrNull(0)?.let {
+                arguments[it] = builder.irString(function.instrumentationName(TIMED_ANNOTATION))
+            }
             timedRegular.getOrNull(1)?.let {
                 arguments[it] = tagsBuilder.buildVararg(
                     builder = builder,
@@ -140,15 +114,6 @@ class TimedIrTransformer(
                 )
             }
         }
-
-        val functionType = pluginContext.irBuiltIns.functionN(0).symbol.typeWith(returnType)
-        val lambdaExpression = Log4kIrFunctionExpression(
-            startOffset = function.startOffset,
-            endOffset = function.endOffset,
-            type = functionType,
-            origin = IrStatementOrigin.LAMBDA,
-            function = lambda,
-        )
 
         val measureDispatch = measureFn.owner.dispatchReceiverParam()
         val measureF = measureFn.owner.regularParams().firstOrNull()
@@ -168,14 +133,6 @@ class TimedIrTransformer(
 
         // 3. Replace the original body with `return meter.timed(...).measure { ... }`.
         function.body = builder.irBlockBody { +irReturn(call) }
-    }
-
-    /** The base metric name: the function's own `@Timed(name)` if non-blank, else "ClassName.functionName". */
-    private fun resolveName(function: IrFunction): String {
-        val annotation = function.getAnnotation(TIMED_ANNOTATION)
-        val configured = (annotation?.arguments?.getOrNull(0) as? IrConst)?.value as? String
-        if (!configured.isNullOrBlank()) return configured
-        return function.qualifiedName()
     }
 
     companion object {

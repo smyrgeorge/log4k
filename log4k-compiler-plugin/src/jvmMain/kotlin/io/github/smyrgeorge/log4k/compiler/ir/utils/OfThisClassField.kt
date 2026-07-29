@@ -49,7 +49,7 @@ class OfThisClassField(
     private val memberName: String,
     private val syntheticName: String,
 ) {
-    // Fields synthesized during traversal; attached to their classes by [commit] afterwards.
+    // Fields synthesized during traversal; attached to their classes by [commit] afterward.
     private val created = mutableMapOf<IrClass, IrField>()
 
     /**
@@ -98,17 +98,22 @@ class OfThisClassField(
         }.apply {
             parent = clazz
             val initBuilder = DeclarationIrBuilder(pluginContext, symbol)
+            val thisReceiver = clazz.thisReceiver
+                ?: error("log4k-compiler-plugin: class `${clazz.name}` has no `this` receiver to synthesize a field for.")
             initializer = pluginContext.irFactory.createExpressionBody(
                 clazz.startOffset,
                 clazz.endOffset,
-                initBuilder.irOfThisClass(pluginContext, ofFunction, clazz.thisReceiver!!),
+                initBuilder.irOfThisClass(pluginContext, ofFunction, thisReceiver),
             )
         }
     }
 
     /** Attaches every synthesized field to its class. Must run after the module transform. */
     fun commit() {
-        created.forEach { (clazz, field) -> clazz.declarations.add(field) }
+        // First in the declaration list, so the field is initialized before any user property or
+        // `init` block — an instrumented method invoked during construction must already see it.
+        // Safe to hoist: the initializer only reads `this::class`, never instance state.
+        created.forEach { (clazz, field) -> clazz.declarations.add(0, field) }
         created.clear()
     }
 

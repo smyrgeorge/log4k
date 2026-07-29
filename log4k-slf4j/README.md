@@ -12,7 +12,7 @@
 
 An **SLF4J 2.x provider backed by [log4k](../README.md)**.
 
-Add it to a JVM project and every `org.slf4j.Logger` call — from your own code and from every third-party library that
+Add it to a JVM project, and every `org.slf4j.Logger` call — from your own code and from every third-party library that
 logs through SLF4J (Spring, Netty, Hibernate, …) — is routed into log4k's asynchronous, channel-based pipeline and
 handled by log4k appenders. There is nothing to configure: SLF4J discovers the provider on the classpath.
 
@@ -27,6 +27,7 @@ only for the `jvm` target.
 
 - [Installation](#installation)
 - [How It Works](#how-it-works)
+- [Call-Site Recovery](#call-site-recovery)
 - [Level Mapping](#level-mapping)
 - [Spring Boot](#spring-boot)
 
@@ -69,6 +70,28 @@ it — also applies to loggers created by third-party libraries.
 **SLF4J calls are non-blocking.** Nothing is written on the calling thread: the event is enqueued and appended on
 `Dispatchers.IO`, and `{}` substitution happens later, in the appender. Appenders therefore receive the raw message
 pattern plus the untouched `arguments` array, which is what makes structured/JSON output possible.
+
+## Call-Site Recovery
+
+The SLF4J API transports no source location, and log4k's compile-time call-site injection (see the
+`log4k-compiler-plugin`) instruments log4k entry points only — so the bridge never walks the stack. Instead, when the
+caller (or upstream instrumentation) has recorded the location under a known convention, the bridge recovers it as the
+event's `callSite`. Accepted keys:
+
+- the OpenTelemetry code attributes — `code.file.path` / `code.line.number` / `code.function.name`, with the legacy
+  `code.filepath` / `code.lineno` / `code.function` (+ `code.namespace`) spellings accepted too;
+- logstash-logback-encoder's caller-data fields — `caller_file_name` / `caller_line_number` / `caller_method_name`
+  (+ `caller_class_name`), the shape Logback-based JSON logs (e.g., Spring Boot with the logstash encoder) use.
+
+Sources, in order:
+
+- **Fluent API key-value pairs** are consulted first (`atInfo().addKeyValue("code.file.path", …)`); pairs that formed
+  the call site are consumed into it instead of being duplicated as tags.
+- Otherwise, the **MDC** is read (`MDC.put("code.file.path", …)`), on the caller's thread — so a propagated context is
+  the caller's, not the async pipeline's.
+
+The file key is required; the line and function are best-effort (`0` / `""` when absent). Without any of these
+attributes the event simply carries `callSite = null`.
 
 ## Level Mapping
 

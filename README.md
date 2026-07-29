@@ -20,9 +20,9 @@
 
 A Comprehensive Logging and Tracing Solution for Kotlin Multiplatform.
 
-This project provides a robust, event-driven logging and tracing platform specifically designed for Kotlin
-Multiplatform (also compatible with the Java ecosystem). Built with coroutines and channels at its core, it offers
-asynchronous, scalable logging across multiple platforms.
+This project provides a robust, event-driven logging and tracing platform specifically designed for Kotlin Multiplatform
+(also compatible with the Java ecosystem). Built with coroutines and channels at its core, it offers asynchronous,
+scalable logging across multiple platforms.
 
 This project also tries to be fully compatible with `OpenTelemetry` standard.
 
@@ -36,6 +36,7 @@ This project also tries to be fully compatible with `OpenTelemetry` standard.
     - [Extension Modules](#extension-modules)
         - [The `classic` escape hatch (`log4k-context`)](#the-classic-escape-hatch-log4k-context)
 - [Architecture](#architecture)
+- [Integrations (`log4k-integrations`)](#integrations-log4k-integrations)
 - [Logging API](#logging-api)
     - [Tags](#tags)
     - [Builder DSL](#builder-dsl)
@@ -45,7 +46,6 @@ This project also tries to be fully compatible with `OpenTelemetry` standard.
         - [Using log4k on top of SLF4J (`log4k-slf4j-appender`)](#using-log4k-on-top-of-slf4j-log4k-slf4j-appender)
     - [Json Appender](#json-appender)
 - [Tracing API](#tracing-api)
-    - [Integrations (`log4k-integrations`)](#integrations-log4k-integrations)
 - [Metering API](#metering-api)
     - [Counter](#counter)
     - [UpDownCounter](#updowncounter)
@@ -53,6 +53,7 @@ This project also tries to be fully compatible with `OpenTelemetry` standard.
     - [Histogram](#histogram)
 - [Compiler Plugin](#compiler-plugin)
     - [Setup](#setup)
+    - [Call-site injection](#call-site-injection)
     - [Logging (`@Logged`)](#logging-logged)
     - [Metering (`@Timed`)](#metering-timed)
     - [Tracing (`@Traced`)](#tracing-traced)
@@ -74,8 +75,8 @@ implementation("io.github.smyrgeorge:log4k:x.y.z")
 ### Extension Modules
 
 Starting with Kotlin `2.3.20`, what was previously a call-ambiguity warning between context-aware and non-context
-extension functions became a compilation error. To resolve this, the lambda-based extension functions have been
-split into two separate modules:
+extension functions became a compilation error. To resolve this, the lambda-based extension functions have been split
+into two separate modules:
 
 **`log4k-classic`** — Lambda extensions **without** context receivers (standard usage):
 
@@ -143,10 +144,30 @@ batching—such as sending batched log or trace events over the network or appen
 
 On the other hand, some appenders can be simpler and do not require a `Channel` for event processing. For example, the
 `SimpleConsoleLoggingAppender` directly prints each incoming event to the console without queuing, offering a
-straightforward logging
-solution.
+straightforward logging solution.
 
 The tracing module shares exactly the same principals.
+
+## Integrations (`log4k-integrations`)
+
+To ship traces to an external backend, add the `log4k-integrations` module and register one of its appenders — they
+batch finished spans and publish them over HTTP (Ktor). `OtlpTracingAppender` speaks the vendor-neutral
+[OTLP/HTTP](https://opentelemetry.io/docs/specs/otlp/) protocol accepted by most backends (OpenTelemetry Collector,
+Jaeger, Grafana Tempo, ...), and provider-specific appenders sit alongside it — see the full list, setup details, and
+span mappings in the [module's README](log4k-integrations/README.md).
+
+```kotlin
+// https://central.sonatype.com/artifact/io.github.smyrgeorge/log4k-integrations
+implementation("io.github.smyrgeorge:log4k-integrations:x.y.z")
+// Plus the Ktor engine for your platform, e.g. on the JVM:
+implementation("io.ktor:ktor-client-cio:3.x.x")
+```
+
+```kotlin
+RootLogger.Tracing.appenders.register(
+    OtlpTracingAppender(service = "my-service", env = "production") // localhost:4318
+)
+```
 
 ## Logging API
 
@@ -188,9 +209,9 @@ log.error(e) { e.message } // e: Throwable
 
 ### Tags
 
-Like tracing spans and metering events, every `LoggingEvent` can carry **tags** — structured key/value
-dimensions kept separate from the message text. Following the same convention as the span overloads,
-tags lead the call (`(span?, tags?, msg, args...)`):
+Like tracing spans and metering events, every `LoggingEvent` can carry **tags** — structured key/value dimensions kept
+separate from the message text. Following the same convention as the span overloads, tags lead to the call
+(`(span?, tags?, msg, args...)`):
 
 ```kotlin
 log.info(mapOf("tenant" to "acme", "attempt" to 2), "user {} logged in", "alice")
@@ -198,17 +219,17 @@ log.warn(mapOf("tenant" to "acme")) { "lazy message" } // lazy variant
 ```
 
 Tags are aimed at structured sinks: the `SimpleJsonConsoleLoggingAppender` emits them as a nested
-`"tags"` object, and the `log4k-slf4j-appender` forwards them as SLF4J key-value pairs (in the opposite
-direction, the `log4k-slf4j` provider turns fluent-API `addKeyValue(...)` pairs into event tags). The
-plain-text console appenders deliberately keep the log line tag-free. The compiler plugin can attach
-static tags as well — see [`@Logged`](#logging-logged).
+`"tags"` object, and the `log4k-slf4j-appender` forwards them as SLF4J key-value pairs (in the opposite direction, the
+`log4k-slf4j` provider turns fluent-API `addKeyValue(...)` pairs into event tags). The plain-text console appenders
+deliberately keep the log line tag-free. The compiler plugin can attach static tags as well — see [
+`@Logged`](#logging-logged).
 
 ### Builder DSL
 
 Every level also has a builder-style entry point — `atTrace`, `atDebug`, `atInfo`, `atWarn`, `atError`
 (plus the generic `at(level)`) — that assembles the whole event in a single block. The generic
-`at(level)` is a member of `Logger`, while the level-named shorthands are extension functions living
-in the `io.github.smyrgeorge.log4k.impl.extensions` package:
+`at(level)` is a member of `Logger`, while the level-named shorthands are extension functions living in the
+`io.github.smyrgeorge.log4k.impl.extensions` package:
 
 ```kotlin
 log.atWarn {
@@ -224,12 +245,12 @@ log.atWarn {
 
 The block configures a `LoggingEvent.Builder` whose properties map one-to-one onto the parameters of
 `Logger.log(level, span, tags, message, arguments, throwable)`: `message` is the log message, `cause`
-becomes the event's throwable, and `tags` become the event's [tags](#tags). A `span` (for trace
-correlation) and message `arguments` can be set the same way. Everything is optional — unset
-properties fall back to their defaults (empty message/tags/arguments, no cause, no span).
+becomes the event's throwable, and `tags` become the event's [tags](#tags). A `span` (for trace correlation) and message
+`arguments` can be set the same way. Everything is optional — unset properties fall back to their defaults (empty
+message/tags/arguments, no cause, no span).
 
-The functions are `inline` and the block only runs when the level is enabled, so — like the lazy
-lambda API — a filtered-out event costs neither the message interpolation nor the tags allocation:
+The functions are `inline` and the block only runs when the level is enabled, so — like the lazy lambda API — a
+filtered-out event costs neither the message interpolation nor the tags' allocation:
 
 ```kotlin
 log.atDebug {
@@ -241,8 +262,7 @@ log.atDebug {
 ### Context Parameters Support
 
 The logging API supports Kotlin's context receivers for automatic span propagation. When logging within a
-`TracingContext`,
-the current span is automatically attached to log events without explicitly passing it:
+`TracingContext`, the current span is automatically attached to log events without explicitly passing it:
 
 ```kotlin
 trace.span("my-operation") {
@@ -268,8 +288,8 @@ trace.span("my-operation") {
 }
 ```
 
-All log levels (`trace`, `debug`, `info`, `warn`, `error`) support context receivers, both with message strings
-and with lambdas for lazy evaluation.
+All log levels (`trace`, `debug`, `info`, `warn`, `error`) support context receivers, both with message strings and with
+lambdas for lazy evaluation.
 
 See the [Logger](./log4k/src/commonMain/kotlin/io/github/smyrgeorge/log4k/Logger.kt)
 and [TracingContext](./log4k/src/commonMain/kotlin/io/github/smyrgeorge/log4k/TracingContext.kt) classes for more
@@ -294,7 +314,7 @@ Both modules are JVM-only: SLF4J itself is a JVM API.
 
 #### Using SLF4J on top of log4k (`log4k-slf4j`)
 
-An SLF4J 2.x provider backed by log4k. Add it to a JVM project and every `org.slf4j.Logger` call — from your own code
+An SLF4J 2.x provider backed by log4k. Add it to a JVM project, and every `org.slf4j.Logger` call — from your own code
 and from every third-party library that logs through SLF4J (Spring, Netty, Hibernate, …) — is routed into log4k's
 asynchronous, channel-based pipeline and handled by log4k appenders. There is nothing to configure: SLF4J discovers the
 provider on the classpath.
@@ -330,7 +350,7 @@ Slf4jLoggingAppender.install()
 
 For detailed setup instructions and usage, see the module's [README.md](./log4k-slf4j-appender/README.md).
 
-### Json Appender
+### JSON Appender
 
 ```kotlin
 // You can register the `SimpleJsonConsoleLoggingAppender` for json logs in the console.
@@ -380,8 +400,8 @@ trace.span("test", parent) {
 }
 ```
 
-Additionally, you can instantiate a span that represents the parent span.
-This is useful in cases that the parent span is created outside our application (e.g., received from an HTTP call).
+Additionally, you can instantiate a span that represents the parent span. This is useful in cases that the parent span
+is created outside our application (e.g., received from an HTTP call).
 
 ```kotlin
 // Create the parent span.
@@ -399,27 +419,6 @@ In the examples above, we see two variations of the `Span` class:
 - **Span.Remote**: Represents a span created outside our application and propagated to us (e.g., from an HTTP call). It
   does not expose any methods and serves only as a reference to the parent remote span.
 
-### Integrations (`log4k-integrations`)
-
-To ship traces to an external backend, add the `log4k-integrations` module and register one of its appenders —
-they batch finished spans and publish them over HTTP (Ktor). `OtlpTracingAppender` speaks the vendor-neutral
-[OTLP/HTTP](https://opentelemetry.io/docs/specs/otlp/) protocol accepted by most backends (OpenTelemetry
-Collector, Jaeger, Grafana Tempo, ...), and provider-specific appenders sit alongside it — see the full list,
-setup details and span mappings in the [module's README](log4k-integrations/README.md).
-
-```kotlin
-// https://central.sonatype.com/artifact/io.github.smyrgeorge/log4k-integrations
-implementation("io.github.smyrgeorge:log4k-integrations:x.y.z")
-// Plus the Ktor engine for your platform, e.g. on the JVM:
-implementation("io.ktor:ktor-client-cio:3.x.x")
-```
-
-```kotlin
-RootLogger.Tracing.appenders.register(
-    OtlpTracingAppender(service = "my-service", env = "production") // localhost:4318
-)
-```
-
 ## Metering API
 
 A measurement captured at runtime.
@@ -436,8 +435,8 @@ Several types of metrics are supported:
   it will increase and decrease with the number of work items in the queue.
 - **Gauge**: Measures a current value at the time it is read. An example would be the fuel gauge in a vehicle. Gauges
   are asynchronous.
-- **Histogram**: A client-side aggregation of values, such as request latencies. A histogram is a good
-  choice if you are interested in value statistics. For example, How many requests take fewer than 1s?
+- **Histogram**: A client-side aggregation of values, such as request latencies. A histogram is a good choice if you are
+  interested in value statistics. For example, How many requests take fewer than 1s?
 
 ```kotlin
 // Create a Counter that holds Int values.
@@ -476,8 +475,8 @@ RootLogger.Metering.appenders.register(collector)
 ```
 
 The `SimpleMeteringCollectorAppender` processes all events, updating the value for each registered instrument. It also
-provides a method that returns a string with the collected data in the `OpenMetrics` line format: metric and label
-names are sanitized to the exposition alphabet (e.g. `event-a` becomes `event_a`), counter samples carry the mandatory
+provides a method that returns a string with the collected data in the `OpenMetrics` line format: metric and label names
+are sanitized to the exposition alphabet (e.g. `event-a` becomes `event_a`), counter-samples carry the mandatory
 `_total` suffix, an `UpDownCounter` is exposed as a `gauge`, units are appended to the metric name, and the exposition
 is terminated with `# EOF`.
 
@@ -517,8 +516,7 @@ requests.set(10, "path" to "/a")
 ### UpDownCounter
 
 An `UpDownCounter` behaves like a `Counter` but can also decrease — for example, a queue length or the number of
-in-flight
-requests. In addition to `increment`/`set`, it supports `decrement`.
+in-flight requests. In addition to `increment`/`set`, it supports `decrement`.
 
 ```kotlin
 val queue = meter.upDownCounter<Int>("queue-size")
@@ -569,8 +567,9 @@ meter.histogram<Double>("request-duration").poll(every = 10.seconds) {
 
 The [`log4k-compiler-plugin`](./log4k-compiler-plugin) is a Kotlin IR compiler plugin that automatically instruments
 your code — wrapping functions in tracing spans (`@Traced`), entry/exit logging (`@Logged`) and call/duration metrics
-(`@Timed`) — with no manual `trace.span("…") { }` blocks, `log.info("…")` calls, or counters required. Because it
-operates on common IR before backend lowering, it works across all Kotlin Multiplatform targets.
+(`@Timed`) — with no manual `trace.span("…") { }` blocks, `log.info("…")` calls, or counters required. It also injects
+compile-time [call-site info](#call-site-injection) (file/line/function) into every log call. Because it operates on
+common IR before backend lowering, it works across all Kotlin Multiplatform targets.
 
 ### Setup
 
@@ -592,6 +591,42 @@ dependencies {
     implementation("io.github.smyrgeorge:log4k-classic:x.y.z")
 }
 ```
+
+### Call-site injection
+
+With the plugin applied, every log call is rewritten at compile time so the emitted `LoggingEvent` carries a
+`SourceLocation` — the call's **file**, **line**, and **enclosing function**. Because the values are baked in as
+constants, accurate source locations cost no runtime stack-walking — and they work on every Kotlin target, including
+Native, JS, and Wasm, where walking the stack is expensive or impossible. No annotation is needed; it applies to every
+entry point:
+
+```kotlin
+log.info("user loaded")          // classic extensions (eager and lazy `{ … }` variants)
+log.atInfo { message = "done" }  // the at/atTrace/…/atError builder DSL
+log.info { "done" }              // log4k-context overloads (the current span is still auto-attached)
+log.classic.info { "done" }      // the log4k-context `classic` escape hatch
+```
+
+The entry/exit/failure lines generated for a [`@Logged`](#logging-logged) function carry a `SourceLocation` as well —
+there it is the **declaration** of the annotated function (also when the annotation sits on the class), not a call site.
+
+The JSON appender emits it as logstash-logback-encoder-style caller-data fields (`caller_method_name`,
+`caller_file_name`, `caller_line_number`) — so log4k JSON lines match what Logback-based JSON logs (e.g., Spring Boot
+with the logstash encoder) produce. The plain-text appenders (console, Android Logcat, Apple)
+deliberately keep their lines free of it — the location stays available on `LoggingEvent.callSite` for structured sinks.
+
+Everything about the call is preserved: argument evaluation order, the span auto-attached by the `log4k-context`
+overloads (from the `TracingContext`/`Span` in scope), and the laziness of `log.info { … }` message lambdas (they are
+still neither allocated nor invoked when the level is disabled). Without the plugin, `LoggingEvent.callSite` is simply
+`null`.
+
+- **SLF4J** — when events are forwarded to an SLF4J backend via `log4k-slf4j-appender`, the call site survives the
+  bridge as the `caller_file_name`/`caller_line_number`/`caller_method_name` key-value pairs —
+  logstash-logback-encoder's caller-data field names, so a JSON backend renders it exactly like Logback's native caller
+  data (the backend's own
+  `%class`/`%line` would only see the forwarding coroutine). In the opposite direction, `log4k-slf4j` recovers a call
+  site recorded under those `caller_*` fields **or** the OpenTelemetry `code.*` attributes (legacy spellings included)
+  from the fluent event's key-value pairs or from the **MDC**.
 
 ### Logging (`@Logged`)
 
@@ -622,7 +657,7 @@ exception is rethrown. Both `suspend` and regular functions are supported (the w
 - **Level** — `@Logged(level = Level.DEBUG)`; the entry/exit lines use it (default `INFO`), the failure line is always
   `ERROR`.
 - **Dimensions** — `@Logged(tags = [Tag("component", "billing")])` attaches static tags to every emitted line (entry,
-  exit and failure), so structured appenders receive them as fields. Class-level tags apply to every instrumented
+  exit, and failure), so structured appenders receive them as fields. Class-level tags apply to every instrumented
   member, and a function's own tag with the same key wins.
 - **Masking** — `@Masked` on a parameter renders the literal `<MASKED>` in the entry line instead of the real value
   (which is never `toString()`ed), keeping secrets out of the logs:
@@ -667,7 +702,7 @@ Each call records three metrics, keyed off the metric base name:
 Both `suspend` and regular functions are supported (the wrapper reuses the `inline` `Meter.Timed.measure` helper), and
 the instrument bundle is created once per `(name, tags)` combination and cached by `Meter.timed(name, tags)`.
 
-- **Metric name** — `@Timed(name = "…")`; when omitted it defaults to `ClassName.functionName`.
+- **Metric name** — `@Timed(name = "…")`; when omitted, it defaults to `ClassName.functionName`.
 - **Dimensions** — `@Timed(tags = [Tag("tier", "gold")])` attaches static labels to the recorded `calls`/`errors`/
   `duration` values. Keep them **low-cardinality** (they become time-series labels); for per-request data use a
   `@Traced` span attribute instead. Class-level tags apply to every member, and a function's own tag with the same key
@@ -678,8 +713,8 @@ the instrument bundle is created once per `(name, tags)` combination and cached 
   own `@Timed` overrides the class-level defaults (e.g., its `name`).
 - **Opt out** — `@NoTime` excludes a single function, or (on a class) disables metrics for the whole class.
 
-With a `SimpleMeteringCollectorAppender` registered, calling `placeOrder` a few times exposes, in OpenMetrics form
-(dots in instrument names are sanitized to `_`, and the unit is appended to the metric name):
+With a `SimpleMeteringCollectorAppender` registered, calling `placeOrder` a few times exposes, in OpenMetrics form (dots
+in instrument names are sanitized to `_`, and the unit is appended to the metric name):
 
 ```text
 # TYPE OrderService_placeOrder_calls counter
@@ -717,7 +752,7 @@ The new span's **parent** (and the tracer that creates it) is resolved from what
 3. otherwise a `trace: Tracer` member — reused, or synthesized as `private val _trace_ = Tracer.of(this::class)` — which
    creates a new **root** span (mirroring how `@Logged`/`@Timed` resolve their logger/meter).
 
-- **Span name** — `@Traced(name = "…")`; when omitted it defaults to `ClassName.functionName`.
+- **Span name** — `@Traced(name = "…")`; when omitted, it defaults to `ClassName.functionName`.
 - **Static tags** — `@Traced(tags = [Tag("component", "billing")])` attaches key/value tags to the span.
 - **Class-level** — annotate a **class** with `@Traced` to instrument every eligible public member function; class-level
   `tags` apply to every generated span.
@@ -820,4 +855,4 @@ integrity.
 
 ## Examples
 
-For more detailed examples take also a look at the `examples` module.
+For more detailed examples, take a look at the `examples` module.

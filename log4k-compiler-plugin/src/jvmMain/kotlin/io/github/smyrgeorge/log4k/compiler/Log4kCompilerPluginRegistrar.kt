@@ -1,5 +1,6 @@
 package io.github.smyrgeorge.log4k.compiler
 
+import io.github.smyrgeorge.log4k.compiler.callsite.CallSiteIrGenerationExtension
 import io.github.smyrgeorge.log4k.compiler.logged.LoggedIrGenerationExtension
 import io.github.smyrgeorge.log4k.compiler.timed.TimedIrGenerationExtension
 import io.github.smyrgeorge.log4k.compiler.trace.TraceIrGenerationExtension
@@ -10,6 +11,7 @@ import org.jetbrains.kotlin.config.CompilerConfiguration
 
 /**
  * Registers every log4k IR instrumentation pass:
+ * - [CallSiteIrGenerationExtension] — injects compile-time call-site info into every log call.
  * - [TraceIrGenerationExtension] — wraps `@Traced` functions in a tracing span.
  * - [TimedIrGenerationExtension] — wraps `@Timed` functions in call/error/duration metrics.
  * - [LoggedIrGenerationExtension] — wraps `@Logged` functions in entry/exit logging.
@@ -20,6 +22,7 @@ class Log4kCompilerPluginRegistrar : CompilerPluginRegistrar() {
     override val supportsK2: Boolean = true
 
     override fun ExtensionStorage.registerExtensions(configuration: CompilerConfiguration) {
+        IrGenerationExtension.registerExtension(CallSiteIrGenerationExtension(configuration))
         IrGenerationExtension.registerExtension(TraceIrGenerationExtension(configuration))
         IrGenerationExtension.registerExtension(TimedIrGenerationExtension(configuration))
         IrGenerationExtension.registerExtension(LoggedIrGenerationExtension(configuration))

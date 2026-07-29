@@ -40,9 +40,37 @@ abstract class Logger(
         message: String,
         arguments: Array<out Any?>,
         throwable: Throwable?,
+    ): Unit = log(level, span, tags, message, arguments, throwable, null)
+
+    /**
+     * Logs a message with the specified logging level, additional context, and the source location
+     * of the call.
+     *
+     * This overload is the target the `log4k-compiler-plugin` rewrites logging calls to: the plugin
+     * appends a compile-time [SourceLocation] so the emitted event carries accurate file/line/function
+     * information on every platform, without any runtime stack-walking. It can also be called
+     * directly when the call site is known by other means.
+     *
+     * @param level The logging level of the event.
+     * @param span An optional span that can be used for tracing the context.
+     * @param tags Structured key-value dimensions attached to the event, kept separate from the
+     *             message text (mirroring the tags carried by tracing spans and metering events).
+     * @param message The log message to be recorded.
+     * @param arguments Additional arguments to be included in the log event.
+     * @param throwable An optional throwable associated with the log event.
+     * @param callSite The source location of the call, or `null` when unknown.
+     */
+    fun log(
+        level: Level,
+        span: Span?,
+        tags: Tags,
+        message: String,
+        arguments: Array<out Any?>,
+        throwable: Throwable?,
+        callSite: SourceLocation?,
     ) {
         if (!level.enabled()) return
-        val event = toLoggingEvent(level, span, tags, message, arguments, throwable)
+        val event = toLoggingEvent(level, span, tags, message, arguments, throwable, callSite)
         RootLogger.log(event)
     }
 
@@ -55,6 +83,7 @@ abstract class Logger(
      * @param message The log message to be recorded.
      * @param arguments Additional arguments to be included in the log event.
      * @param throwable An optional throwable associated with the log event.
+     * @param callSite The source location of the call, or `null` when unknown.
      * @return A `LoggingEvent` representing the logging details.
      */
     abstract fun toLoggingEvent(
@@ -64,6 +93,7 @@ abstract class Logger(
         message: String,
         arguments: Array<out Any?>,
         throwable: Throwable?,
+        callSite: SourceLocation?,
     ): LoggingEvent
 
     /**
@@ -101,10 +131,25 @@ abstract class Logger(
      * @param level The logging level of the event.
      * @param f The block that configures the event's [LoggingEvent.Builder].
      */
-    inline fun at(level: Level, f: LoggingEvent.Builder.() -> Unit) {
+    inline fun at(level: Level, f: LoggingEvent.Builder.() -> Unit): Unit = at(level, null, f)
+
+    /**
+     * Logs an event at the given [level] using the builder-style DSL, attaching the source location
+     * of the call (see [at] for the DSL itself).
+     *
+     * This overload is the target the `log4k-compiler-plugin` rewrites `at`/`atTrace`/…/`atError`
+     * calls to: the plugin injects a compile-time [SourceLocation] so the emitted event carries accurate
+     * file/line/function information. It can also be called directly when the call site is known by
+     * other means.
+     *
+     * @param level The logging level of the event.
+     * @param callSite The source location of the call, or `null` when unknown.
+     * @param f The block that configures the event's [LoggingEvent.Builder].
+     */
+    inline fun at(level: Level, callSite: SourceLocation?, f: LoggingEvent.Builder.() -> Unit) {
         if (!level.enabled()) return
         val builder = LoggingEvent.Builder().apply(f)
-        log(level, builder.span, builder.tags, builder.message, builder.arguments, builder.cause)
+        log(level, builder.span, builder.tags, builder.message, builder.arguments, builder.cause, callSite)
     }
 
     /**
@@ -147,8 +192,28 @@ abstract class Logger(
         name: String,
         args: String,
         f: () -> T
+    ): T = logged(level = level, span = span, tags = tags, name = name, args = args, callSite = null, f = f)
+
+    /**
+     * [logged] with the source location of the instrumented function attached to every emitted line.
+     *
+     * This overload is the one the `log4k-compiler-plugin` targets: the injected [callSite] describes
+     * the **declaration** of the `@Logged` function (its file, line, and `ClassName.functionName`),
+     * so the entry/exit/failure lines are attributed to the annotated function instead of carrying no
+     * location at all.
+     *
+     * @param callSite The declaration site of the instrumented function, or `null` when unknown.
+     */
+    inline fun <T> logged(
+        level: Level,
+        span: Span?,
+        tags: Tags,
+        name: String,
+        args: String,
+        callSite: SourceLocation?,
+        f: () -> T
     ): T {
-        if (isEnabled(level)) log(level, span, tags, "→ $name($args)", emptyArray<Any?>(), null)
+        if (isEnabled(level)) log(level, span, tags, "→ $name($args)", emptyArray<Any?>(), null, callSite)
         val mark = TimeSource.Monotonic.markNow()
         var completed = false
         try {
@@ -156,22 +221,30 @@ abstract class Logger(
                 completed = true
                 if (isEnabled(level)) {
                     val rendered = runCatching { result.toString() }.getOrElse { "<toString() failed>" }
-                    log(level, span, tags, "← $name = $rendered (${mark.elapsedNow()})", emptyArray<Any?>(), null)
+                    log(
+                        level = level,
+                        span = span,
+                        tags = tags,
+                        message = "← $name = $rendered (${mark.elapsedNow()})",
+                        arguments = emptyArray<Any?>(),
+                        throwable = null,
+                        callSite = callSite
+                    )
                 }
             }
         } catch (e: CancellationException) {
-            // Cancellation is normal control flow, not a failure: no "✗ failed" ERROR line.
-            // `completed` stays false so the finally below emits the neutral completion line.
+            // Cancellation is a normal control flow, not a failure: no "✗ failed" ERROR line.
+            // `completed` stays false, so the finally below emits the neutral completion line.
             throw e
         } catch (e: Throwable) {
             completed = true
-            log(Level.ERROR, span, tags, "✗ $name failed (${mark.elapsedNow()})", emptyArray<Any?>(), e)
+            log(Level.ERROR, span, tags, "✗ $name failed (${mark.elapsedNow()})", emptyArray<Any?>(), e, callSite)
             throw e
         } finally {
             // Must stay a single unconditional call: the compiler does not re-emit a conditional
             // `finally` block on the non-local-return path of an inlined lambda (the condition
             // lives inside the helper instead). Mirrors the `span {}`/`measure` helpers' shape.
-            loggedCompletion(completed, level, span, tags, name, mark.elapsedNow())
+            loggedCompletion(completed, level, span, tags, name, mark.elapsedNow(), callSite)
         }
     }
 
@@ -188,10 +261,11 @@ abstract class Logger(
         span: Span?,
         tags: Tags,
         name: String,
-        elapsed: Duration
+        elapsed: Duration,
+        callSite: SourceLocation?
     ) {
         if (completed || !isEnabled(level)) return
-        log(level, span, tags, "← $name ($elapsed)", emptyArray<Any?>(), null)
+        log(level, span, tags, "← $name ($elapsed)", emptyArray<Any?>(), null, callSite)
     }
 
     companion object {

@@ -32,7 +32,7 @@ class SimpleConsoleLoggingAppender : Appender<LoggingEvent> {
             append(" - ")
             append(message.format(arguments))
             // Keep the stack trace in the same string as its log line: printing it separately
-            // (e.g. via printStackTrace) goes to a different stream and gets detached/reordered.
+            // (e.g., via printStackTrace) goes to a different stream and gets detached/reordered.
             throwable?.let {
                 appendLine()
                 append(it.stackTraceToString().trimEnd())

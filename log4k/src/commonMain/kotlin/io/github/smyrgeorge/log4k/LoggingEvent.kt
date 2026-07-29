@@ -16,6 +16,8 @@ import kotlin.time.Instant
  * @property arguments An array of arguments that are used to parameterize the log message.
  * @property thread The name of the thread in which the logging event was generated.
  * @property throwable An optional throwable associated with the logging event, capturing any exceptions or errors.
+ * @property callSite The source location of the log call, injected at compile time by the
+ *   `log4k-compiler-plugin` (see [SourceLocation]); `null` when the plugin is not applied.
  */
 class LoggingEvent(
     val id: Long,
@@ -28,6 +30,7 @@ class LoggingEvent(
     val arguments: Array<out Any?>,
     val thread: String,
     val throwable: Throwable?,
+    val callSite: SourceLocation? = null,
 ) {
     /**
      * Mutable receiver of the builder-style logging DSL — [Logger.at] and its level-named extension

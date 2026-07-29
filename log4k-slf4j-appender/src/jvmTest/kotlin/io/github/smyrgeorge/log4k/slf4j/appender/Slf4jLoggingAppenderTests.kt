@@ -12,6 +12,7 @@ import assertk.assertions.isNull
 import assertk.assertions.isSameInstanceAs
 import assertk.assertions.messageContains
 import io.github.smyrgeorge.log4k.Appender
+import io.github.smyrgeorge.log4k.SourceLocation
 import io.github.smyrgeorge.log4k.Level
 import io.github.smyrgeorge.log4k.Logger
 import io.github.smyrgeorge.log4k.LoggingEvent
@@ -223,6 +224,64 @@ class Slf4jLoggingAppenderTests {
         assertThat(captured.keyValues).containsExactly(
             "traceId" to span.context.traceId,
             "spanId" to "span-1",
+        )
+    }
+
+    // --- Call-site propagation ---------------------------------------------------------------------
+
+    @Test
+    fun callSite_becomesKeyValuePairs() = runTest {
+        // The compile-time call site (normally injected by the log4k-compiler-plugin) must survive
+        // the bridge: the backend's own %class/%line see the forwarding coroutine, so these key-value
+        // pairs are the only channel carrying the real source location.
+        logger("appender.callsite").log(
+            level = Level.INFO,
+            span = null,
+            tags = emptyMap(),
+            message = "m",
+            arguments = emptyArray(),
+            throwable = null,
+            callSite = SourceLocation(file = "Api.kt", line = 42, function = "Api.handle"),
+        )
+
+        // logstash-logback-encoder's caller-data field names: a JSON backend renders these exactly
+        // like Logback's native caller data. The method is the bare name (the class lives in the
+        // logger name), mirroring how the logstash encoder splits caller_class/method.
+        val captured = Slf4jCapture.await { it.logger == "appender.callsite" }
+        assertThat(captured.keyValues).containsExactly(
+            "caller_file_name" to "Api.kt",
+            "caller_line_number" to 42,
+            "caller_method_name" to "handle",
+        )
+    }
+
+    @Test
+    fun callSite_isCombinedWithTagsAndSpanKeyValues() = runTest {
+        val span = TracingEvent.Span.Local(
+            id = "span-cs",
+            name = "test-span",
+            level = Level.INFO,
+            tracer = Tracer.of("appender.callsite.tracer"),
+        )
+
+        logger("appender.callsite.combined").log(
+            level = Level.INFO,
+            span = span,
+            tags = mapOf("tenant" to "acme"),
+            message = "m",
+            arguments = emptyArray(),
+            throwable = null,
+            callSite = SourceLocation(file = "Api.kt", line = 7, function = "Api.combined"),
+        )
+
+        val captured = Slf4jCapture.await { it.logger == "appender.callsite.combined" }
+        assertThat(captured.keyValues).containsExactly(
+            "tenant" to "acme",
+            "traceId" to span.context.traceId,
+            "spanId" to "span-cs",
+            "caller_file_name" to "Api.kt",
+            "caller_line_number" to 7,
+            "caller_method_name" to "combined",
         )
     }
 

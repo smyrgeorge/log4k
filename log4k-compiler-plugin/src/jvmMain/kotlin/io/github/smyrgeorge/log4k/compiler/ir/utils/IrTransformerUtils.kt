@@ -1,5 +1,7 @@
 package io.github.smyrgeorge.log4k.compiler.ir.utils
 
+import io.github.smyrgeorge.log4k.compiler.ir.Log4kIrFunctionExpression
+import org.jetbrains.kotlin.backend.common.extensions.DeclarationFinder
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageLocation
@@ -7,34 +9,46 @@ import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
 import org.jetbrains.kotlin.descriptors.Modality
+import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
 import org.jetbrains.kotlin.ir.builders.declarations.buildFun
 import org.jetbrains.kotlin.ir.builders.declarations.buildValueParameter
 import org.jetbrains.kotlin.ir.builders.irBlockBody
 import org.jetbrains.kotlin.ir.builders.irCall
+import org.jetbrains.kotlin.ir.builders.irCallConstructor
 import org.jetbrains.kotlin.ir.builders.irGet
 import org.jetbrains.kotlin.ir.builders.irGetObjectValue
+import org.jetbrains.kotlin.ir.builders.irInt
 import org.jetbrains.kotlin.ir.builders.irReturn
+import org.jetbrains.kotlin.ir.builders.irString
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
+import org.jetbrains.kotlin.ir.declarations.IrFile
 import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.IrParameterKind
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.ir.declarations.IrValueParameter
 import org.jetbrains.kotlin.ir.expressions.IrBlockBody
+import org.jetbrains.kotlin.ir.expressions.IrConst
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrExpressionBody
 import org.jetbrains.kotlin.ir.expressions.IrReturn
+import org.jetbrains.kotlin.ir.expressions.IrStatementOrigin
 import org.jetbrains.kotlin.ir.expressions.impl.IrGetClassImpl
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
+import org.jetbrains.kotlin.ir.symbols.IrConstructorSymbol
 import org.jetbrains.kotlin.ir.symbols.IrSimpleFunctionSymbol
 import org.jetbrains.kotlin.ir.symbols.UnsafeDuringIrConstructionAPI
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.classOrNull
 import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.fileOrNull
+import org.jetbrains.kotlin.ir.util.getAnnotation
+import org.jetbrains.kotlin.ir.util.hasAnnotation
 import org.jetbrains.kotlin.ir.util.isSubtypeOfClass
 import org.jetbrains.kotlin.ir.util.parentClassOrNull
 import org.jetbrains.kotlin.ir.util.patchDeclarationParents
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformerVoid
+import org.jetbrains.kotlin.name.CallableId
+import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 
@@ -51,7 +65,6 @@ val LOG4K_PACKAGE = FqName("io.github.smyrgeorge.log4k")
  * Shared by [io.github.smyrgeorge.log4k.compiler.trace.TraceIrTransformer] and
  * [io.github.smyrgeorge.log4k.compiler.logged.LoggedIrTransformer].
  */
-@OptIn(UnsafeDuringIrConstructionAPI::class)
 fun IrPluginContext.moveBody(function: IrFunction, lambda: IrFunction): IrBlockBody {
     val block = when (val original = function.body) {
         is IrBlockBody -> original
@@ -110,6 +123,31 @@ fun IrPluginContext.buildInlineLambda(
 }
 
 /**
+ * [buildInlineLambda] wrapped in the [Log4kIrFunctionExpression] the transformers pass as the `f`
+ * argument of the inline runtime helpers (`logged`/`measure`/`traced`): a `() -> T` — or, with
+ * [extensionReceiverType], an `R.() -> T` — carrying [enclosing]'s original body. The moved body is
+ * reachable through [Log4kIrFunctionExpression.function] (e.g., to prepend statements to it).
+ */
+fun IrPluginContext.buildInlineLambdaExpression(
+    enclosing: IrFunction,
+    returnType: IrType,
+    extensionReceiverType: IrType? = null,
+    extensionReceiverName: Name = Name.identifier($$"$this$lambda"),
+): Log4kIrFunctionExpression {
+    val lambda = buildInlineLambda(enclosing, returnType, extensionReceiverType, extensionReceiverName)
+    val type =
+        if (extensionReceiverType == null) irBuiltIns.functionN(0).symbol.typeWith(returnType)
+        else irBuiltIns.functionN(1).symbol.typeWith(extensionReceiverType, returnType)
+    return Log4kIrFunctionExpression(
+        startOffset = enclosing.startOffset,
+        endOffset = enclosing.endOffset,
+        type = type,
+        origin = IrStatementOrigin.LAMBDA,
+        function = lambda,
+    )
+}
+
+/**
  * Builds `<Companion>.of(this::class)` for a companion `of(KClass<*>)` factory such as
  * `Logger.of` or `Meter.of`, using [thisReceiver] (a class or function dispatch receiver) as `this`.
  */
@@ -122,7 +160,11 @@ fun DeclarationIrBuilder.irOfThisClass(
     val kClassType = pluginContext.irBuiltIns.kClassClass.typeWith(thisReceiver.type)
     val getClass = IrGetClassImpl(thisReceiver.startOffset, thisReceiver.endOffset, kClassType, irGet(thisReceiver))
     return irCall(ofFn).apply {
-        ofFn.owner.dispatchReceiverParam()?.let { arguments[it] = irGetObjectValue(it.type, it.type.classOrNull!!) }
+        ofFn.owner.dispatchReceiverParam()?.let {
+            val companion = it.type.classOrNull
+                ?: error("log4k-compiler-plugin: the `of` factory's dispatch receiver is not a class type.")
+            arguments[it] = irGetObjectValue(it.type, companion)
+        }
         ofFn.owner.regularParams().firstOrNull()?.let { arguments[it] = getClass }
     }
 }
@@ -137,6 +179,16 @@ fun IrFunction.qualifiedName(): String {
     return if (className != null) "$className.$functionName" else functionName
 }
 
+/**
+ * The instrumentation name configured on [this] function's [annotation]: its first argument
+ * (`@Timed(name = …)` / `@Traced(name = …)`) when it is a non-blank string constant, else the
+ * default [qualifiedName].
+ */
+fun IrFunction.instrumentationName(annotation: FqName): String {
+    val configured = (getAnnotation(annotation)?.arguments?.getOrNull(0) as? IrConst)?.value as? String
+    return if (configured.isNullOrBlank()) qualifiedName() else configured
+}
+
 /** The single dispatch-receiver parameter of [this], or `null` (new-API `parameters` accessor). */
 fun IrFunction.dispatchReceiverParam(): IrValueParameter? =
     parameters.singleOrNull { it.kind == IrParameterKind.DispatchReceiver }
@@ -147,7 +199,7 @@ fun IrFunction.regularParams(): List<IrValueParameter> =
 
 /**
  * The first context parameter or extension receiver of [this] function whose type is a subtype of
- * [type] — i.e. a value of [type] "in scope" for the function. Used to pick up a `TracingContext` or
+ * [type] — i.e., a value of [type] "in scope" for the function. Used to pick up a `TracingContext` or
  * `TracingEvent.Span` provided via `context(_: …)` or an extension receiver.
  */
 fun IrFunction.receiverOrContextOf(type: IrClassSymbol): IrValueParameter? =
@@ -161,13 +213,33 @@ fun IrFunction.receiverOrContextOf(type: IrClassSymbol): IrValueParameter? =
  * concrete member function that is not a constructor, property accessor, or inherited (fake-override)
  * member.
  */
-@OptIn(UnsafeDuringIrConstructionAPI::class)
 fun IrFunction.isClassLevelEligible(): Boolean {
     if (this !is IrSimpleFunction) return false // exclude constructors
     if (visibility != DescriptorVisibilities.PUBLIC) return false
     if (isFakeOverride) return false // exclude inherited members
     if (correspondingPropertySymbol != null) return false // exclude property accessors
     return true
+}
+
+/**
+ * Whether [this] function is a target of the instrumentation driven by [annotation]: it must have a
+ * body, not be disabled by [killSwitch] (on the function or its class — the per-class opt-out wins
+ * over any [annotation]), and either carry [annotation] itself or be an eligible member (see
+ * [isClassLevelEligible]) of a class annotated with it.
+ *
+ * Shared by the `@Logged`/`@Timed`/`@Traced` transformers, paired with their respective
+ * `@NoLog`/`@NoTime`/`@NoTrace` kill switches.
+ */
+fun IrFunction.isInstrumentationTarget(annotation: FqName, killSwitch: FqName): Boolean {
+    if (body == null) return false
+    val enclosingClass = parentClassOrNull
+    if (hasAnnotation(killSwitch)) return false
+    if (enclosingClass?.hasAnnotation(killSwitch) == true) return false
+    // Explicit annotation on the function.
+    if (hasAnnotation(annotation)) return true
+    // Class-level annotation: instrument every eligible public member function.
+    if (enclosingClass == null || !enclosingClass.hasAnnotation(annotation)) return false
+    return isClassLevelEligible()
 }
 
 /**
@@ -188,4 +260,49 @@ private fun IrFunction.compilerLocation(): CompilerMessageLocation? {
         entry.getColumnNumber(startOffset) + 1,
         null,
     )
+}
+
+/** The `SourceLocation(file, line, function)` constructor, or `null` on an older log4k runtime. */
+@OptIn(UnsafeDuringIrConstructionAPI::class)
+fun DeclarationFinder.findSourceLocationConstructor(): IrConstructorSymbol? =
+    findConstructors(ClassId(LOG4K_PACKAGE, Name.identifier("SourceLocation")))
+        .firstOrNull { it.owner.regularParams().size == 3 }
+
+/**
+ * The log4k member function [name] declared on [className] (dot-separated for nested classes, e.g.
+ * `"Meter.Timed"`) with exactly [regularParams] regular parameters, or `null` when the runtime on
+ * the classpath does not provide that overload. The parameter count pins the exact overload the
+ * plugin was built against, so an unexpected runtime degrades to "not found" instead of a
+ * mis-shaped call.
+ */
+@OptIn(UnsafeDuringIrConstructionAPI::class)
+fun DeclarationFinder.findLog4kFunction(className: String, name: String, regularParams: Int): IrSimpleFunctionSymbol? =
+    findFunctions(CallableId(ClassId(LOG4K_PACKAGE, FqName(className), false), Name.identifier(name)))
+        .firstOrNull { it.owner.regularParams().size == regularParams }
+
+/**
+ * Builds `SourceLocation(file, line, function)` for the source [offset] inside [file] — the value the
+ * instrumentation passes attach to emitted events (a call site in
+ * [io.github.smyrgeorge.log4k.compiler.callsite.CallSiteIrTransformer], a function declaration in
+ * [io.github.smyrgeorge.log4k.compiler.logged.LoggedIrTransformer]). Returns `null` for synthetic
+ * [offset]s — there is no source position to record.
+ */
+@OptIn(UnsafeDuringIrConstructionAPI::class)
+fun IrBuilderWithScope.irSourceLocation(
+    constructor: IrConstructorSymbol,
+    file: IrFile,
+    offset: Int,
+    function: String,
+): IrExpression? {
+    if (offset < 0) return null
+    val params = constructor.owner.regularParams()
+    if (params.size != 3) return null
+    val entry = file.fileEntry
+    // The simple file name only — a full path would leak build-machine directory layouts.
+    val fileName = entry.name.substringAfterLast('/').substringAfterLast('\\')
+    return irCallConstructor(constructor, emptyList()).apply {
+        arguments[params[0]] = irString(fileName)
+        arguments[params[1]] = irInt(entry.getLineNumber(offset) + 1) // IrFileEntry lines are 0-based.
+        arguments[params[2]] = irString(function)
+    }
 }

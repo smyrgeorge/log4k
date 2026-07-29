@@ -28,6 +28,11 @@ class SimpleJsonConsoleLoggingAppender : Appender<LoggingEvent> {
                 put("tags", tags)
                 put("thread", thread)
                 put("throwable", throwable?.stackTraceToString())
+                callSite?.let {
+                    put("caller_method_name", it.function.substringAfterLast('.').takeIf(String::isNotBlank))
+                    put("caller_file_name", it.file)
+                    put("caller_line_number", it.line)
+                }
             }
             return map.toJsonElement().toString()
         }
