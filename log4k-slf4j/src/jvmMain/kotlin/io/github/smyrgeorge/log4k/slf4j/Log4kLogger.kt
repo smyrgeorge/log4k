@@ -81,6 +81,15 @@ public class Log4kLogger(
      * since log4k tag values are non-null. Key-value pairs recorded under the OpenTelemetry code
      * conventions become the event's [SourceLocation] (falling back to the MDC) and are consumed rather than
      * kept as tags.
+     *
+     * SLF4J hands the fluent event over verbatim, so the trailing-[Throwable] convention
+     * (`log.atError().log("failed for {}", id, e)`) must be normalized *here*: when no cause was set via
+     * `setCause`, a trailing [Throwable] argument is promoted to the event's throwable and trimmed from
+     * the arguments — exactly what every other delivery route does with a fluent event (Logback's
+     * event-aware logger, and SLF4J's own fallback through the classic API). Unlike the classic
+     * `(String, Object)` overload, the promotion applies even to a lone throwable argument, mirroring
+     * those routes. Without it, log4k would ignore the throwable as an excess formatting argument and
+     * the stack trace would be lost.
      */
     override fun log(event: Slf4jLoggingEvent) {
         val keyValuePairs = event.keyValuePairs ?: emptyList()
@@ -88,13 +97,15 @@ public class Log4kLogger(
         val tags = keyValuePairs
             .filterNot { kvpCallSite != null && it.key in CODE_LOCATION_KEYS }
             .associate { it.key to (it.value ?: "null") }
+        val arguments: Array<out Any?> = event.argumentArray ?: emptyArray()
+        val trailingThrowable = if (event.throwable == null) arguments.lastOrNull() as? Throwable else null
         log4k.log(
             level = event.level.toLevel(),
             span = null,
             tags = tags,
             message = event.message ?: "null",
-            arguments = event.argumentArray ?: emptyArray(),
-            throwable = event.throwable,
+            arguments = if (trailingThrowable != null) arguments.copyOf(arguments.size - 1) else arguments,
+            throwable = event.throwable ?: trailingThrowable,
             callSite = kvpCallSite ?: callSiteFromMdc(),
         )
     }

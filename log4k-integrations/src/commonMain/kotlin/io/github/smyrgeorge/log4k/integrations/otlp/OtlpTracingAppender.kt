@@ -3,11 +3,11 @@ package io.github.smyrgeorge.log4k.integrations.otlp
 import io.github.smyrgeorge.log4k.TracingEvent
 import io.github.smyrgeorge.log4k.impl.OpenTelemetryAttributes
 import io.github.smyrgeorge.log4k.impl.appenders.BatchAppender
-import io.github.smyrgeorge.log4k.integrations.epochNanos
-import io.github.smyrgeorge.log4k.integrations.finishedSpans
-import io.github.smyrgeorge.log4k.integrations.fnv1a64
-import io.github.smyrgeorge.log4k.integrations.isHex
-import io.github.smyrgeorge.log4k.integrations.toName
+import io.github.smyrgeorge.log4k.integrations.util.epochNanos
+import io.github.smyrgeorge.log4k.integrations.util.finishedSpans
+import io.github.smyrgeorge.log4k.integrations.util.fnv1a64
+import io.github.smyrgeorge.log4k.integrations.util.isHex
+import io.github.smyrgeorge.log4k.integrations.util.toName
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.request.header
@@ -16,6 +16,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
+import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
@@ -52,7 +53,7 @@ import kotlin.time.Instant
  *   `exception` event (`exception.type/message/stacktrace`) is synthesized from the status, per
  *   the OpenTelemetry exception conventions.
  *
- * Delivery is best-effort: endpoint failures are reported to the console and the batch is
+ * Delivery is best-effort: endpoint failures are reported to the console, and the batch is
  * dropped — the appender itself keeps running.
  *
  * @param service The `service.name` resource attribute the spans are reported under.
@@ -85,28 +86,31 @@ class OtlpTracingAppender(
         val spans = event.finishedSpans()
         if (spans.isEmpty()) return
 
-        // ExportTraceServiceRequest: one resource (this service), one scope, all spans in it.
-        val payload = buildJsonObject {
-            putJsonArray("resourceSpans") {
-                add(buildJsonObject {
-                    putJsonObject("resource") {
-                        putJsonArray("attributes") {
-                            add(attribute("service.name", service))
-                            env?.let { add(attribute("deployment.environment.name", it)) }
-                            version?.let { add(attribute("service.version", it)) }
-                        }
-                    }
-                    putJsonArray("scopeSpans") {
-                        add(buildJsonObject {
-                            putJsonObject("scope") { put("name", "log4k") }
-                            putJsonArray("spans") { spans.forEach { add(it.toOtlpSpan()) } }
-                        })
-                    }
-                })
-            }
-        }
-
+        // The payload mapping stays inside the try: it renders user-supplied values (tag
+        // `toString()`s, throwable class names), and a failure there would otherwise escape to
+        // FlowAppender, which swallows it — dropping the batch *silently* instead of reporting it.
         try {
+            // ExportTraceServiceRequest: one resource (this service), one scope, all spans in it.
+            val payload = buildJsonObject {
+                putJsonArray("resourceSpans") {
+                    add(buildJsonObject {
+                        putJsonObject("resource") {
+                            putJsonArray("attributes") {
+                                add(attribute("service.name", service))
+                                env?.let { add(attribute("deployment.environment.name", it)) }
+                                version?.let { add(attribute("service.version", it)) }
+                            }
+                        }
+                        putJsonArray("scopeSpans") {
+                            add(buildJsonObject {
+                                putJsonObject("scope") { put("name", "log4k") }
+                                putJsonArray("spans") { spans.forEach { add(it.toOtlpSpan()) } }
+                            })
+                        }
+                    })
+                }
+            }
+
             val response = client.post(url) {
                 contentType(ContentType.Application.Json)
                 this@OtlpTracingAppender.headers.forEach { (key, value) -> header(key, value) }
@@ -115,6 +119,8 @@ class OtlpTracingAppender(
             if (!response.status.isSuccess()) {
                 println("[$name] OTLP endpoint responded with ${response.status.value}; dropped ${spans.size} span(s).")
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             println("[$name] Failed to publish ${spans.size} span(s) to the OTLP endpoint: $e")
         }
@@ -198,7 +204,7 @@ class OtlpTracingAppender(
         /** Doubles above 2^53 - 1 cannot represent integers exactly; keep them as doubles. */
         private const val MAX_SAFE_INTEGER = 9007199254740991.0
 
-        /** A typed OTLP `KeyValue`: booleans, integers and floats keep their type. */
+        /** A typed OTLP `KeyValue`: booleans, integers, and floats keep their type. */
         private fun attribute(key: String, value: Any): JsonObject = buildJsonObject {
             put("key", key)
             putJsonObject("value") {
@@ -235,8 +241,8 @@ class OtlpTracingAppender(
 
         /**
          * OTLP trace ids are exactly 32 lowercase hex chars, and the all-zero id is reserved as
-         * the invalid sentinel. A 16-char hex id — the 64-bit form used by e.g. B3 carriers —
-         * is zero-padded so correlation with the upstream trace is preserved; anything else
+         * the invalid sentinel. A 16-char hex id — the 64-bit form used by e.g., B3 carriers —
+         * is zero-padded, so the correlation with the upstream trace is preserved; anything else
          * is hashed.
          */
         private fun traceIdHex(id: String): String = when (id.length) {

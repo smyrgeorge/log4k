@@ -1,4 +1,4 @@
-package io.github.smyrgeorge.log4k.integrations
+package io.github.smyrgeorge.log4k.integrations.util
 
 import kotlin.reflect.KClass
 

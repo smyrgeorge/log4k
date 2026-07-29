@@ -418,6 +418,50 @@ class Log4kLoggerTests {
     }
 
     @Test
+    fun fluentTrailingThrowable_isPromotedToTheThrowable() = runTest {
+        val boom = IllegalStateException("boom")
+
+        // The fluent event reaches `LoggingEventAware.log` verbatim (no normalization by SLF4J), so the
+        // bridge itself must honor the trailing-throwable convention — as Logback's event-aware logger
+        // and SLF4J's non-aware fallback both do. Before, `boom` stayed an excess formatting argument
+        // and its stack trace was silently lost.
+        logger("slf4j.fluent.trailing").atError().log("failed for {}", 7, boom)
+
+        val event = appender.awaitEvent { it.logger == "slf4j.fluent.trailing" }
+        assertThat(event.throwable).isSameInstanceAs(boom)
+        assertThat(event.message).isEqualTo("failed for {}")
+        assertThat(event.arguments.toList()).containsExactly(7)
+    }
+
+    @Test
+    fun fluentLoneThrowableArgument_isPromotedToTheThrowable() = runTest {
+        val boom = IllegalStateException("boom")
+
+        // Unlike the classic (String, Object) overload, the fluent delivery routes promote even a lone
+        // trailing throwable (Logback's `EventArgUtil.extractThrowable` has no two-argument requirement).
+        logger("slf4j.fluent.trailing.lone").atError().log("failed", boom)
+
+        val event = appender.awaitEvent { it.logger == "slf4j.fluent.trailing.lone" }
+        assertThat(event.throwable).isSameInstanceAs(boom)
+        assertThat(event.arguments.toList()).isEmpty()
+    }
+
+    @Test
+    fun fluentSetCause_winsOverATrailingThrowable() = runTest {
+        val cause = IllegalStateException("cause")
+        val argument = IllegalArgumentException("argument")
+
+        // Promotion applies only when no cause was set explicitly; an explicit cause keeps the trailing
+        // throwable as an ordinary formatting argument (mirrors Logback, which extracts only when the
+        // event carries no throwable).
+        logger("slf4j.fluent.trailing.cause").atError().setCause(cause).log("failed: {}", argument)
+
+        val event = appender.awaitEvent { it.logger == "slf4j.fluent.trailing.cause" }
+        assertThat(event.throwable).isSameInstanceAs(cause)
+        assertThat(event.arguments.toList()).containsExactly(argument)
+    }
+
+    @Test
     fun fluentApi_respectsLevelGating() = runTest {
         val log = logger("slf4j.fluent.gated", Level.WARN)
 

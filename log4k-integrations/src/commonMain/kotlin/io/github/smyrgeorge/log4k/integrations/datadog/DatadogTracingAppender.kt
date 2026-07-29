@@ -2,12 +2,12 @@ package io.github.smyrgeorge.log4k.integrations.datadog
 
 import io.github.smyrgeorge.log4k.TracingEvent
 import io.github.smyrgeorge.log4k.impl.appenders.BatchAppender
-import io.github.smyrgeorge.log4k.integrations.epochNanos
-import io.github.smyrgeorge.log4k.integrations.finishedSpans
-import io.github.smyrgeorge.log4k.integrations.fnv1a64
-import io.github.smyrgeorge.log4k.integrations.isHex
-import io.github.smyrgeorge.log4k.integrations.nonZero
-import io.github.smyrgeorge.log4k.integrations.toName
+import io.github.smyrgeorge.log4k.integrations.util.epochNanos
+import io.github.smyrgeorge.log4k.integrations.util.finishedSpans
+import io.github.smyrgeorge.log4k.integrations.util.fnv1a64
+import io.github.smyrgeorge.log4k.integrations.util.isHex
+import io.github.smyrgeorge.log4k.integrations.util.nonZero
+import io.github.smyrgeorge.log4k.integrations.util.toName
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.request.header
@@ -16,6 +16,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
+import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonUnquotedLiteral
 import kotlinx.serialization.json.buildJsonArray
@@ -52,7 +53,7 @@ import kotlin.time.Instant
  * - Span events are encoded as a JSON array in `meta.events`, mirroring the OpenTelemetry
  *   ingestion convention. An error status sets `error=1` plus `error.type/message/stack`.
  *
- * Delivery is best-effort: agent failures are reported to the console and the batch is
+ * Delivery is best-effort: agent failures are reported to the console, and the batch is
  * dropped — the appender itself keeps running.
  *
  * @param service The Datadog service name the spans are reported under.
@@ -83,15 +84,18 @@ class DatadogTracingAppender(
         val spans = event.finishedSpans()
         if (spans.isEmpty()) return
 
-        // The intake API expects an array of traces, each an array of its spans.
-        val traces = spans.groupBy { it.context.traceId }.values
-        val payload = buildJsonArray {
-            traces.forEach { trace ->
-                add(buildJsonArray { trace.forEach { add(it.toDatadogSpan()) } })
-            }
-        }
-
+        // The payload mapping stays inside the try: it renders user-supplied values (tag
+        // `toString()`s, throwable class names), and a failure there would otherwise escape to
+        // FlowAppender, which swallows it — dropping the batch *silently* instead of reporting it.
         try {
+            // The intake API expects an array of traces, each an array of its spans.
+            val traces = spans.groupBy { it.context.traceId }.values
+            val payload = buildJsonArray {
+                traces.forEach { trace ->
+                    add(buildJsonArray { trace.forEach { add(it.toDatadogSpan()) } })
+                }
+            }
+
             val response = client.put(endpoint) {
                 contentType(ContentType.Application.Json)
                 header("Datadog-Meta-Lang", "kotlin")
@@ -102,6 +106,8 @@ class DatadogTracingAppender(
             if (!response.status.isSuccess()) {
                 println("[$name] Datadog agent responded with ${response.status.value}; dropped ${spans.size} span(s).")
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             println("[$name] Failed to publish ${spans.size} span(s) to the Datadog agent: $e")
         }
