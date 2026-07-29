@@ -43,7 +43,8 @@ import org.jetbrains.kotlin.name.FqName
  * fun compute(x: Int): Int = meter.timed("UserService.compute").measure { /* body */ }
  * ```
  *
- * The `Meter` is resolved by [OfThisClassField]: a `meter: Meter` member is reused; otherwise
+ * The `Meter` is resolved by [OfThisClassField]: a `meter: Meter` member is reused, else the class's
+ * single `Meter`-typed property (whatever its name); otherwise
  * `private val _meter_ = Meter.of(this::class)` is synthesized (created once per class). `Meter.timed`
  * caches its instrument bundle by name, and `Meter.Timed.measure` is `inline`, so both regular and
  * `suspend` function work: the moved body is placed in an inline lambda and therefore keeps its
@@ -56,7 +57,8 @@ class TimedIrTransformer(
     private val messageCollector: MessageCollector,
 ) : IrElementTransformerVoidWithContext() {
 
-    // Reuses a `meter: Meter` member, or synthesizes `private val _meter_ = Meter.of(this::class)`.
+    // Reuses a `meter: Meter` member (else the class's single `Meter`-typed property), or
+    // synthesizes `private val _meter_ = Meter.of(this::class)`.
     private val meterField: OfThisClassField? =
         OfThisClassField.of(pluginContext, finder, messageCollector, "Meter", "@Timed", "meter", "_meter_")
 

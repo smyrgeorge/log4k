@@ -76,9 +76,10 @@ import org.jetbrains.kotlin.name.FqName
  *
  * `Logger.logged` is `inline`, so both regular and `suspend` functions work: the moved body is
  * placed in an inline lambda and therefore keeps its original suspension context. The `Logger` is
- * resolved by [OfThisClassField]: a log4k `log: Logger` member is reused; otherwise (or if `log` is a
- * foreign type such as `org.slf4j.Logger`) `private val _log_ = Logger.of(this::class)` is
- * synthesized. A span is attached to the log lines when one is in scope: a `TracingContext`
+ * resolved by [OfThisClassField]: a log4k `log: Logger` member is reused, else the class's single
+ * `Logger`-typed property (whatever its name); otherwise (e.g. `log` is a foreign type such as
+ * `org.slf4j.Logger` and no other log4k `Logger` is declared) `private val _log_ =
+ * Logger.of(this::class)` is synthesized. A span is attached to the log lines when one is in scope: a `TracingContext`
  * parameter/receiver (its `currentOrNull()`), else a `TracingEvent.Span` parameter/receiver directly,
  * else none.
  */
@@ -103,7 +104,8 @@ class LoggedIrTransformer(
     // Materializes `@Logged(tags = [...])` as the `tags: Map<String, Any>` argument.
     private val tagsBuilder = AnnotationTagsBuilder(pluginContext, finder, messageCollector)
 
-    // Reuses a log4k `log: Logger` member, or synthesizes `private val _log_ = Logger.of(this::class)`.
+    // Reuses a log4k `log: Logger` member (else the class's single `Logger`-typed property), or
+    // synthesizes `private val _log_ = Logger.of(this::class)`.
     private val loggerField: OfThisClassField? =
         OfThisClassField.of(pluginContext, finder, messageCollector, "Logger", "@Logged", "log", "_log_")
 

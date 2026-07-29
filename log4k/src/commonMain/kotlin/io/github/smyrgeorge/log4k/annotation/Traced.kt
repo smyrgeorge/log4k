@@ -15,7 +15,8 @@ package io.github.smyrgeorge.log4k.annotation
  *    current span;
  * 2. otherwise a [io.github.smyrgeorge.log4k.TracingEvent.Span] parameter/receiver (e.g. a
  *    `Span.Local` receiver) — used directly as the parent;
- * 3. otherwise a `trace: Tracer` member of the enclosing class — reused, or synthesized as
+ * 3. otherwise a `trace: Tracer` member of the enclosing class (or its single `Tracer`-typed
+ *    property under any other name) — reused, or synthesized as
  *    `private val _trace_ = Tracer.of(this::class)` — which creates a new **root** span.
  *
  * ```kotlin

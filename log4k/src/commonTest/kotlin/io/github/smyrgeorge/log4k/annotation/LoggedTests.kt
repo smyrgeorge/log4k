@@ -3,10 +3,12 @@ package io.github.smyrgeorge.log4k.annotation
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isGreaterThan
+import assertk.assertions.isNotEqualTo
 import assertk.assertions.isSameInstanceAs
 import assertk.assertions.startsWith
 import io.github.smyrgeorge.log4k.Appender
 import io.github.smyrgeorge.log4k.Level
+import io.github.smyrgeorge.log4k.Logger
 import io.github.smyrgeorge.log4k.LoggingEvent
 import io.github.smyrgeorge.log4k.RootLogger
 import io.github.smyrgeorge.log4k.utils.CapturingLoggingAppender
@@ -53,6 +55,27 @@ private class TaggedLoggedFixture {
 private class SilencedLoggedFixture {
     @Logged
     fun ignored(): Int = 0 // class-level @NoLog kill switch -> not logged despite @Logged
+}
+
+private class RenamedLoggerFixture {
+    // Not named `log`: reused anyway, as the class's single `Logger`-typed property.
+    @Suppress("unused") // used by the generated @Logged code (added after the frontend).
+    private val myLogger = Logger.of("custom.renamed.logger")
+
+    @Logged
+    fun work(x: Int): Int = x + 1
+}
+
+private class AmbiguousLoggerFixture {
+    // Two `Logger` properties and none named `log`: ambiguous -> the plugin synthesizes `_log_`.
+    @Suppress("unused")
+    private val first = Logger.of("custom.ambiguous.first")
+
+    @Suppress("unused")
+    private val second = Logger.of("custom.ambiguous.second")
+
+    @Logged
+    fun work(x: Int): Int = x + 2
 }
 
 /**
@@ -218,6 +241,26 @@ class LoggedTests {
         assertThat(renders).isEqualTo(0)
         val events = appender.awaitEvents(2) { it.message.contains("LoggedFixture.handle") }
         assertThat(events[0].message).isEqualTo("→ LoggedFixture.handle(secret=<MASKED>, visible=1)")
+    }
+
+    @Test
+    fun logged_loggerPropertyUnderAnotherName_isReusedByType() = runTest {
+        RenamedLoggerFixture().work(1)
+
+        val events = appender.awaitEvents(2) { it.message.contains("RenamedLoggerFixture.work") }
+        // The class's single `Logger`-typed property is reused, so the lines carry its custom name.
+        assertThat(events[0].logger).isEqualTo("custom.renamed.logger")
+        assertThat(events[1].logger).isEqualTo("custom.renamed.logger")
+    }
+
+    @Test
+    fun logged_ambiguousLoggerProperties_useASynthesizedLogger() = runTest {
+        AmbiguousLoggerFixture().work(1)
+
+        val events = appender.awaitEvents(2) { it.message.contains("AmbiguousLoggerFixture.work") }
+        // Two candidates are never guessed between: a `_log_` logger is synthesized instead.
+        assertThat(events[0].logger).isNotEqualTo("custom.ambiguous.first")
+        assertThat(events[0].logger).isNotEqualTo("custom.ambiguous.second")
     }
 
     @Test

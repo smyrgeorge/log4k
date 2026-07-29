@@ -4,6 +4,7 @@ import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isInstanceOf
 import io.github.smyrgeorge.log4k.Appender
+import io.github.smyrgeorge.log4k.Meter
 import io.github.smyrgeorge.log4k.MeteringEvent
 import io.github.smyrgeorge.log4k.RootLogger
 import io.github.smyrgeorge.log4k.utils.CapturingMeteringAppender
@@ -32,6 +33,15 @@ private class TimedFixture {
 private class SilencedTimedFixture {
     @Timed
     fun ping(): String = "pong" // class-level @NoTime kill switch -> not measured despite @Timed
+}
+
+private class RenamedMeterFixture {
+    // Not named `meter`: reused anyway, as the class's single `Meter`-typed property.
+    @Suppress("unused") // used by the generated @Timed code (added after the frontend).
+    private val myMeter = Meter.of("custom.renamed.meter")
+
+    @Timed
+    fun work(): Int = 42
 }
 
 @Timed(tags = [Tag("layer", "service")])
@@ -103,6 +113,17 @@ class TimedTests {
         val calls = appender.awaitValue("custom.op.calls")
         assertThat(calls.tags["layer"]).isEqualTo("service") // from the class
         assertThat(calls.tags["tier"]).isEqualTo("gold")     // from the function
+    }
+
+    @Test
+    fun timed_meterPropertyUnderAnotherName_isReusedByType() = runTest {
+        // A `MeteringEvent` carries no meter identity, so this verifies the fallback functionally:
+        // the instrumented body still records through the reused `Meter`-typed property.
+        val result = RenamedMeterFixture().work()
+
+        assertThat(result).isEqualTo(42)
+        val calls = appender.awaitValue("RenamedMeterFixture.work.calls")
+        assertThat(calls).isInstanceOf(MeteringEvent.Increment::class)
     }
 
     @Test

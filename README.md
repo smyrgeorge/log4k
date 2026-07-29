@@ -662,9 +662,11 @@ exception is rethrown. Both `suspend` and regular functions are supported (the w
 - **Masking** — `@Masked` on a parameter renders the literal `<MASKED>` in the entry line instead of the real value
   (which is never `toString()`ed), keeping secrets out of the logs:
   `fun login(username: String, @Masked password: String)` logs `→ login(username=alice, password=<MASKED>)`.
-- **Logger** — read from a `log: Logger` property on the enclosing class. If none exists — or `log` is a foreign type
-  such as `org.slf4j.Logger` — the plugin synthesizes `private val _log_ = Logger.of(this::class)` under a distinct
-  name, so it never clashes with the existing `log`.
+- **Logger** — read from a `log: Logger` property on the enclosing class, falling back to the class's **single**
+  `Logger`-typed property under any other name (e.g. `logger`; two or more are ambiguous and are not guessed between).
+  If neither exists — e.g. `log` is a foreign type such as `org.slf4j.Logger` and no other log4k `Logger` is declared —
+  the plugin synthesizes `private val _log_ = Logger.of(this::class)` under a distinct name, so it never clashes with
+  the existing `log`.
 - **Span correlation** — a span is attached to every emitted log line when one is in scope: a `TracingContext`
   parameter/receiver (its current span), otherwise a `TracingEvent.Span` in scope (e.g., a `Span.Local` receiver) used
   directly.
@@ -707,7 +709,8 @@ the instrument bundle is created once per `(name, tags)` combination and cached 
   `duration` values. Keep them **low-cardinality** (they become time-series labels); for per-request data use a
   `@Traced` span attribute instead. Class-level tags apply to every member, and a function's own tag with the same key
   wins.
-- **Meter** — read from a `meter: Meter` property on the enclosing class; if none exists, the plugin synthesizes
+- **Meter** — read from a `meter: Meter` property on the enclosing class, falling back to the class's single
+  `Meter`-typed property under any other name; if neither exists, the plugin synthesizes
   `private val _meter_ = Meter.of(this::class)` (mirroring how `@Logged` resolves its logger).
 - **Class-level** — annotate a **class** with `@Timed` to instrument every eligible public member function; a function's
   own `@Timed` overrides the class-level defaults (e.g., its `name`).
@@ -749,8 +752,9 @@ The new span's **parent** (and the tracer that creates it) is resolved from what
 
 1. a `TracingContext` parameter/receiver — the span nests under its current span;
 2. otherwise a `TracingEvent.Span` parameter/receiver (e.g., a `Span.Local` receiver) — used directly as the parent;
-3. otherwise a `trace: Tracer` member — reused, or synthesized as `private val _trace_ = Tracer.of(this::class)` — which
-   creates a new **root** span (mirroring how `@Logged`/`@Timed` resolve their logger/meter).
+3. otherwise a `trace: Tracer` member (or the class's single `Tracer`-typed property under any other name) — reused, or
+   synthesized as `private val _trace_ = Tracer.of(this::class)` — which creates a new **root** span (mirroring how
+   `@Logged`/`@Timed` resolve their logger/meter).
 
 - **Span name** — `@Traced(name = "…")`; when omitted, it defaults to `ClassName.functionName`.
 - **Static tags** — `@Traced(tags = [Tag("component", "billing")])` attaches key/value tags to the span.

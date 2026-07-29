@@ -55,12 +55,24 @@ object LoggedCompilerPlugin {
         fun boom(): Nothing = error("kaboom")
     }
 
+    class PaymentService {
+        // Not named `log`, but it is the class's single log4k `Logger`-typed property: the plugin
+        // falls back to it by type and reuses it (no `_log_` is synthesized). Two or more `Logger`
+        // properties would be ambiguous — the plugin then synthesizes instead of guessing.
+        @Suppress("unused")
+        private val logger = Logger.of(this::class)
+
+        @Logged
+        fun charge(amount: Int): String = "charged-$amount"
+    }
+
     // Stands in for a foreign logger type (e.g. org.slf4j.Logger) that happens to be named `log`.
     class ForeignLogger
 
     class InventoryService {
-        // A `log` member of a foreign type: the plugin ignores it (it is not a log4k Logger) and
-        // synthesizes its own `private val _log_ = Logger.of(this::class)` — no name clash, no error.
+        // A `log` member of a foreign type: the plugin ignores it (it is not a log4k Logger) and —
+        // with no other log4k `Logger` property to fall back to — synthesizes its own
+        // `private val _log_ = Logger.of(this::class)` — no name clash, no error.
         @Suppress("unused")
         private val log = ForeignLogger()
 
@@ -123,6 +135,12 @@ object LoggedCompilerPlugin {
         } catch (e: IllegalStateException) {
             println(">> caught rethrown exception: ${e.message}")
         }
+
+        delay(500.milliseconds)
+
+        // A `logger` property (not named `log`): reused via the single-`Logger`-property fallback.
+        val payments = PaymentService()
+        println(">> charge -> ${payments.charge(42)}")
 
         delay(500.milliseconds)
 

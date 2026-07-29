@@ -11,7 +11,8 @@ package io.github.smyrgeorge.log4k.annotation
  * - `"<name>.duration"` — a histogram of the invocation duration in milliseconds.
  *
  * The [io.github.smyrgeorge.log4k.Meter] is taken from a `meter: Meter` property declared in the
- * enclosing class; if the class does not declare one, the plugin synthesizes
+ * enclosing class, falling back to the class's single `Meter`-typed property under any other name;
+ * if the class declares neither, the plugin synthesizes
  * `private val _meter_ = Meter.of(this::class)`. The three instruments are created once and cached
  * (see [io.github.smyrgeorge.log4k.Meter.Timed]). Because the wrapping uses the `inline`
  * [io.github.smyrgeorge.log4k.Meter.Timed.measure] helper, both regular and `suspend` functions are

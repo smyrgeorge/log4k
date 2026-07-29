@@ -7,6 +7,7 @@ import assertk.assertions.isNull
 import io.github.smyrgeorge.log4k.Appender
 import io.github.smyrgeorge.log4k.Level
 import io.github.smyrgeorge.log4k.RootLogger
+import io.github.smyrgeorge.log4k.Tracer
 import io.github.smyrgeorge.log4k.TracingContext
 import io.github.smyrgeorge.log4k.TracingEvent
 import io.github.smyrgeorge.log4k.TracingEvent.Span.Status.Code
@@ -36,6 +37,15 @@ private class TracedFixture {
 private class SilencedTracedFixture {
     @Traced
     fun ignored(): Int = 1 // class-level @NoTrace kill switch -> not traced despite @Traced
+}
+
+private class RenamedTracerFixture {
+    // Not named `trace`: reused anyway, as the class's single `Tracer`-typed property.
+    @Suppress("unused") // used by the generated @Traced code (added after the frontend).
+    private val myTracer = Tracer.of("custom.renamed.tracer")
+
+    @Traced
+    fun helper(): Int = 3 // no context/span in scope -> ROOT span via the reused tracer
 }
 
 @Traced(name = "child-op")
@@ -100,6 +110,17 @@ class TracedTests {
         val span = appender.awaitSpan("TracedFixture.helper")
         assertThat(span.parent).isNull() // root span
         assertThat(span.tags["layer"]).isEqualTo("service")
+    }
+
+    @Test
+    fun traced_tracerPropertyUnderAnotherName_isReusedByType() = runTest {
+        val result = RenamedTracerFixture().helper()
+
+        assertThat(result).isEqualTo(3)
+        val span = appender.awaitSpan("RenamedTracerFixture.helper")
+        assertThat(span.parent).isNull() // root span
+        // The class's single `Tracer`-typed property is reused: the span carries its custom tracer.
+        assertThat(span.context.tracer.name).isEqualTo("custom.renamed.tracer")
     }
 
     @Test

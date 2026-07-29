@@ -13,6 +13,9 @@ import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
 import org.jetbrains.kotlin.ir.declarations.IrField
 import org.jetbrains.kotlin.ir.declarations.IrFunction
+import org.jetbrains.kotlin.ir.declarations.IrParameterKind
+import org.jetbrains.kotlin.ir.declarations.IrProperty
+import org.jetbrains.kotlin.ir.declarations.IrValueParameter
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.IrSimpleFunctionSymbol
@@ -31,10 +34,14 @@ import org.jetbrains.kotlin.name.Name
  * Resolves — or synthesizes — a per-class member holding an instance of [typeSymbol] obtained via a
  * companion `of(KClass<*>)` factory (e.g. `Logger.of(this::class)` / `Meter.of(this::class)`).
  *
- * [access] reuses a member named [memberName] of the target type if the class declares one, otherwise
- * it synthesizes `private val [syntheticName] = <Type>.of(this::class)` (created once per class). A
- * [memberName] member of a foreign type (e.g. `org.slf4j.Logger` when we want a log4k `Logger`) is
- * ignored — the synthetic name is distinct, so it never clashes.
+ * [access] resolves the member in three steps:
+ * 1. a member named [memberName] (e.g. `log`) is reused when its type is the target type;
+ * 2. otherwise the class's **single** property of the target type — whatever its name (e.g.
+ *    `private val logger = Logger.of(this::class)`) — is reused; two or more such properties are
+ *    ambiguous, so none is picked;
+ * 3. otherwise `private val [syntheticName] = <Type>.of(this::class)` is synthesized (created once
+ *    per class). A [memberName] member of a foreign type (e.g. `org.slf4j.Logger` when we want a
+ *    log4k `Logger`) is never reused — the synthetic name is distinct, so it never clashes.
  *
  * Synthesized fields are collected during the module traversal and only attached to their classes by
  * [commit] afterwards, so a class's declaration list is never mutated while it is being iterated.
@@ -69,23 +76,48 @@ class OfThisClassField(
             )
         val builder = DeclarationIrBuilder(pluginContext, function.symbol)
 
-        // Reuse an existing `memberName` member of the target type.
-        val existing = enclosingClass.properties.firstOrNull { it.name.asString() == memberName }
-        if (existing != null) {
-            val getter = existing.getter
-            if (getter != null && getter.returnType.isSubtypeOfClass(typeSymbol)) {
-                return builder.irCall(getter.symbol).apply {
-                    getter.dispatchReceiverParam()?.let { arguments[it] = builder.irGet(thisParam) }
-                }
-            }
-            val backing = existing.backingField
-            if (backing != null && backing.type.isSubtypeOfClass(typeSymbol)) {
-                return builder.irGetField(builder.irGet(thisParam), backing)
-            }
-            // The member exists but is a foreign type; fall through and synthesize our own.
-        }
+        // 1. Reuse an existing `memberName` member of the target type.
+        enclosingClass.properties.firstOrNull { it.name.asString() == memberName }
+            ?.let { reuse(builder, thisParam, it) }
+            ?.let { return it }
 
+        // 2. No conventional member (or it is a foreign type): fall back to the class's single
+        //    property of the target type, whatever its name. Two or more candidates are ambiguous —
+        //    synthesize instead of guessing between them.
+        enclosingClass.properties
+            .mapNotNull { reuse(builder, thisParam, it) }
+            .take(2).toList()
+            .singleOrNull()
+            ?.let { return it }
+
+        // 3. Synthesize `private val <syntheticName> = <Type>.of(this::class)`.
         return builder.irGetField(builder.irGet(thisParam), getOrCreate(enclosingClass))
+    }
+
+    /**
+     * Builds an access to [property] (a getter call, else a backing-field read) when its type is the
+     * target type — or `null` when it is a foreign type. A member **extension** property (or one with
+     * context parameters) is never reused: its getter needs receivers we cannot provide.
+     */
+    private fun reuse(
+        builder: DeclarationIrBuilder,
+        thisParam: IrValueParameter,
+        property: IrProperty,
+    ): IrExpression? {
+        val getter = property.getter
+        if (getter != null &&
+            getter.returnType.isSubtypeOfClass(typeSymbol) &&
+            getter.parameters.all { it.kind == IrParameterKind.DispatchReceiver }
+        ) {
+            return builder.irCall(getter.symbol).apply {
+                getter.dispatchReceiverParam()?.let { arguments[it] = builder.irGet(thisParam) }
+            }
+        }
+        val backing = property.backingField
+        if (backing != null && backing.type.isSubtypeOfClass(typeSymbol)) {
+            return builder.irGetField(builder.irGet(thisParam), backing)
+        }
+        return null
     }
 
     private fun getOrCreate(clazz: IrClass): IrField = created.getOrPut(clazz) {

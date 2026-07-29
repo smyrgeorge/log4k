@@ -47,8 +47,9 @@ import org.jetbrains.kotlin.name.Name
  * The span's **parent** (and the tracer that creates it) is resolved from what is in scope, in order:
  * 1. a `TracingContext` parameter/receiver — the new span nests under its current span (as before);
  * 2. otherwise a `TracingEvent.Span` parameter/receiver — used directly as the parent;
- * 3. otherwise a `trace: Tracer` member — reused, or synthesized as
- *    `private val _trace_ = Tracer.of(this::class)` — which creates a new root span.
+ * 3. otherwise a `trace: Tracer` member (else the class's single `Tracer`-typed property, whatever
+ *    its name) — reused, or synthesized as `private val _trace_ = Tracer.of(this::class)` — which
+ *    creates a new root span.
  *
  * Given:
  * ```kotlin
@@ -81,7 +82,8 @@ class TraceIrTransformer(
     // directly) — resolved from a context parameter/receiver of the instrumented function.
     private val tracing = TracingSymbols.of(finder)
 
-    // Reuses a `trace: Tracer` member, or synthesizes `private val _trace_ = Tracer.of(this::class)`.
+    // Reuses a `trace: Tracer` member (else the class's single `Tracer`-typed property), or
+    // synthesizes `private val _trace_ = Tracer.of(this::class)`.
     private val tracerField: OfThisClassField? =
         OfThisClassField.of(pluginContext, finder, messageCollector, "Tracer", "@Traced", "trace", "_trace_")
 

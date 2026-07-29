@@ -18,8 +18,10 @@ import io.github.smyrgeorge.log4k.Level
  * supported.
  *
  * The [io.github.smyrgeorge.log4k.Logger] is taken from a property named `log` (of type
- * [io.github.smyrgeorge.log4k.Logger]) declared in the enclosing class. If the class does not declare
- * one — or declares a `log` of a foreign type, such as `org.slf4j.Logger` — the plugin synthesizes
+ * [io.github.smyrgeorge.log4k.Logger]) declared in the enclosing class, falling back to the class's
+ * **single** property of type `Logger` under any other name (e.g. `logger`; two or more are
+ * ambiguous and are not guessed between). If neither exists — e.g. `log` is a foreign type, such as
+ * `org.slf4j.Logger`, and no other log4k `Logger` is declared — the plugin synthesizes
  * `private val _log_ = Logger.of(this::class)` (a distinct name, so it never clashes with the
  * foreign `log`).
  *
