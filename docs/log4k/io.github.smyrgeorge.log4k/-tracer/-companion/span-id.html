@@ -38,7 +38,7 @@
             </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
         </button>
         <div class="navigation-controls--break ui-kit_mobile-only"></div>
-        <div class="library-version" id="library-version">2.3.0
+        <div class="library-version" id="library-version">2.4.0
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
@@ -94,7 +94,7 @@
   <div class="cover ">
     <h1 class="cover"><span>span</span><wbr><span><span>Id</span></span></h1>
   </div>
-  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="span-id.html"><span class="token function">spanId</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/smyrgeorge/log4k/tree/main/log4k/src/commonMain/kotlin/io/github/smyrgeorge/log4k/Tracer.kt#L111">source</a>)</span></span></div><p class="paragraph">Generates a 16-character hexadecimal string representing a unique span identifier.</p><span class="kdoc-tag"><h4 class="">Return</h4><p class="paragraph">A 16-character hexadecimal string pad-started with zeros if necessary.</p></span></div></div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="span-id.html"><span class="token function">spanId</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/smyrgeorge/log4k/tree/main/log4k/src/commonMain/kotlin/io/github/smyrgeorge/log4k/Tracer.kt#L128">source</a>)</span></span></div><p class="paragraph">Generates a 16-character hexadecimal string representing a unique span identifier.</p><p class="paragraph">The identifier is guaranteed to be non-zero: W3C Trace Context and OpenTelemetry reserve the all-zero ID as the invalid/null sentinel. (This also keeps <a href="trace-id.html">traceId</a> valid, since a trace ID is invalid only when all 32 characters are zero.)</p><span class="kdoc-tag"><h4 class="">Return</h4><p class="paragraph">A 16-character hexadecimal string pad-started with zeros if necessary.</p></span></div></div>
 </div>
     <div class="footer">
         <div class="footer--container">

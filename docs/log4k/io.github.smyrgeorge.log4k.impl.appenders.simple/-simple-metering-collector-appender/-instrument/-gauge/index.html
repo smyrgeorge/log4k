@@ -38,7 +38,7 @@
             </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
         </button>
         <div class="navigation-controls--break ui-kit_mobile-only"></div>
-        <div class="library-version" id="library-version">2.3.0
+        <div class="library-version" id="library-version">2.4.0
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
@@ -93,7 +93,7 @@
   <div class="breadcrumbs"><a href="../../../../index.html">log4k</a><span class="delimiter">/</span><a href="../../../index.html">io.github.smyrgeorge.log4k.impl.appenders.simple</a><span class="delimiter">/</span><a href="../../index.html">SimpleMeteringCollectorAppender</a><span class="delimiter">/</span><a href="../index.html">Instrument</a><span class="delimiter">/</span><span class="current">Gauge</span></div>
   <div class="cover ">
     <h1 class="cover"><span><span>Gauge</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">Gauge</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">name<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">tags<span class="token operator">: </span><a href="../../../../io.github.smyrgeorge.log4k.impl/-tags/index.html">Tags</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">kind<span class="token operator">: </span><a href="../../../../io.github.smyrgeorge.log4k/-meter/-instrument/-kind/index.html">Meter.Instrument.Kind</a><span class="token punctuation">, </span></span><span class="parameter ">unit<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">description<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-number/index.html">Number</a><span class="token punctuation">, </span></span><span class="parameter ">updatedAt<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.time/-instant/index.html">Instant</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span> : <a href="../-abstract-recorder/index.html">SimpleMeteringCollectorAppender.Instrument.AbstractRecorder</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/smyrgeorge/log4k/tree/main/log4k/src/commonMain/kotlin/io/github/smyrgeorge/log4k/impl/appenders/simple/SimpleMeteringCollectorAppender.kt#L316">source</a>)</span></span></div><p class="paragraph">A gauge that tracks the latest recorded value (it can arbitrarily rise and fall).</p><ul><li><p class="paragraph">OpenTelemetry: https://opentelemetry.io/docs/specs/otel/metrics/api/#gauge</p></li><li><p class="paragraph">Prometheus: https://prometheus.io/docs/concepts/metric_types/#gauge</p></li></ul></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">Gauge</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>name<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>tags<span class="token operator">: </span><a href="../../../../io.github.smyrgeorge.log4k.impl/-tags/index.html">Tags</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>kind<span class="token operator">: </span><a href="../../../../io.github.smyrgeorge.log4k/-meter/-instrument/-kind/index.html">Meter.Instrument.Kind</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>unit<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>description<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>value<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-number/index.html">Number</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>updatedAt<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.time/-instant/index.html">Instant</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span> : <a href="../index.html">SimpleMeteringCollectorAppender.Instrument</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/smyrgeorge/log4k/tree/main/log4k/src/commonMain/kotlin/io/github/smyrgeorge/log4k/impl/appenders/simple/SimpleMeteringCollectorAppender.kt#L350">source</a>)</span></span></div><p class="paragraph">A gauge that tracks the latest recorded value (it can arbitrarily rise and fall): each observation produces a new aggregate carrying the latest value.</p><ul><li><p class="paragraph">OpenTelemetry: https://opentelemetry.io/docs/specs/otel/metrics/api/#gauge</p></li><li><p class="paragraph">Prometheus: https://prometheus.io/docs/concepts/metric_types/#gauge</p></li></ul></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
@@ -119,107 +119,107 @@
       </div>
       <div data-togglable="PROPERTY">
         <h2 class="tableheader">Properties</h2>
-        <div class="table"><a data-name="1564222567%2FProperties%2F-757297100" anchor-label="description" id="1564222567%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+        <div class="table"><a data-name="-35234944%2FProperties%2F-757297100" anchor-label="description" id="-35234944%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="../-abstract-recorder/description.html"><span><span>description</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1564222567%2FProperties%2F-757297100"></span>
+                  <div><a href="description.html"><span><span>description</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-35234944%2FProperties%2F-757297100"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="../-abstract-recorder/description.html">description</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="description.html">description</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="893084739%2FProperties%2F-757297100" anchor-label="kind" id="893084739%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+<a data-name="424413002%2FProperties%2F-757297100" anchor-label="kind" id="424413002%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="../-abstract-recorder/kind.html"><span><span>kind</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="893084739%2FProperties%2F-757297100"></span>
+                  <div><a href="kind.html"><span><span>kind</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="424413002%2FProperties%2F-757297100"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="../-abstract-recorder/kind.html">kind</a><span class="token operator">: </span><a href="../../../../io.github.smyrgeorge.log4k/-meter/-instrument/-kind/index.html">Meter.Instrument.Kind</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="kind.html">kind</a><span class="token operator">: </span><a href="../../../../io.github.smyrgeorge.log4k/-meter/-instrument/-kind/index.html">Meter.Instrument.Kind</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-215279316%2FProperties%2F-757297100" anchor-label="name" id="-215279316%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+<a data-name="-683951053%2FProperties%2F-757297100" anchor-label="name" id="-683951053%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="../-abstract-recorder/name.html"><span><span>name</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-215279316%2FProperties%2F-757297100"></span>
+                  <div><a href="name.html"><span><span>name</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-683951053%2FProperties%2F-757297100"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="../-abstract-recorder/name.html">name</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="name.html">name</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1392075938%2FProperties%2F-757297100" anchor-label="tags" id="-1392075938%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+<a data-name="-1860747675%2FProperties%2F-757297100" anchor-label="tags" id="-1860747675%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="../-abstract-recorder/tags.html"><span><span>tags</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1392075938%2FProperties%2F-757297100"></span>
+                  <div><a href="tags.html"><span><span>tags</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1860747675%2FProperties%2F-757297100"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="../-abstract-recorder/tags.html">tags</a><span class="token operator">: </span><a href="../../../../io.github.smyrgeorge.log4k.impl/-tags/index.html">Tags</a><span class="token operator">?</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="tags.html">tags</a><span class="token operator">: </span><a href="../../../../io.github.smyrgeorge.log4k.impl/-tags/index.html">Tags</a><span class="token operator">?</span></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-2056301485%2FProperties%2F-757297100" anchor-label="unit" id="-2056301485%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+<a data-name="1769994074%2FProperties%2F-757297100" anchor-label="unit" id="1769994074%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="../-abstract-recorder/unit.html"><span><span>unit</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2056301485%2FProperties%2F-757297100"></span>
+                  <div><a href="unit.html"><span><span>unit</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1769994074%2FProperties%2F-757297100"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="../-abstract-recorder/unit.html">unit</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="unit.html">unit</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="259322837%2FProperties%2F-757297100" anchor-label="updatedAt" id="259322837%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+<a data-name="1732517166%2FProperties%2F-757297100" anchor-label="updatedAt" id="1732517166%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="../-abstract-recorder/updated-at.html"><span>updated</span><wbr><span><span>At</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="259322837%2FProperties%2F-757297100"></span>
+                  <div><a href="updated-at.html"><span>updated</span><wbr><span><span>At</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1732517166%2FProperties%2F-757297100"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">var </span><a href="../-abstract-recorder/updated-at.html">updatedAt</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.time/-instant/index.html">Instant</a><span class="token operator">?</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="updated-at.html">updatedAt</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.time/-instant/index.html">Instant</a><span class="token operator">?</span></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1599473938%2FProperties%2F-757297100" anchor-label="value" id="1599473938%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+<a data-name="-44448021%2FProperties%2F-757297100" anchor-label="value" id="-44448021%2FProperties%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="../-abstract-recorder/value.html"><span><span>value</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1599473938%2FProperties%2F-757297100"></span>
+                  <div><a href="value.html"><span><span>value</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-44448021%2FProperties%2F-757297100"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">var </span><a href="../-abstract-recorder/value.html">value</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-number/index.html">Number</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="value.html">value</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-number/index.html">Number</a></div></div></div>
                 </div>
               </div>
             </div>
@@ -238,52 +238,82 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="../../../../io.github.smyrgeorge.log4k.impl/-tags/index.html">Tags</a><span class="token punctuation">.</span><a href="../format.html"><span class="token function">format</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Renders the tags as an OpenMetrics label set, e.g. <code class="lang-kotlin">{key="value",…}</code>.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="../../../../io.github.smyrgeorge.log4k.impl/-tags/index.html">Tags</a><span class="token punctuation">.</span><a href="../format.html"><span class="token function">format</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Renders the tags as an OpenMetrics label set, e.g. <code class="lang-kotlin">{key="value",…}</code>: label names are sanitized and label values escaped per the exposition format.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-851899152%2FFunctions%2F-757297100" anchor-label="openMetricsHeaderString" id="-851899152%2FFunctions%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+<a data-name="-203191788%2FFunctions%2F-757297100" anchor-label="openMetricsHeaderString" id="-203191788%2FFunctions%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="../open-metrics-header-string.html"><span>open</span><wbr><span>Metrics</span><wbr><span>Header</span><wbr><span><span>String</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-851899152%2FFunctions%2F-757297100"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-203191788%2FFunctions%2F-757297100"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="../open-metrics-header-string.html"><span class="token function">openMetricsHeaderString</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">The OpenMetrics metadata block (<code class="lang-kotlin"># HELP</code>, <code class="lang-kotlin"># UNIT</code>, <code class="lang-kotlin"># TYPE</code>) emitted once per instrument name. https://github.com/prometheus/OpenMetrics/blob/main/specification/OpenMetrics.md#metricfamily</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="../open-metrics-header-string.html"><span class="token function">openMetricsHeaderString</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">family<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">The OpenMetrics metadata block (<code class="lang-kotlin"># TYPE</code>, <code class="lang-kotlin"># UNIT</code>, <code class="lang-kotlin"># HELP</code>) emitted once per metric family. https://github.com/prometheus/OpenMetrics/blob/main/specification/OpenMetrics.md#metricfamily</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-118772086%2FFunctions%2F-757297100" anchor-label="openMetricsValueString" id="-118772086%2FFunctions%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+<a data-name="1578159363%2FFunctions%2F-757297100" anchor-label="openMetricsName" id="1578159363%2FFunctions%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../open-metrics-name.html"><span>open</span><wbr><span>Metrics</span><wbr><span><span>Name</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1578159363%2FFunctions%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="../open-metrics-name.html"><span class="token function">openMetricsName</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">The OpenMetrics MetricFamily name for this instrument: the sanitized <a href="../name.html">name</a>, with a counter's <code class="lang-kotlin">_total</code> suffix stripped (it is re-added on the sample line) and the sanitized <a href="../unit.html">unit</a> appended when not already present — OpenMetrics requires the unit to be a suffix of the family name.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1787032780%2FFunctions%2F-757297100" anchor-label="openMetricsType" id="-1787032780%2FFunctions%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../open-metrics-type.html"><span>open</span><wbr><span>Metrics</span><wbr><span><span>Type</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1787032780%2FFunctions%2F-757297100"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="../open-metrics-type.html"><span class="token function">openMetricsType</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">The OpenMetrics type of this instrument. An <code class="lang-kotlin">UpDownCounter</code> is exposed as a <code class="lang-kotlin">gauge</code>, mirroring the OpenTelemetry-to-Prometheus mapping — <code class="lang-kotlin">updowncounter</code> is not a valid exposition type, and the value is non-monotonic.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="883544762%2FFunctions%2F-757297100" anchor-label="openMetricsValueString" id="883544762%2FFunctions%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="../open-metrics-value-string.html"><span>open</span><wbr><span>Metrics</span><wbr><span>Value</span><wbr><span><span>String</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-118772086%2FFunctions%2F-757297100"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="883544762%2FFunctions%2F-757297100"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="../open-metrics-value-string.html"><span class="token function">openMetricsValueString</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">The OpenMetrics sample line(s) for this series: <code class="lang-kotlin">name{tags} value [updatedAt]</code>. Overridden by multi-line instruments such as <a href="../-histogram/index.html">Histogram</a>. https://github.com/prometheus/OpenMetrics/blob/main/specification/OpenMetrics.md#sample</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="../open-metrics-value-string.html"><span class="token function">openMetricsValueString</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">family<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">The OpenMetrics sample line(s) for this series: <code class="lang-kotlin">name{tags} value</code>. Counter samples get the mandatory <code class="lang-kotlin">_total</code> suffix. Overridden by multi-line instruments such as <a href="../-histogram/index.html">Histogram</a>. https://github.com/prometheus/OpenMetrics/blob/main/specification/OpenMetrics.md#sample</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-667134990%2FFunctions%2F-757297100" anchor-label="record" id="-667134990%2FFunctions%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
+<a data-name="1989516235%2FFunctions%2F-757297100" anchor-label="record" id="1989516235%2FFunctions%2F-757297100" data-filterable-set=":log4k/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":log4k/commonMain" data-filterable-set=":log4k/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="../-abstract-recorder/record.html"><span><span>record</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-667134990%2FFunctions%2F-757297100"></span>
+                  <div><a href="record.html"><span><span>record</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1989516235%2FFunctions%2F-757297100"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="../-abstract-recorder/record.html"><span class="token function">record</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">event<span class="token operator">: </span><a href="../../../../io.github.smyrgeorge.log4k/-metering-event/-record/index.html">MeteringEvent.Record</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Replaces the current value with the latest observation.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="record.html"><span class="token function">record</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">event<span class="token operator">: </span><a href="../../../../io.github.smyrgeorge.log4k/-metering-event/-record/index.html">MeteringEvent.Record</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">SimpleMeteringCollectorAppender.Instrument.Gauge</a></div><div class="brief "><p class="paragraph">Returns a copy carrying the latest observation.</p></div></div></div>
                 </div>
               </div>
             </div>

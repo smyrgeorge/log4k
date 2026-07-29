@@ -1,0 +1,209 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>OtlpTracingAppender</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../index.html" tabindex="1">
+                    log4k
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">2.4.0
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":log4k-integrations/commonMain">common</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":log4k-integrations/commonMain" data-filter=":log4k-integrations/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    log4k
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="log4k-integrations::io.github.smyrgeorge.log4k.integrations.otlp/OtlpTracingAppender///PointingToDeclaration//155465788">
+  <div class="breadcrumbs"><a href="../../index.html">log4k-integrations</a><span class="delimiter">/</span><a href="../index.html">io.github.smyrgeorge.log4k.integrations.otlp</a><span class="delimiter">/</span><span class="current">OtlpTracingAppender</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Otlp</span><wbr><span>Tracing</span><wbr><span><span>Appender</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k-integrations/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">OtlpTracingAppender</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">service<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">endpoint<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator"> = </span><span class="token string">"http://localhost:4318"</span><span class="token punctuation">, </span></span><span class="parameter ">batchSize<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">100</span><span class="token punctuation">, </span></span><span class="parameter ">batchTimeout<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.time/-duration/index.html">Duration</a><span class="token operator"> = </span>2.seconds<span class="token punctuation">, </span></span><span class="parameter ">env<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">version<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">headers<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token operator"> = </span>emptyMap()<span class="token punctuation">, </span></span><span class="parameter ">engine<span class="token operator">: </span><span data-unresolved-link="io.ktor.client.engine/HttpClientEngine///PointingToDeclaration/">HttpClientEngine</span><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span> : <a href="../../../log4k/io.github.smyrgeorge.log4k.impl.appenders/-batch-appender/index.html">BatchAppender</a><span class="token operator">&lt;</span><a href="../../../log4k/io.github.smyrgeorge.log4k/-tracing-event/index.html">TracingEvent</a><span class="token operator">&gt; </span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/smyrgeorge/log4k/tree/main/log4k-integrations/src/commonMain/kotlin/io/github/smyrgeorge/log4k/integrations/otlp/OtlpTracingAppender.kt#L71">source</a>)</span></span></div><p class="paragraph">An <a href="../../../log4k/io.github.smyrgeorge.log4k/-appender/index.html">io.github.smyrgeorge.log4k.Appender</a> that publishes finished spans over <a href="https://opentelemetry.io/docs/specs/otlp/">OTLP/HTTP</a> (<code class="lang-kotlin">POST /v1/traces</code>, JSON) — the vendor-neutral OpenTelemetry protocol accepted natively by most tracing backends: the OpenTelemetry Collector, Jaeger, Grafana Tempo, Honeycomb, the Datadog Agent's OTLP ingest, and many more. Register it with <code class="lang-kotlin">RootLogger.Tracing.appenders.register(...)</code>.</p><p class="paragraph">Spans are shipped in batches (via <a href="../../../log4k/io.github.smyrgeorge.log4k.impl.appenders/-batch-appender/index.html">BatchAppender</a>): a batch is sent as soon as it reaches <a href="../../../log4k-integrations/io.github.smyrgeorge.log4k.integrations.otlp/-otlp-tracing-appender/--root--.html">batchSize</a> spans or when <a href="../../../log4k-integrations/io.github.smyrgeorge.log4k.integrations.otlp/-otlp-tracing-appender/--root--.html">batchTimeout</a> elapses since the first span of the batch arrived — so low traffic never holds spans back for long.</p><p class="paragraph">The HTTP transport is a <a href="https://ktor.io/docs/client-engines.html">Ktor client</a>: pass an <a href="../../../log4k-integrations/io.github.smyrgeorge.log4k.integrations.otlp/-otlp-tracing-appender/--root--.html">engine</a> explicitly, or add exactly one Ktor engine artifact for your platform (CIO, Darwin, Curl, WinHttp, Js, ...) to the runtime classpath and leave it <code class="lang-kotlin">null</code> so the engine is discovered automatically.</p><p class="paragraph">Mapping notes:</p><ul><li><p class="paragraph">log4k's span model is already OpenTelemetry-shaped, so the mapping is direct: hex trace and span ids pass through unchanged (a 16-char/64-bit hex trace id is zero-padded; a non-hexadecimal or all-zero id is hashed to a stable valid one), events map to span events, and the status code/description map to the OTLP status.</p></li><li><p class="paragraph">Tags map to typed attributes: booleans to <code class="lang-kotlin">boolValue</code>, integer numbers to <code class="lang-kotlin">intValue</code>, floating-point numbers to <code class="lang-kotlin">doubleValue</code>, everything else to <code class="lang-kotlin">stringValue</code>.</p></li><li><p class="paragraph">When a span ends with an error but no explicit <code class="lang-kotlin">exception</code> event was recorded, an <code class="lang-kotlin">exception</code> event (<code class="lang-kotlin">exception.type/message/stacktrace</code>) is synthesized from the status, per the OpenTelemetry exception conventions.</p></li></ul><p class="paragraph">Delivery is best-effort: endpoint failures are reported to the console, and the batch is dropped — the appender itself keeps running.</p><h4 class="tableheader">Parameters</h4><div class="table"><div class="table-row table-row_content" data-filterable-current=":log4k-integrations/commonMain" data-filterable-set=":log4k-integrations/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>service</span></span></u></div></span></div><div><div class="title"><p class="paragraph">The <code class="lang-kotlin">service.name</code> resource attribute the spans are reported under.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":log4k-integrations/commonMain" data-filterable-set=":log4k-integrations/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>endpoint</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Base URL of the OTLP/HTTP endpoint (the standard <code class="lang-kotlin">/v1/traces</code> path is                  appended). Defaults to <code class="lang-kotlin">http://localhost:4318</code>.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":log4k-integrations/commonMain" data-filterable-set=":log4k-integrations/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>batch</span><wbr><span><span>Size</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Maximum number of spans per request. Defaults to 100.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":log4k-integrations/commonMain" data-filterable-set=":log4k-integrations/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>batch</span><wbr><span><span>Timeout</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Maximum time to hold an incomplete batch. Defaults to 2 seconds.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":log4k-integrations/commonMain" data-filterable-set=":log4k-integrations/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>env</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Optional <code class="lang-kotlin">deployment.environment.name</code> resource attribute.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":log4k-integrations/commonMain" data-filterable-set=":log4k-integrations/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>version</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Optional <code class="lang-kotlin">service.version</code> resource attribute.</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":log4k-integrations/commonMain" data-filterable-set=":log4k-integrations/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>headers</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Extra HTTP headers for every request — most vendors authenticate this way                 (e.g. <code class="lang-kotlin">x-honeycomb-team</code>, <code class="lang-kotlin">api-key</code>, <code class="lang-kotlin">Authorization</code>).</p></div></div></div></div><div class="table-row table-row_content" data-filterable-current=":log4k-integrations/commonMain" data-filterable-set=":log4k-integrations/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>engine</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Optional Ktor <span data-unresolved-link="io.ktor.client.engine/HttpClientEngine///PointingToDeclaration/">HttpClientEngine</span>. When <code class="lang-kotlin">null</code>, the engine available on the                classpath is used.</p></div></div></div></div></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="tableheader">Constructors</h2>
+        <div class="table"><a data-name="-2030482143%2FConstructors%2F155465788" anchor-label="OtlpTracingAppender" id="-2030482143%2FConstructors%2F155465788" data-filterable-set=":log4k-integrations/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":log4k-integrations/commonMain" data-filterable-set=":log4k-integrations/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-otlp-tracing-appender.html"><span>Otlp</span><wbr><span>Tracing</span><wbr><span><span>Appender</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2030482143%2FConstructors%2F155465788"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k-integrations/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">service<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">endpoint<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator"> = </span><span class="token string">"http://localhost:4318"</span><span class="token punctuation">, </span></span><span class="parameter ">batchSize<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">100</span><span class="token punctuation">, </span></span><span class="parameter ">batchTimeout<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.time/-duration/index.html">Duration</a><span class="token operator"> = </span>2.seconds<span class="token punctuation">, </span></span><span class="parameter ">env<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">version<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">headers<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token operator"> = </span>emptyMap()<span class="token punctuation">, </span></span><span class="parameter ">engine<span class="token operator">: </span><span data-unresolved-link="io.ktor.client.engine/HttpClientEngine///PointingToDeclaration/">HttpClientEngine</span><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="-1020831683%2FProperties%2F155465788" anchor-label="name" id="-1020831683%2FProperties%2F155465788" data-filterable-set=":log4k-integrations/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k-integrations/commonMain" data-filterable-set=":log4k-integrations/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1020831683%2FProperties%2F155465788"><span><span>name</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1020831683%2FProperties%2F155465788"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k-integrations/commonMain"><div class="symbol monospace"><span class="token keyword">override </span><span class="token keyword">val </span><a href="index.html#-1020831683%2FProperties%2F155465788">name</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="1291104368%2FFunctions%2F155465788" anchor-label="append" id="1291104368%2FFunctions%2F155465788" data-filterable-set=":log4k-integrations/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k-integrations/commonMain" data-filterable-set=":log4k-integrations/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1291104368%2FFunctions%2F155465788"><span><span>append</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1291104368%2FFunctions%2F155465788"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k-integrations/commonMain"><div class="symbol monospace"><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="index.html#1291104368%2FFunctions%2F155465788"><span class="token function">append</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">event<span class="token operator">: </span><a href="../../../log4k/io.github.smyrgeorge.log4k/-tracing-event/index.html">TracingEvent</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1901180627%2FFunctions%2F155465788" anchor-label="handle" id="1901180627%2FFunctions%2F155465788" data-filterable-set=":log4k-integrations/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k-integrations/commonMain" data-filterable-set=":log4k-integrations/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="handle.html"><span><span>handle</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1901180627%2FFunctions%2F155465788"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k-integrations/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="handle.html"><span class="token function">handle</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">event<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../../log4k/io.github.smyrgeorge.log4k/-tracing-event/index.html">TracingEvent</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1136026771%2FFunctions%2F155465788" anchor-label="setup" id="-1136026771%2FFunctions%2F155465788" data-filterable-set=":log4k-integrations/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k-integrations/commonMain" data-filterable-set=":log4k-integrations/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1136026771%2FFunctions%2F155465788"><span><span>setup</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1136026771%2FFunctions%2F155465788"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k-integrations/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="index.html#-1136026771%2FFunctions%2F155465788"><span class="token function">setup</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">flow<span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="../../../log4k/io.github.smyrgeorge.log4k/-tracing-event/index.html">TracingEvent</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../../../log4k/io.github.smyrgeorge.log4k/-tracing-event/index.html">TracingEvent</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

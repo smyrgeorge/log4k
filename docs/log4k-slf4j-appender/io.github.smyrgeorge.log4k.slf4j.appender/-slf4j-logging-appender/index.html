@@ -1,0 +1,198 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>Slf4jLoggingAppender</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../index.html" tabindex="1">
+                    log4k
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">2.4.0
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":log4k-slf4j-appender/jvmMain">jvm</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":log4k-slf4j-appender/jvmMain" data-filter=":log4k-slf4j-appender/jvmMain">
+                                <span class="checkbox--icon"></span>
+                                jvm
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    log4k
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="log4k-slf4j-appender::io.github.smyrgeorge.log4k.slf4j.appender/Slf4jLoggingAppender///PointingToDeclaration//-1620805976">
+  <div class="breadcrumbs"><a href="../../index.html">log4k-slf4j-appender</a><span class="delimiter">/</span><a href="../index.html">io.github.smyrgeorge.log4k.slf4j.appender</a><span class="delimiter">/</span><span class="current">Slf4jLoggingAppender</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Slf4j</span><wbr><span>Logging</span><wbr><span><span>Appender</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k-slf4j-appender/jvmMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">Slf4jLoggingAppender</a> : <a href="../../../log4k/io.github.smyrgeorge.log4k/-appender/index.html">Appender</a><span class="token operator">&lt;</span><a href="../../../log4k/io.github.smyrgeorge.log4k/-logging-event/index.html">LoggingEvent</a><span class="token operator">&gt; </span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/smyrgeorge/log4k/tree/main/log4k-slf4j-appender/src/jvmMain/kotlin/io/github/smyrgeorge/log4k/slf4j/appender/Slf4jLoggingAppender.kt#L52">source</a>)</span></span></div><p class="paragraph">An <a href="../../../log4k/io.github.smyrgeorge.log4k/-appender/index.html">Appender</a> that forwards every log4k <a href="../../../log4k/io.github.smyrgeorge.log4k/-logging-event/index.html">LoggingEvent</a> to SLF4J — the reverse direction of the <code class="lang-kotlin">log4k-slf4j</code> module.</p><p class="paragraph">Use it to adopt log4k inside an existing JVM project that already has an SLF4J backend (Logback, Log4j2, …) configured: everything emitted through the log4k API — including the entry/exit lines the <code class="lang-kotlin">log4k-compiler-plugin</code> generates for <code class="lang-kotlin">@Logged</code> functions — lands in that backend instead of log4k's default console appender. <a href="-companion/install.html">install</a> performs the swap:</p><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">Slf4jLoggingAppender.install()</code></pre><span class="copy-tooltip"><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div><span class="copy-icon"></span></span></div><p class="paragraph">Forwarding uses the SLF4J 2.x fluent API and hands over the <strong>raw</strong> message pattern together with its arguments: log4k's <code class="lang-kotlin">{}</code> placeholder rules deliberately mirror SLF4J's <code class="lang-kotlin">MessageFormatter</code>, so substitution can be left to the backend, and structured encoders (JSON, logstash, …) keep the individual arguments instead of receiving a pre-flattened string. A <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html">Throwable</a> on the event becomes the SLF4J cause, the event's tags are attached as key-value pairs, and when the event is span-correlated the span's <code class="lang-kotlin">traceId</code>/<code class="lang-kotlin">spanId</code> are attached as key-value pairs as well. Events at <a href="../../../log4k/io.github.smyrgeorge.log4k/-level/-o-f-f/index.html">Level.OFF</a> are dropped, and levels disabled in the backend cost only a no-op builder.</p><p class="paragraph">Two gates apply in this setup: log4k's own logger levels decide whether an event is published at all, and the backend's configuration decides whether the forwarded call is written. Keep the log4k side at least as verbose as the backend, so the backend configuration remains the single source of truth.</p><p class="paragraph">Because delivery goes through <code class="lang-kotlin">RootLogger</code>'s asynchronous queue, the backend observes the forwarding coroutine, not the original call site: caller-location patterns (<code class="lang-kotlin">%class</code>, <code class="lang-kotlin">%line</code>), <code class="lang-kotlin">%thread</code>, and the backend timestamp refer to the moment of forwarding. The original values remain available on the <a href="../../../log4k/io.github.smyrgeorge.log4k/-logging-event/index.html">LoggingEvent</a> (<code class="lang-kotlin">thread</code>, <code class="lang-kotlin">timestamp</code>) for custom bridges that need full fidelity. When the event carries a compile-time <a href="../../../log4k/io.github.smyrgeorge.log4k/-source-location/index.html">io.github.smyrgeorge.log4k.SourceLocation</a> (injected by the <code class="lang-kotlin">log4k-compiler-plugin</code>), the <strong>real</strong> source location survives the bridge as key-value pairs named after logstash-logback-encoder's caller-data fields — <code class="lang-kotlin">caller_file_name</code> / <code class="lang-kotlin">caller_line_number</code> / <code class="lang-kotlin">caller_method_name</code> — so a JSON backend renders it exactly like Logback's own caller data, even though the backend's <code class="lang-kotlin">%class</code>/<code class="lang-kotlin">%line</code> cannot see past the forwarding coroutine.</p><p class="paragraph">This appender must never run while SLF4J itself is backed by log4k (the <code class="lang-kotlin">log4k-slf4j</code> provider): every forwarded event would be routed straight back into log4k, endlessly. Construction fails fast with a descriptive error if that binding is detected.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="tableheader">Constructors</h2>
+        <div class="table"><a data-name="-1491160929%2FConstructors%2F-1620805976" anchor-label="Slf4jLoggingAppender" id="-1491160929%2FConstructors%2F-1620805976" data-filterable-set=":log4k-slf4j-appender/jvmMain"></a>
+          <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":log4k-slf4j-appender/jvmMain" data-filterable-set=":log4k-slf4j-appender/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-slf4j-logging-appender.html"><span>Slf4j</span><wbr><span>Logging</span><wbr><span><span>Appender</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1491160929%2FConstructors%2F-1620805976"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k-slf4j-appender/jvmMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="TYPE">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="442093535%2FClasslikes%2F-1620805976" anchor-label="Companion" id="442093535%2FClasslikes%2F-1620805976" data-filterable-set=":log4k-slf4j-appender/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k-slf4j-appender/jvmMain" data-filterable-set=":log4k-slf4j-appender/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-companion/index.html"><span><span>Companion</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="442093535%2FClasslikes%2F-1620805976"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k-slf4j-appender/jvmMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-companion/index.html">Companion</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="-958426153%2FProperties%2F-1620805976" anchor-label="name" id="-958426153%2FProperties%2F-1620805976" data-filterable-set=":log4k-slf4j-appender/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k-slf4j-appender/jvmMain" data-filterable-set=":log4k-slf4j-appender/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="name.html"><span><span>name</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-958426153%2FProperties%2F-1620805976"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k-slf4j-appender/jvmMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="name.html">name</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="-486489869%2FFunctions%2F-1620805976" anchor-label="append" id="-486489869%2FFunctions%2F-1620805976" data-filterable-set=":log4k-slf4j-appender/jvmMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":log4k-slf4j-appender/jvmMain" data-filterable-set=":log4k-slf4j-appender/jvmMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="append.html"><span><span>append</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-486489869%2FFunctions%2F-1620805976"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":log4k-slf4j-appender/jvmMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend override </span><span class="token keyword">fun </span><a href="append.html"><span class="token function">append</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">event<span class="token operator">: </span><a href="../../../log4k/io.github.smyrgeorge.log4k/-logging-event/index.html">LoggingEvent</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
