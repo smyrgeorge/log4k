@@ -477,8 +477,8 @@ RootLogger.Metering.appenders.register(collector)
 The `SimpleMeteringCollectorAppender` processes all events, updating the value for each registered instrument. It also
 provides a method that returns a string with the collected data in the `OpenMetrics` line format: metric and label names
 are sanitized to the exposition alphabet (e.g. `event-a` becomes `event_a`), counter-samples carry the mandatory
-`_total` suffix, an `UpDownCounter` is exposed as a `gauge`, units are appended to the metric name, and the exposition
-is terminated with `# EOF`.
+`_total` suffix, an `UpDownCounter` is exposed as a `gauge`, histograms are aggregated into explicit cumulative buckets
+(see [Histogram](#histogram)), units are appended to the metric name, and the exposition is terminated with `# EOF`.
 
 ```kotlin
 val metrics = collector.toOpenMetricsLineFormatString()
@@ -491,6 +491,9 @@ println(metrics)
 // # TYPE event_b gauge
 // event_b{label="pool-b"} 4.0
 // # TYPE request_duration histogram
+// request_duration_bucket{path="/a",le="5.0"} 2
+// ...                                            <- one cumulative bucket per configured boundary
+// request_duration_bucket{path="/a",le="10000.0"} 2
 // request_duration_bucket{path="/a",le="+Inf"} 2
 // request_duration_sum{path="/a"} 0.8
 // request_duration_count{path="/a"} 2
@@ -543,14 +546,33 @@ dynamic environments. `poll` returns the `Job` backing the loop — cancel it to
 ### Histogram
 
 A `Histogram` samples individual observations (such as request latencies or payload sizes) and lets appenders aggregate
-their distribution. The `SimpleMeteringCollectorAppender` keeps a running `count` and `sum` per tag-set and exposes them
-as the mandatory OpenMetrics `_count`, `_sum` and cumulative `+Inf` bucket series.
+their distribution. The `SimpleMeteringCollectorAppender` folds each observation into a set of explicit cumulative
+buckets plus a running `count` and `sum` per tag-set, and exposes them as the OpenMetrics `_bucket{le="…"}`, `_sum` and
+`_count` series — the finite bucket boundaries are what let a backend (Prometheus `histogram_quantile`, Datadog, …)
+derive percentiles.
 
 ```kotlin
 val durations = meter.histogram<Double>("request-duration", unit = "seconds")
 durations.record(0.3, "path" to "/a")
 durations.record(0.5, "path" to "/a")
 ```
+
+By default every histogram uses the OpenTelemetry SDK's default explicit boundaries (`5.0, 10.0, 25.0, …, 10000.0`) —
+millisecond-oriented, a direct fit for the `.duration` histograms recorded by
+`Meter.timed`/`@Timed`. Histograms in other units usually want their own boundaries, configurable on the appender:
+
+```kotlin
+val collector = SimpleMeteringCollectorAppender(
+    // Applied to every histogram without an explicit override; pass emptyList() to collapse
+    // histograms to just the implicit `+Inf` bucket (count/sum only).
+    defaultHistogramBucketBoundaries = listOf(5.0, 10.0, 25.0, 50.0, 100.0, 250.0, 500.0, 1000.0),
+    // Per-instrument overrides, keyed by instrument name.
+    histogramBucketBoundaries = mapOf("request-duration" to listOf(0.1, 0.25, 0.5, 1.0, 2.5)),
+)
+```
+
+Boundaries are upper bounds (`le` — less-or-equal) and are normalized before use: non-finite entries are dropped (the
+`+Inf` bucket is always emitted implicitly), duplicates removed, and the rest sorted ascending.
 
 Like a `Gauge`, a `Histogram` extends the recorder API, so it can also be polled at a fixed interval:
 
@@ -726,6 +748,9 @@ OrderService_placeOrder_calls_total{} 3
 # TYPE OrderService_placeOrder_duration_ms histogram
 # UNIT OrderService_placeOrder_duration_ms ms
 # HELP OrderService_placeOrder_duration_ms Invocation duration of 'OrderService.placeOrder'.
+OrderService_placeOrder_duration_ms_bucket{le="5.0"} 3
+...                                            <- one cumulative bucket per configured boundary
+OrderService_placeOrder_duration_ms_bucket{le="10000.0"} 3
 OrderService_placeOrder_duration_ms_bucket{le="+Inf"} 3
 OrderService_placeOrder_duration_ms_sum{} 1.732
 OrderService_placeOrder_duration_ms_count{} 3

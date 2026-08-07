@@ -37,7 +37,9 @@ class SimpleMeteringCollectorAppenderTests {
 
     @Test
     fun rendersOpenMetricsCompliantExposition() = runTest {
-        val appender = SimpleMeteringCollectorAppender()
+        // Bucket boundaries are exercised by the dedicated histogram tests below; disabled here
+        // to keep this test focused on the overall exposition shape.
+        val appender = SimpleMeteringCollectorAppender(defaultHistogramBucketBoundaries = emptyList())
 
         appender.create("requests", Kind.Counter, description = "Total requests.")
         appender.append(MeteringEvent.Increment(nextId(), "requests", mapOf("path" to "/a"), value = 2L))
@@ -167,7 +169,8 @@ class SimpleMeteringCollectorAppenderTests {
 
     @Test
     fun histogramAccumulatesCountAndSumAcrossRecords() = runTest {
-        val appender = SimpleMeteringCollectorAppender()
+        // No finite buckets: only the implicit `+Inf` bucket plus `_sum`/`_count` remain.
+        val appender = SimpleMeteringCollectorAppender(defaultHistogramBucketBoundaries = emptyList())
 
         appender.create("sizes", Kind.Histogram)
         appender.append(MeteringEvent.Record(nextId(), "sizes", emptyMap(), value = 0.5))
@@ -487,7 +490,7 @@ class SimpleMeteringCollectorAppenderTests {
 
     @Test
     fun unitAlreadySuffixedOnTheNameIsNotDoubled() = runTest {
-        val appender = SimpleMeteringCollectorAppender()
+        val appender = SimpleMeteringCollectorAppender(defaultHistogramBucketBoundaries = emptyList())
 
         // "req_ms" already ends with the unit: the family name must not become "req_ms_ms".
         // Also pins the metadata block order: TYPE, then UNIT, then HELP.
@@ -519,20 +522,146 @@ class SimpleMeteringCollectorAppenderTests {
 
     @Test
     fun histogramDropsUserTagNamedLe() = runTest {
-        val appender = SimpleMeteringCollectorAppender()
+        val appender = SimpleMeteringCollectorAppender(defaultHistogramBucketBoundaries = listOf(2.5))
 
         appender.create("latency", Kind.Histogram)
         appender.append(
             MeteringEvent.Record(nextId(), "latency", mapOf("le" to "user-value", "path" to "/a"), value = 1.5)
         )
 
-        // The reserved `le` tag is dropped from all series; the bucket keeps its own `le="+Inf"`.
+        // The reserved `le` tag is dropped from all series; each bucket keeps its own `le`.
         assertThat(appender.toOpenMetricsLineFormatString()).isEqualTo(
             """
             # TYPE latency histogram
+            latency_bucket{path="/a",le="2.5"} 1
             latency_bucket{path="/a",le="+Inf"} 1
             latency_sum{path="/a"} 1.5
             latency_count{path="/a"} 1
+            # EOF
+
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun histogramFoldsObservationsIntoCumulativeDefaultBuckets() = runTest {
+        // The default constructor applies the OTel default (millisecond-oriented) boundaries.
+        val appender = SimpleMeteringCollectorAppender()
+
+        appender.create("latency", Kind.Histogram, unit = "ms")
+        // One observation per interesting region; the last exceeds the top boundary and lands
+        // only in the implicit `+Inf` bucket.
+        listOf(3.0, 7.5, 40.0, 900.0, 20_000.0).forEach {
+            appender.append(MeteringEvent.Record(nextId(), "latency", emptyMap(), value = it))
+        }
+
+        // Buckets are cumulative and the `+Inf` bucket always equals `_count`.
+        assertThat(appender.toOpenMetricsLineFormatString()).isEqualTo(
+            """
+            # TYPE latency_ms histogram
+            # UNIT latency_ms ms
+            latency_ms_bucket{le="5.0"} 1
+            latency_ms_bucket{le="10.0"} 2
+            latency_ms_bucket{le="25.0"} 2
+            latency_ms_bucket{le="50.0"} 3
+            latency_ms_bucket{le="75.0"} 3
+            latency_ms_bucket{le="100.0"} 3
+            latency_ms_bucket{le="250.0"} 3
+            latency_ms_bucket{le="500.0"} 3
+            latency_ms_bucket{le="750.0"} 3
+            latency_ms_bucket{le="1000.0"} 4
+            latency_ms_bucket{le="2500.0"} 4
+            latency_ms_bucket{le="5000.0"} 4
+            latency_ms_bucket{le="7500.0"} 4
+            latency_ms_bucket{le="10000.0"} 4
+            latency_ms_bucket{le="+Inf"} 5
+            latency_ms_sum{} 20950.5
+            latency_ms_count{} 5
+            # EOF
+
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun histogramBoundariesCanBeOverriddenPerInstrumentName() = runTest {
+        // Overrides are keyed by the instrument name as registered with the Meter; instruments
+        // without an entry fall back to the appender-wide default.
+        val appender = SimpleMeteringCollectorAppender(
+            defaultHistogramBucketBoundaries = listOf(1.0),
+            histogramBucketBoundaries = mapOf("sizes" to listOf(10.0, 100.0)),
+        )
+
+        appender.create("sizes", Kind.Histogram)
+        appender.append(MeteringEvent.Record(nextId(), "sizes", emptyMap(), value = 5))
+        appender.append(MeteringEvent.Record(nextId(), "sizes", emptyMap(), value = 50.5))
+
+        appender.create("other", Kind.Histogram)
+        appender.append(MeteringEvent.Record(nextId(), "other", emptyMap(), value = 0.5))
+
+        assertThat(appender.toOpenMetricsLineFormatString()).isEqualTo(
+            """
+            # TYPE other histogram
+            other_bucket{le="1.0"} 1
+            other_bucket{le="+Inf"} 1
+            other_sum{} 0.5
+            other_count{} 1
+            # TYPE sizes histogram
+            sizes_bucket{le="10.0"} 1
+            sizes_bucket{le="100.0"} 2
+            sizes_bucket{le="+Inf"} 2
+            sizes_sum{} 55.5
+            sizes_count{} 2
+            # EOF
+
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun histogramBucketUpperBoundsAreInclusive() = runTest {
+        val appender = SimpleMeteringCollectorAppender(defaultHistogramBucketBoundaries = listOf(1.0, 2.5))
+
+        // Observations exactly on a boundary land in that bucket (`le` = less-or-equal).
+        appender.create("exact", Kind.Histogram)
+        appender.append(MeteringEvent.Record(nextId(), "exact", emptyMap(), value = 1.0))
+        appender.append(MeteringEvent.Record(nextId(), "exact", emptyMap(), value = 2.5))
+
+        assertThat(appender.toOpenMetricsLineFormatString()).isEqualTo(
+            """
+            # TYPE exact histogram
+            exact_bucket{le="1.0"} 1
+            exact_bucket{le="2.5"} 2
+            exact_bucket{le="+Inf"} 2
+            exact_sum{} 3.5
+            exact_count{} 2
+            # EOF
+
+            """.trimIndent()
+        )
+    }
+
+    @Test
+    fun histogramBoundariesAreNormalizedBeforeUse() = runTest {
+        // Unsorted, duplicated and non-finite boundaries: the appender sorts ascending,
+        // deduplicates, and drops NaN/±Inf (the `+Inf` bucket is always emitted implicitly).
+        val appender = SimpleMeteringCollectorAppender(
+            defaultHistogramBucketBoundaries = listOf(
+                5.0, 0.5, Double.NaN, 5.0, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY,
+            ),
+        )
+
+        appender.create("normalized", Kind.Histogram)
+        appender.append(MeteringEvent.Record(nextId(), "normalized", emptyMap(), value = 0.25))
+
+        assertThat(appender.toOpenMetricsLineFormatString()).isEqualTo(
+            """
+            # TYPE normalized histogram
+            normalized_bucket{le="0.5"} 1
+            normalized_bucket{le="5.0"} 1
+            normalized_bucket{le="+Inf"} 1
+            normalized_sum{} 0.25
+            normalized_count{} 1
             # EOF
 
             """.trimIndent()
@@ -547,8 +676,8 @@ class SimpleMeteringCollectorAppenderTests {
         RootLogger.Metering.appenders.unregisterAll()
         // Register the collector before the capturer: RootLogger delivers each event to the
         // appenders in registration order, so once the capturer sees an event the collector has
-        // already folded it.
-        val collector = SimpleMeteringCollectorAppender()
+        // already folded it. (Buckets are covered by the histogram tests; disabled here.)
+        val collector = SimpleMeteringCollectorAppender(defaultHistogramBucketBoundaries = emptyList())
         val capturing = CapturingMeteringAppender()
         RootLogger.Metering.appenders.register(collector)
         RootLogger.Metering.appenders.register(capturing)
@@ -636,11 +765,12 @@ class SimpleMeteringCollectorAppenderTests {
             }
             // Render continuously while the writer folds events (yield keeps single-threaded
             // targets fair). Every snapshot must be internally consistent: the histogram's
-            // `_bucket` and `_count` lines render the same immutable aggregate, so they can
-            // never disagree.
+            // `+Inf` bucket and `_count` lines render the same immutable aggregate (bucket
+            // counts included, exercising the copy-on-record path), so they can never disagree.
             while (writer.isActive) {
                 val exposition = appender.toOpenMetricsLineFormatString()
-                assertThat(exposition.lineValue("race_lat_bucket")).isEqualTo(exposition.lineValue("race_lat_count"))
+                assertThat(exposition.lineValue("""race_lat_bucket{le="+Inf"}"""))
+                    .isEqualTo(exposition.lineValue("race_lat_count"))
                 yield()
             }
             writer.join()

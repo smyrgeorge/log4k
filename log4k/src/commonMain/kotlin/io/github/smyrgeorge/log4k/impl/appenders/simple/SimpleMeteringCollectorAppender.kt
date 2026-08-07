@@ -26,12 +26,38 @@ import kotlin.time.Instant
  * consistent snapshot — never a map being mutated underneath it, and never a torn aggregate (e.g. a
  * histogram whose `count` was updated but whose `sum` was not).
  *
+ * Histograms aggregate into explicit cumulative buckets (plus the running `count` and `sum`) —
+ * the finite bucket boundaries are what let a backend (Prometheus `histogram_quantile`, Datadog,
+ * …) derive percentiles. Every histogram uses the appender-wide default boundaries unless
+ * [histogramBucketBoundaries] carries an entry for its instrument name. The out-of-the-box
+ * default, [DEFAULT_HISTOGRAM_BUCKET_BOUNDARIES], is the OpenTelemetry SDK's millisecond-oriented
+ * set — a direct fit for the `.duration` histograms recorded by [Meter.timed]. An empty boundary
+ * list collapses a histogram to just its implicit `+Inf` bucket (`count`/`sum` only).
+ *
  * - OpenTelemetry metrics: https://opentelemetry.io/docs/specs/otel/metrics/api/
  * - OpenMetrics: https://github.com/prometheus/OpenMetrics/blob/main/specification/OpenMetrics.md
+ *
+ * @param defaultHistogramBucketBoundaries The bucket upper bounds applied to every histogram
+ *   without an explicit override. Normalized before use: non-finite entries are dropped (the
+ *   `+Inf` bucket is always emitted implicitly), duplicates removed, and the rest sorted
+ *   ascending.
+ * @param histogramBucketBoundaries Per-instrument bucket-boundary overrides, keyed by the
+ *   instrument name as registered with the [Meter] (e.g. `"UserService.loadUser.duration"`).
+ *   Values are normalized the same way as [defaultHistogramBucketBoundaries].
  */
 @OptIn(ExperimentalAtomicApi::class)
-class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
+class SimpleMeteringCollectorAppender(
+    defaultHistogramBucketBoundaries: List<Double> = DEFAULT_HISTOGRAM_BUCKET_BOUNDARIES,
+    histogramBucketBoundaries: Map<String, List<Double>> = emptyMap(),
+) : Appender<MeteringEvent> {
     override val name: String = this::class.toName()
+
+    // Bucket boundaries are resolved per instrument name when its aggregate is created; both the
+    // default and the overrides are normalized once here (finite, deduplicated, ascending).
+    private val defaultHistogramBucketBoundaries: List<Double> =
+        defaultHistogramBucketBoundaries.normalizeBucketBoundaries()
+    private val histogramBucketBoundaries: Map<String, List<Double>> =
+        histogramBucketBoundaries.mapValues { (_, boundaries) -> boundaries.normalizeBucketBoundaries() }
 
     // The aggregated value per instrument-and-tag-set, keyed by the (name, tags) pair itself:
     // hash-based keys (Int hashes of name+tags) can collide and silently merge distinct series.
@@ -179,6 +205,7 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
                 kind = info.kind,
                 unit = info.unit,
                 description = info.description,
+                boundaries = histogramBucketBoundaries[name] ?: defaultHistogramBucketBoundaries,
                 updatedAt = timestamp
             )
         }
@@ -362,10 +389,14 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
         }
 
         /**
-         * Aggregates sampled observations into a running `count` and `sum`. Unlike a gauge (which
-         * keeps only the last value), a histogram accumulates every recorded value. Because the
-         * aggregate is immutable, a rendered snapshot can never observe a `count` without its
-         * matching `sum`.
+         * Aggregates sampled observations into explicit cumulative buckets plus a running `count`
+         * and `sum`. Unlike a gauge (which keeps only the last value), a histogram accumulates
+         * every recorded value: an observation lands in the first bucket whose upper bound
+         * ([boundaries], ascending) is `>=` the value — or only in the implicit `+Inf` bucket,
+         * which always equals `count`, when it exceeds them all. [bucketCounts] holds the
+         * per-bucket (non-cumulative) counts and is cumulated at render time. Because the
+         * aggregate is immutable (a fold copies the counts), a rendered snapshot can never observe
+         * a `count` without its matching `sum` and bucket counts.
          *
          * - OpenTelemetry: https://opentelemetry.io/docs/specs/otel/metrics/api/#histogram
          * - Prometheus: https://prometheus.io/docs/concepts/metric_types/#histogram
@@ -376,6 +407,8 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
             override val kind: Meter.Instrument.Kind,
             override val unit: String?,
             override val description: String?,
+            val boundaries: List<Double> = emptyList(),
+            val bucketCounts: LongArray = LongArray(boundaries.size),
             val count: Long = 0,
             val sum: Double = 0.0,
             override val updatedAt: Instant? = null,
@@ -383,23 +416,46 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
             // Keep the interface's `value` in sync with the observation count.
             override val value: Number get() = count
 
-            /** Returns a copy with the observation folded into the running `count`/`sum`. */
-            fun record(event: MeteringEvent.Record): Histogram =
-                Histogram(name, tags, kind, unit, description, count + 1, sum + event.value.toDouble(), event.timestamp)
+            /** Returns a copy with the observation folded into its bucket and the running `count`/`sum`. */
+            fun record(event: MeteringEvent.Record): Histogram {
+                val observed = event.value.toDouble()
+                val counts = bucketCounts.copyOf()
+                val bucket = boundaries.indexOfFirst { observed <= it }
+                if (bucket >= 0) counts[bucket]++
+                return Histogram(
+                    name = name,
+                    tags = tags,
+                    kind = kind,
+                    unit = unit,
+                    description = description,
+                    boundaries = boundaries,
+                    bucketCounts = counts,
+                    count = count + 1,
+                    sum = sum + observed,
+                    updatedAt = event.timestamp,
+                )
+            }
 
             /**
-             * A histogram is exposed as its cumulative `+Inf` bucket plus the mandatory `_sum` and
-             * `_count` series.
+             * A histogram is exposed as one cumulative `_bucket` series per finite boundary, the
+             * cumulative `+Inf` bucket, and the mandatory `_sum` and `_count` series.
              * https://github.com/prometheus/OpenMetrics/blob/main/specification/OpenMetrics.md#histogram
              */
             override fun openMetricsValueString(family: String): String = buildString {
                 // `le` is reserved for the bucket boundary: a user tag with that (sanitized) name
-                // is dropped so the bucket's own `le` never clashes and the label sets stay
+                // is dropped so the buckets' own `le` never clashes and the label sets stay
                 // consistent across the `_bucket`, `_sum` and `_count` series.
                 val seriesTags = tags?.filterKeys { it.sanitizeLabelName() != "le" }
                 val tagStr = seriesTags?.format() ?: ""
-                val bucketTags = ((seriesTags ?: emptyMap()) + ("le" to "+Inf")).format()
-                append(family).append("_bucket").append(bucketTags).append(" ").append(count).appendLine()
+                val baseTags = seriesTags ?: emptyMap()
+                var cumulative = 0L
+                boundaries.forEachIndexed { i, boundary ->
+                    cumulative += bucketCounts[i]
+                    val bucketTags = (baseTags + ("le" to boundary.formatBucketBoundary())).format()
+                    append(family).append("_bucket").append(bucketTags).append(" ").append(cumulative).appendLine()
+                }
+                val infTags = (baseTags + ("le" to "+Inf")).format()
+                append(family).append("_bucket").append(infTags).append(" ").append(count).appendLine()
                 append(family).append("_sum").append(tagStr).append(" ").append(sum).appendLine()
                 append(family).append("_count").append(tagStr).append(" ").append(count).appendLine()
             }
@@ -407,6 +463,34 @@ class SimpleMeteringCollectorAppender : Appender<MeteringEvent> {
     }
 
     companion object {
+        /**
+         * The default histogram bucket upper bounds: the OpenTelemetry SDK's default explicit
+         * bucket boundaries. They are millisecond-oriented, matching the `.duration` histograms
+         * recorded by [Meter.timed]; histograms in other units (bytes, counts, …) usually want a
+         * per-instrument override.
+         * https://opentelemetry.io/docs/specs/otel/metrics/sdk/#explicit-bucket-histogram-aggregation
+         */
+        val DEFAULT_HISTOGRAM_BUCKET_BOUNDARIES: List<Double> = listOf(
+            5.0, 10.0, 25.0, 50.0, 75.0, 100.0, 250.0, 500.0, 750.0, 1000.0, 2500.0, 5000.0, 7500.0, 10000.0,
+        )
+
+        /**
+         * Normalizes bucket boundaries: non-finite entries (`NaN`, `±Inf`) are dropped — the
+         * `+Inf` bucket is always emitted implicitly — and the rest deduplicated and sorted
+         * ascending, as the cumulative rendering requires.
+         */
+        private fun List<Double>.normalizeBucketBoundaries(): List<Double> =
+            filter { it.isFinite() }.distinct().sorted()
+
+        /**
+         * Renders a bucket boundary for its `le` label. Integral values keep an explicit `.0`
+         * (`le="5.0"`) on every platform — Kotlin/JS would render `5.0.toString()` as `"5"` —
+         * matching the OpenMetrics canonical float form and keeping series identity stable
+         * across targets.
+         */
+        private fun Double.formatBucketBoundary(): String =
+            if (this == toLong().toDouble()) "${toLong()}.0" else toString()
+
         // The exposition format restricts metric names to `[a-zA-Z_:][a-zA-Z0-9_:]*` and label names to
         // `[a-zA-Z_][a-zA-Z0-9_]*`; help texts and label values need `\`, `"` and line-feed escaping.
         // https://github.com/prometheus/OpenMetrics/blob/main/specification/OpenMetrics.md#abnf
