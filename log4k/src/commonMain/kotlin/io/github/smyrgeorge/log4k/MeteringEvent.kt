@@ -15,12 +15,21 @@ sealed interface MeteringEvent {
     val name: String
     val timestamp: Instant
 
+    /**
+     * Registers an instrument's metadata with the collectors.
+     *
+     * [boundaries] is histogram-only: the explicit bucket upper bounds set at the definition site
+     * via `Meter.histogram(boundaries = …)`, defaulting to
+     * [Meter.Companion.DEFAULT_HISTOGRAM_BUCKET_BOUNDARIES]. It is empty for every other
+     * instrument kind — and for a histogram that wants no finite buckets (`count`/`sum` only).
+     */
     data class CreateInstrument(
         override val id: Long,
         override val name: String,
         val kind: Kind,
         val unit: String?,
         val description: String?,
+        val boundaries: List<Double> = emptyList(),
         override val timestamp: Instant = Clock.System.now(),
     ) : MeteringEvent
 

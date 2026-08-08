@@ -28,34 +28,30 @@ import kotlin.time.Instant
  *
  * Histograms aggregate into explicit cumulative buckets (plus the running `count` and `sum`) —
  * the finite bucket boundaries are what let a backend (Prometheus `histogram_quantile`, Datadog,
- * …) derive percentiles. Every histogram uses the appender-wide default boundaries unless
- * [histogramBucketBoundaries] carries an entry for its instrument name. The out-of-the-box
- * default, [DEFAULT_HISTOGRAM_BUCKET_BOUNDARIES], is the OpenTelemetry SDK's millisecond-oriented
- * set — a direct fit for the `.duration` histograms recorded by [Meter.timed]. An empty boundary
+ * …) derive percentiles. Every histogram uses the boundaries carried by its `CreateInstrument`
+ * event — set at the definition site via [Meter.histogram]'s `boundaries` parameter, defaulting
+ * to [Meter.DEFAULT_HISTOGRAM_BUCKET_BOUNDARIES] (the OpenTelemetry SDK's millisecond-oriented
+ * set, a direct fit for the `.duration` histograms recorded by [Meter.timed]) — unless
+ * [histogramBucketBoundaries] carries an override for its instrument name. An empty boundary
  * list collapses a histogram to just its implicit `+Inf` bucket (`count`/`sum` only).
  *
  * - OpenTelemetry metrics: https://opentelemetry.io/docs/specs/otel/metrics/api/
  * - OpenMetrics: https://github.com/prometheus/OpenMetrics/blob/main/specification/OpenMetrics.md
  *
- * @param defaultHistogramBucketBoundaries The bucket upper bounds applied to every histogram
- *   without an explicit override. Normalized before use: non-finite entries are dropped (the
- *   `+Inf` bucket is always emitted implicitly), duplicates removed, and the rest sorted
- *   ascending.
  * @param histogramBucketBoundaries Per-instrument bucket-boundary overrides, keyed by the
- *   instrument name as registered with the [Meter] (e.g. `"UserService.loadUser.duration"`).
- *   Values are normalized the same way as [defaultHistogramBucketBoundaries].
+ *   instrument name as registered with the [Meter] (e.g. `"UserService.loadUser.duration"`); an
+ *   entry wins over the boundaries carried by the instrument's own `CreateInstrument` event.
+ *   Values are normalized before use: non-finite entries are dropped (the `+Inf` bucket is
+ *   always emitted implicitly), duplicates removed, and the rest sorted ascending.
  */
 @OptIn(ExperimentalAtomicApi::class)
 class SimpleMeteringCollectorAppender(
-    defaultHistogramBucketBoundaries: List<Double> = DEFAULT_HISTOGRAM_BUCKET_BOUNDARIES,
     histogramBucketBoundaries: Map<String, List<Double>> = emptyMap(),
 ) : Appender<MeteringEvent> {
     override val name: String = this::class.toName()
 
-    // Bucket boundaries are resolved per instrument name when its aggregate is created; both the
-    // default and the overrides are normalized once here (finite, deduplicated, ascending).
-    private val defaultHistogramBucketBoundaries: List<Double> =
-        defaultHistogramBucketBoundaries.normalizeBucketBoundaries()
+    // Per-instrument bucket-boundary overrides, normalized once here (finite, deduplicated,
+    // ascending); resolved against the instrument's own boundaries when its aggregate is created.
     private val histogramBucketBoundaries: Map<String, List<Double>> =
         histogramBucketBoundaries.mapValues { (_, boundaries) -> boundaries.normalizeBucketBoundaries() }
 
@@ -75,6 +71,7 @@ class SimpleMeteringCollectorAppender(
                     kind = event.kind,
                     unit = event.unit,
                     description = event.description,
+                    boundaries = event.boundaries.normalizeBucketBoundaries(),
                 ))
             }
 
@@ -205,7 +202,9 @@ class SimpleMeteringCollectorAppender(
                 kind = info.kind,
                 unit = info.unit,
                 description = info.description,
-                boundaries = histogramBucketBoundaries[name] ?: defaultHistogramBucketBoundaries,
+                // An explicit appender override wins over the boundaries the instrument itself
+                // was defined with (which default to Meter.DEFAULT_HISTOGRAM_BUCKET_BOUNDARIES).
+                boundaries = histogramBucketBoundaries[name] ?: info.boundaries,
                 updatedAt = timestamp
             )
         }
@@ -303,12 +302,17 @@ class SimpleMeteringCollectorAppender(
             "${k.sanitizeLabelName()}=\"${v.toString().escapeLabelValue()}\""
         }
 
-        /** Immutable metadata for an instrument, registered from a [MeteringEvent.CreateInstrument]. */
+        /**
+         * Immutable metadata for an instrument, registered from a [MeteringEvent.CreateInstrument].
+         * [boundaries] carries the histogram's bucket upper bounds (already normalized), empty for
+         * every other instrument kind.
+         */
         data class Info(
             val name: String,
             val kind: Meter.Instrument.Kind,
             val unit: String?,
             val description: String?,
+            val boundaries: List<Double> = emptyList(),
         )
 
         /**
@@ -463,17 +467,6 @@ class SimpleMeteringCollectorAppender(
     }
 
     companion object {
-        /**
-         * The default histogram bucket upper bounds: the OpenTelemetry SDK's default explicit
-         * bucket boundaries. They are millisecond-oriented, matching the `.duration` histograms
-         * recorded by [Meter.timed]; histograms in other units (bytes, counts, …) usually want a
-         * per-instrument override.
-         * https://opentelemetry.io/docs/specs/otel/metrics/sdk/#explicit-bucket-histogram-aggregation
-         */
-        val DEFAULT_HISTOGRAM_BUCKET_BOUNDARIES: List<Double> = listOf(
-            5.0, 10.0, 25.0, 50.0, 75.0, 100.0, 250.0, 500.0, 750.0, 1000.0, 2500.0, 5000.0, 7500.0, 10000.0,
-        )
-
         /**
          * Normalizes bucket boundaries: non-finite entries (`NaN`, `±Inf`) are dropped — the
          * `+Inf` bucket is always emitted implicitly — and the rest deduplicated and sorted

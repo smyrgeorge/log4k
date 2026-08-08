@@ -551,23 +551,29 @@ buckets plus a running `count` and `sum` per tag-set, and exposes them as the Op
 `_count` series — the finite bucket boundaries are what let a backend (Prometheus `histogram_quantile`, Datadog, …)
 derive percentiles.
 
+Bucket boundaries are set where the instrument is defined, via `Meter.histogram`'s `boundaries` parameter. They default
+to `Meter.DEFAULT_HISTOGRAM_BUCKET_BOUNDARIES` — the OpenTelemetry SDK's default explicit boundaries
+(`5.0, 10.0, 25.0, …, 10000.0`), millisecond-oriented and a direct fit for the `.duration` histograms recorded by
+`Meter.timed`/`@Timed`. Histograms in other units usually want their own; pass `emptyList()` to collapse the histogram
+to just the implicit `+Inf` bucket (count/sum only).
+
 ```kotlin
-val durations = meter.histogram<Double>("request-duration", unit = "seconds")
+val durations = meter.histogram<Double>(
+    name = "request-duration",
+    unit = "seconds",
+    boundaries = listOf(0.1, 0.25, 0.5, 1.0, 2.5),
+)
 durations.record(0.3, "path" to "/a")
 durations.record(0.5, "path" to "/a")
 ```
 
-By default every histogram uses the OpenTelemetry SDK's default explicit boundaries (`5.0, 10.0, 25.0, …, 10000.0`) —
-millisecond-oriented, a direct fit for the `.duration` histograms recorded by
-`Meter.timed`/`@Timed`. Histograms in other units usually want their own boundaries, configurable on the appender:
+The `SimpleMeteringCollectorAppender` can still override the boundaries per instrument — an entry in its
+`histogramBucketBoundaries` map wins over the boundaries the instrument was defined with:
 
 ```kotlin
 val collector = SimpleMeteringCollectorAppender(
-    // Applied to every histogram without an explicit override; pass emptyList() to collapse
-    // histograms to just the implicit `+Inf` bucket (count/sum only).
-    defaultHistogramBucketBoundaries = listOf(5.0, 10.0, 25.0, 50.0, 100.0, 250.0, 500.0, 1000.0),
     // Per-instrument overrides, keyed by instrument name.
-    histogramBucketBoundaries = mapOf("request-duration" to listOf(0.1, 0.25, 0.5, 1.0, 2.5)),
+    histogramBucketBoundaries = mapOf("request-duration" to listOf(0.05, 0.1, 0.5, 1.0)),
 )
 ```
 

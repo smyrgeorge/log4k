@@ -77,23 +77,35 @@ abstract class Meter(
     ): Instrument.Gauge<T> = Instrument.Gauge(name, this, unit, description)
 
     /**
-     * Creates a new histogram instrument with the specified name, unit, and description.
+     * Creates a new histogram instrument with the specified name, unit, description, and bucket
+     * boundaries.
      *
      * A histogram samples individual observations (e.g. request durations or payload sizes) and
      * lets appenders aggregate their distribution — typically exposing a running `count` and `sum`
-     * (and buckets where the appender supports them).
+     * plus one cumulative bucket per boundary (which is what a backend needs to derive
+     * percentiles).
+     *
+     * [boundaries] are the explicit bucket upper bounds, in the instrument's [unit] (mirroring
+     * OpenTelemetry's explicit bucket histogram aggregation). They default to
+     * [DEFAULT_HISTOGRAM_BUCKET_BOUNDARIES] — the OpenTelemetry SDK's millisecond-oriented set —
+     * and an empty list means no finite buckets at all (`count`/`sum` only). Collectors may still
+     * override them per instrument (e.g. the `SimpleMeteringCollectorAppender`'s
+     * `histogramBucketBoundaries` map wins over the definition-site boundaries).
      *
      * @param T the numeric type of the values recorded by the histogram.
      * @param name the name of the histogram.
      * @param unit the unit of measurement for the histogram, which is optional.
      * @param description a description of the histogram, which is optional.
+     * @param boundaries the explicit bucket upper bounds, defaulting to
+     *   [DEFAULT_HISTOGRAM_BUCKET_BOUNDARIES].
      * @return a new `Instrument.Histogram` instance.
      */
     fun <T : Number> histogram(
         name: String,
         unit: String? = null,
-        description: String? = null
-    ): Instrument.Histogram<T> = Instrument.Histogram(name, this, unit, description)
+        description: String? = null,
+        boundaries: List<Double> = DEFAULT_HISTOGRAM_BUCKET_BOUNDARIES,
+    ): Instrument.Histogram<T> = Instrument.Histogram(name, this, unit, description, boundaries)
 
     // The [Timed] bundles created by [timed], cached by (name, tags) so each distinct combination
     // creates its instruments once.
@@ -152,6 +164,8 @@ abstract class Meter(
      * @param kind the kind of the instrument, defined by the `Kind` enum.
      * @param unit the unit of measurement for the instrument, which is optional.
      * @param description a description of the instrument, which is optional.
+     * @param boundaries the explicit bucket upper bounds, carried by histograms only (empty for
+     *   every other kind) — see [Meter.histogram].
      */
     sealed class Instrument(
         val name: String,
@@ -159,6 +173,7 @@ abstract class Meter(
         val kind: Kind,
         val unit: String? = null,
         val description: String? = null,
+        val boundaries: List<Double> = emptyList(),
     ) {
         init {
             init()
@@ -179,7 +194,8 @@ abstract class Meter(
                 name = name,
                 kind = kind,
                 unit = unit,
-                description = description
+                description = description,
+                boundaries = boundaries,
             ).also { RootLogger.meter(it) }
         }
 
@@ -276,6 +292,7 @@ abstract class Meter(
          * @param kind the type of the instrument.
          * @param unit the unit of measurement, default is null.
          * @param description the description of the recorder, default is null.
+         * @param boundaries the explicit bucket upper bounds (histograms only), default is empty.
          */
         sealed class AbstractRecorder<T : Number>(
             name: String,
@@ -283,7 +300,8 @@ abstract class Meter(
             kind: Kind,
             unit: String? = null,
             description: String? = null,
-        ) : Instrument(name, meter, kind, unit, description) {
+            boundaries: List<Double> = emptyList(),
+        ) : Instrument(name, meter, kind, unit, description, boundaries) {
             /**
              * Records a metering event with a specified value and optional tags.
              * If the meter is muted, the event will not be recorded.
@@ -390,21 +408,23 @@ abstract class Meter(
         /**
          * Represents a histogram instrument for sampling observations and aggregating their
          * distribution (for example, request latencies). Values are reported through
-         * [AbstractRecorder.record]; appenders aggregate them into a `count`/`sum` (and buckets
-         * where supported).
+         * [AbstractRecorder.record]; appenders aggregate them into a `count`/`sum` plus the
+         * cumulative buckets defined by [boundaries].
          *
          * @param T the numeric type of the values recorded by the histogram.
          * @param name the name of the histogram.
          * @param meter the Meter instance to which this histogram belongs.
          * @param unit the unit of measurement for the histogram, which is optional.
          * @param description a description of the histogram, which is optional.
+         * @param boundaries the explicit bucket upper bounds — see [Meter.histogram].
          */
         class Histogram<T : Number>(
             name: String,
             meter: Meter,
             unit: String? = null,
             description: String? = null,
-        ) : AbstractRecorder<T>(name, meter, Kind.Histogram, unit, description)
+            boundaries: List<Double> = DEFAULT_HISTOGRAM_BUCKET_BOUNDARIES,
+        ) : AbstractRecorder<T>(name, meter, Kind.Histogram, unit, description, boundaries)
     }
 
     /**
@@ -454,6 +474,17 @@ abstract class Meter(
     }
 
     companion object {
+        /**
+         * The default histogram bucket upper bounds: the OpenTelemetry SDK's default explicit
+         * bucket boundaries. They are millisecond-oriented — a direct fit for the `.duration`
+         * histograms recorded by [timed]; histograms in other units (bytes, counts, …) usually
+         * want their own [histogram] `boundaries`.
+         * https://opentelemetry.io/docs/specs/otel/metrics/sdk/#explicit-bucket-histogram-aggregation
+         */
+        val DEFAULT_HISTOGRAM_BUCKET_BOUNDARIES: List<Double> = listOf(
+            5.0, 10.0, 25.0, 50.0, 75.0, 100.0, 250.0, 500.0, 750.0, 1000.0, 2500.0, 5000.0, 7500.0, 10000.0,
+        )
+
         val registry = CollectorRegistry<Meter>()
         var factory: MeterFactory = SimpleMeterFactory()
         fun of(name: String): Meter = factory.get(name)
