@@ -3,6 +3,7 @@ package io.github.smyrgeorge.log4k.impl.appenders.simple
 import io.github.smyrgeorge.log4k.Appender
 import io.github.smyrgeorge.log4k.Level
 import io.github.smyrgeorge.log4k.LoggingEvent
+import io.github.smyrgeorge.log4k.RootLogger
 import io.github.smyrgeorge.log4k.impl.extensions.format
 import io.github.smyrgeorge.log4k.impl.extensions.toName
 
@@ -11,6 +12,17 @@ class SimpleConsoleLoggingAppender : Appender<LoggingEvent> {
     override suspend fun append(event: LoggingEvent) = event.print()
 
     companion object {
+        /**
+         * Registers a [SimpleConsoleLoggingAppender] with the logging appender registry — by default
+         * unregistering every other logging appender in the same atomic step (see
+         * [io.github.smyrgeorge.log4k.impl.registry.AppenderRegistry.install]).
+         *
+         * @param unregisterOthers Whether to unregister every other logging appender (default `true`).
+         * @return The registered appender, e.g. for later unregistration.
+         */
+        fun install(unregisterOthers: Boolean = true): SimpleConsoleLoggingAppender =
+            RootLogger.Logging.appenders.install(SimpleConsoleLoggingAppender(), unregisterOthers)
+
         fun LoggingEvent.print() {
             val message = format()
             println(message)

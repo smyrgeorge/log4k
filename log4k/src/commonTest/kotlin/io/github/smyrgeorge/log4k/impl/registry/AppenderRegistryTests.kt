@@ -141,6 +141,30 @@ class AppenderRegistryTests {
     }
 
     @Test
+    fun install_byDefault_replacesEveryRegisteredAppender() {
+        val registry = AppenderRegistry<String>()
+        registry.register(FakeAppender("a"))
+        registry.register(FakeAppender("b"))
+        val installed = FakeAppender("installed")
+
+        assertThat(registry.install(installed)).isSameInstanceAs(installed)
+
+        assertThat(registry.all()).containsExactly(installed)
+    }
+
+    @Test
+    fun install_keepingOthers_registersAlongsideThem() {
+        val registry = AppenderRegistry<String>()
+        val a = FakeAppender("a")
+        registry.register(a)
+        val installed = FakeAppender("installed")
+
+        assertThat(registry.install(installed, unregisterOthers = false)).isSameInstanceAs(installed)
+
+        assertThat(registry.all()).containsExactly(a, installed) // insertion order preserved
+    }
+
+    @Test
     fun unregisterAll_clearsEverything() {
         val registry = AppenderRegistry<String>()
         registry.register(FakeAppender("a"))

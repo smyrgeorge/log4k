@@ -2,6 +2,7 @@ package io.github.smyrgeorge.log4k.impl.appenders.simple
 
 import io.github.smyrgeorge.log4k.Appender
 import io.github.smyrgeorge.log4k.LoggingEvent
+import io.github.smyrgeorge.log4k.RootLogger
 import io.github.smyrgeorge.log4k.impl.extensions.format
 import io.github.smyrgeorge.log4k.impl.extensions.toJsonElement
 import io.github.smyrgeorge.log4k.impl.extensions.toName
@@ -11,6 +12,17 @@ class SimpleJsonConsoleLoggingAppender : Appender<LoggingEvent> {
     override suspend fun append(event: LoggingEvent) = event.printJson()
 
     companion object {
+        /**
+         * Registers a [SimpleJsonConsoleLoggingAppender] with the logging appender registry — by default
+         * unregistering every other logging appender in the same atomic step (see
+         * [io.github.smyrgeorge.log4k.impl.registry.AppenderRegistry.install]).
+         *
+         * @param unregisterOthers Whether to unregister every other logging appender (default `true`).
+         * @return The registered appender, e.g. for later unregistration.
+         */
+        fun install(unregisterOthers: Boolean = true): SimpleJsonConsoleLoggingAppender =
+            RootLogger.Logging.appenders.install(SimpleJsonConsoleLoggingAppender(), unregisterOthers)
+
         fun LoggingEvent.printJson() {
             val message = formatJson()
             println(message)

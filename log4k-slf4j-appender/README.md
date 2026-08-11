@@ -48,11 +48,12 @@ once at startup:
 Slf4jLoggingAppender.install()
 ```
 
-`install()` unregisters log4k's default console appender (so nothing is logged twice) and registers the SLF4J appender
-in its place; appenders you registered deliberately are left untouched. If you prefer to manage the registry yourself:
+`install()` registers the SLF4J appender and — by default — unregisters every other logging appender (log4k's default
+console appender included), so nothing is logged twice. Pass `unregisterOthers = false` to keep the appenders already
+registered and add the SLF4J one alongside them. If you prefer to manage the registry yourself:
 
 ```kotlin
-RootLogger.Logging.appenders.unregister(SimpleConsoleLoggingAppender::class)
+RootLogger.Logging.appenders.unregisterAll()
 RootLogger.Logging.appenders.register(Slf4jLoggingAppender())
 ```
 

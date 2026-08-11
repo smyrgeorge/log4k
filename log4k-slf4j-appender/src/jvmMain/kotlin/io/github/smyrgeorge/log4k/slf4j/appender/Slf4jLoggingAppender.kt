@@ -93,18 +93,16 @@ public class Slf4jLoggingAppender : Appender<LoggingEvent> {
 
     public companion object {
         /**
-         * Makes SLF4J the sink for log4k logging: unregisters the default [SimpleConsoleLoggingAppender]
-         * (so nothing is logged twice) and registers a [Slf4jLoggingAppender] in its place. Appenders
-         * registered deliberately by the application are left untouched.
+         * Makes SLF4J the sink for log4k logging: registers a [Slf4jLoggingAppender] and — by default —
+         * unregisters every other logging appender (the default [SimpleConsoleLoggingAppender] included),
+         * so nothing is logged twice. Pass [unregisterOthers]` = false` to keep the appenders already
+         * registered and add the SLF4J one alongside them.
          *
+         * @param unregisterOthers Whether to unregister every other logging appender (default `true`).
          * @return The registered appender, e.g., for later unregistration.
          */
-        public fun install(): Slf4jLoggingAppender {
-            val appender = Slf4jLoggingAppender()
-            RootLogger.Logging.appenders.unregister(SimpleConsoleLoggingAppender::class)
-            RootLogger.Logging.appenders.register(appender)
-            return appender
-        }
+        public fun install(unregisterOthers: Boolean = true): Slf4jLoggingAppender =
+            RootLogger.Logging.appenders.install(Slf4jLoggingAppender(), unregisterOthers)
 
         /**
          * Fails fast when [factory] is the `log4k-slf4j` provider's logger factory, in which case forwarding

@@ -177,15 +177,32 @@ By default, a platform-specific appender is automatically registered:
 - **iOS/macOS**: `AppleLoggingAppender` (routes to Apple's Unified Logging)
 - **All other platforms**: `SimpleConsoleLoggingAppender` (color-coded console output)
 
-You can change the default behavior by unregistering all appenders early in your program:
+You can change the default behavior with `install`, which registers the given appender and — by default — unregisters
+every other one in a single atomic step, so no event is ever delivered twice while the swap happens:
+
+```kotlin
+// Replaces every registered appender (the platform default included):
+RootLogger.Logging.appenders.install(SimpleJsonConsoleLoggingAppender())
+
+// Or keep the existing appenders and just add another one:
+RootLogger.Logging.appenders.install(SimpleJsonConsoleLoggingAppender(), unregisterOthers = false)
+```
+
+The same `install` method is available on every appender registry — `RootLogger.Logging.appenders`,
+`RootLogger.Tracing.appenders` and `RootLogger.Metering.appenders` — and every bundled appender (the platform defaults
+`AndroidLoggingAppender` and `AppleLoggingAppender` included) also exposes a companion `install()` shortcut that
+registers it with the right registry:
+
+```kotlin
+SimpleJsonConsoleLoggingAppender.install()
+SimpleConsoleTracingAppender.install()
+SimpleMeteringCollectorAppender.install()
+```
+
+You can also manage the registry manually:
 
 ```kotlin
 RootLogger.Logging.appenders.unregisterAll()
-```
-
-After unregistering, you can register any appender you want like this:
-
-```kotlin
 RootLogger.Logging.appenders.register(SimpleJsonConsoleLoggingAppender())
 ```
 
@@ -344,7 +361,7 @@ implementation("io.github.smyrgeorge:log4k-slf4j-appender:x.y.z")
 ```
 
 ```kotlin
-// Once at startup: replaces the default console appender with the SLF4J one.
+// Once at startup: makes SLF4J the only sink for log4k logging.
 Slf4jLoggingAppender.install()
 ```
 
@@ -353,8 +370,9 @@ For detailed setup instructions and usage, see the module's [README.md](./log4k-
 ### JSON Appender
 
 ```kotlin
-// You can register the `SimpleJsonConsoleLoggingAppender` for json logs in the console.
-RootLogger.Logging.appenders.register(SimpleJsonConsoleLoggingAppender())
+// You can install the `SimpleJsonConsoleLoggingAppender` for json logs in the console
+// (replacing the default console appender).
+SimpleJsonConsoleLoggingAppender.install()
 ```
 
 ## Tracing API
@@ -364,10 +382,10 @@ collection, and context propagation across services.
 
 ```kotlin
 private val trace: Tracer = Tracer.of(this::class)
-// We need to manually register an appender.
+// We need to manually install an appender.
 // The [SimpleConsoleTracingAppender] will print the traces in the console
 // (is just an example, should not be used as a real example).
-RootLogger.Tracing.appenders.register(SimpleConsoleTracingAppender())
+SimpleConsoleTracingAppender.install()
 
 // Create the span and then start it.
 val span: TracingEvent.Span.Local = trace.span("test").start()
@@ -470,8 +488,7 @@ all registered appenders. For quick debugging you can register the `SimpleConsol
 metric event directly to stdout. For aggregation and export, use the `SimpleMeteringCollectorAppender`:
 
 ```kotlin
-val collector = SimpleMeteringCollectorAppender()
-RootLogger.Metering.appenders.register(collector)
+val collector = SimpleMeteringCollectorAppender.install()
 ```
 
 The `SimpleMeteringCollectorAppender` processes all events, updating the value for each registered instrument. It also

@@ -4,6 +4,7 @@ import android.util.Log
 import io.github.smyrgeorge.log4k.Appender
 import io.github.smyrgeorge.log4k.Level
 import io.github.smyrgeorge.log4k.LoggingEvent
+import io.github.smyrgeorge.log4k.RootLogger
 import io.github.smyrgeorge.log4k.impl.extensions.format
 import io.github.smyrgeorge.log4k.impl.extensions.toName
 
@@ -12,6 +13,20 @@ class AndroidLoggingAppender : Appender<LoggingEvent> {
     override suspend fun append(event: LoggingEvent) = event.print()
 
     companion object {
+        /**
+         * Registers an [AndroidLoggingAppender] with the logging appender registry — by default
+         * unregistering every other logging appender in the same atomic step (see
+         * [io.github.smyrgeorge.log4k.impl.registry.AppenderRegistry.install]).
+         *
+         * Note: on Android this appender is already registered as the platform default, so
+         * `install()` is only needed to restore it after the registry has been reconfigured.
+         *
+         * @param unregisterOthers Whether to unregister every other logging appender (default `true`).
+         * @return The registered appender, e.g. for later unregistration.
+         */
+        fun install(unregisterOthers: Boolean = true): AndroidLoggingAppender =
+            RootLogger.Logging.appenders.install(AndroidLoggingAppender(), unregisterOthers)
+
         fun LoggingEvent.print() {
             val tag = logger.tag()
 

@@ -3,6 +3,7 @@ package io.github.smyrgeorge.log4k.impl.appenders.simple
 import io.github.smyrgeorge.log4k.Appender
 import io.github.smyrgeorge.log4k.Meter
 import io.github.smyrgeorge.log4k.MeteringEvent
+import io.github.smyrgeorge.log4k.RootLogger
 import io.github.smyrgeorge.log4k.impl.Tags
 import io.github.smyrgeorge.log4k.impl.appenders.simple.SimpleMeteringCollectorAppender.Companion.promotingPlus
 import io.github.smyrgeorge.log4k.impl.extensions.toName
@@ -467,6 +468,25 @@ class SimpleMeteringCollectorAppender(
     }
 
     companion object {
+        /**
+         * Registers a [SimpleMeteringCollectorAppender] with the metering appender registry — by default
+         * unregistering every other metering appender in the same atomic step (see
+         * [io.github.smyrgeorge.log4k.impl.registry.AppenderRegistry.install]).
+         *
+         * @param histogramBucketBoundaries Per-instrument bucket-boundary overrides, passed to the
+         *   appender's constructor as-is.
+         * @param unregisterOthers Whether to unregister every other metering appender (default `true`).
+         * @return The registered appender, e.g. for scraping via [toOpenMetricsLineFormatString].
+         */
+        fun install(
+            histogramBucketBoundaries: Map<String, List<Double>> = emptyMap(),
+            unregisterOthers: Boolean = true,
+        ): SimpleMeteringCollectorAppender =
+            RootLogger.Metering.appenders.install(
+                SimpleMeteringCollectorAppender(histogramBucketBoundaries),
+                unregisterOthers,
+            )
+
         /**
          * Normalizes bucket boundaries: non-finite entries (`NaN`, `±Inf`) are dropped — the
          * `+Inf` bucket is always emitted implicitly — and the rest deduplicated and sorted

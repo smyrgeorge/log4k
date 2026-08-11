@@ -2,9 +2,7 @@ package io.github.smyrgeorge.log4k.slf4j.appender
 
 import assertk.assertFailure
 import assertk.assertThat
-import assertk.assertions.contains
 import assertk.assertions.containsExactly
-import assertk.assertions.doesNotContain
 import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
 import assertk.assertions.isInstanceOf
@@ -315,17 +313,25 @@ class Slf4jLoggingAppenderTests {
     // --- install() -------------------------------------------------------------------------------
 
     @Test
-    fun install_replacesTheDefaultConsoleAppenderAndKeepsTheRest() {
+    fun install_byDefault_becomesTheOnlyRegisteredAppender() {
+        // Both the setup() appender and this console one must be swapped out by install().
         val console = SimpleConsoleLoggingAppender()
         RootLogger.Logging.appenders.register(console)
 
         val installed = Slf4jLoggingAppender.install()
 
-        val names = RootLogger.Logging.appenders.all().map { it.name }
-        assertThat(names).contains(installed.name)
-        assertThat(names).doesNotContain(console.name)
+        assertThat(RootLogger.Logging.appenders.all()).containsExactly(installed)
+    }
+
+    @Test
+    fun install_keepingOthers_registersAlongsideTheExistingAppenders() {
+        val console = SimpleConsoleLoggingAppender()
+        RootLogger.Logging.appenders.register(console)
+
+        val installed = Slf4jLoggingAppender.install(unregisterOthers = false)
+
         // The appender registered by setup() plays the role of one the application added deliberately.
-        assertThat(RootLogger.Logging.appenders.all()).contains(appender)
+        assertThat(RootLogger.Logging.appenders.all()).containsExactly(appender, console, installed)
     }
 
     // --- Loop guard ------------------------------------------------------------------------------

@@ -3,6 +3,7 @@ package io.github.smyrgeorge.log4k.impl.appenders
 import io.github.smyrgeorge.log4k.Appender
 import io.github.smyrgeorge.log4k.Level
 import io.github.smyrgeorge.log4k.LoggingEvent
+import io.github.smyrgeorge.log4k.RootLogger
 import io.github.smyrgeorge.log4k.impl.extensions.format
 import io.github.smyrgeorge.log4k.impl.extensions.toName
 import platform.Foundation.NSLog
@@ -12,6 +13,20 @@ class AppleLoggingAppender : Appender<LoggingEvent> {
     override suspend fun append(event: LoggingEvent) = event.print()
 
     companion object {
+        /**
+         * Registers an [AppleLoggingAppender] with the logging appender registry — by default
+         * unregistering every other logging appender in the same atomic step (see
+         * [io.github.smyrgeorge.log4k.impl.registry.AppenderRegistry.install]).
+         *
+         * Note: on Apple targets this appender is already registered as the platform default, so
+         * `install()` is only needed to restore it after the registry has been reconfigured.
+         *
+         * @param unregisterOthers Whether to unregister every other logging appender (default `true`).
+         * @return The registered appender, e.g. for later unregistration.
+         */
+        fun install(unregisterOthers: Boolean = true): AppleLoggingAppender =
+            RootLogger.Logging.appenders.install(AppleLoggingAppender(), unregisterOthers)
+
         fun LoggingEvent.print() {
             if (level == Level.OFF) return
             val formatted = buildString {
