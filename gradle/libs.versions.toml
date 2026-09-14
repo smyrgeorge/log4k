@@ -12,7 +12,7 @@ dokka = "2.2.0"
 # https://github.com/willowtreeapps/assertk
 assertk = "0.28.1"
 # https://mvnrepository.com/artifact/org.slf4j/slf4j-api
-slf4j = "2.0.18"
+slf4j = "2.0.19"
 # https://github.com/ktorio/ktor
 ktor = "3.5.2"
 # https://developer.android.com/studio/releases/gradle-plugin
