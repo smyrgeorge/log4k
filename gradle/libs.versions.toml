@@ -16,7 +16,7 @@ slf4j = "2.0.19"
 # https://github.com/ktorio/ktor
 ktor = "3.6.0"
 # https://developer.android.com/studio/releases/gradle-plugin
-android-gradle-plugin = "9.4.0"
+android-gradle-plugin = "9.4.1"
 
 [libraries]
 gradle-kotlin-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
