@@ -5,7 +5,7 @@
 ![GitHub License](https://img.shields.io/github/license/smyrgeorge/log4k)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/w/smyrgeorge/log4k)
 ![GitHub issues](https://img.shields.io/github/issues/smyrgeorge/log4k)
-[![Kotlin](https://img.shields.io/badge/kotlin-2.4.10-blue.svg?logo=kotlin)](http://kotlinlang.org)
+[![Kotlin](https://img.shields.io/badge/kotlin-2.4.20-blue.svg?logo=kotlin)](http://kotlinlang.org)
 
 ![](https://img.shields.io/static/v1?label=&message=Platforms&color=grey)
 ![](https://img.shields.io/static/v1?label=&message=Jvm&color=blue)
@@ -26,11 +26,15 @@ scalable logging across multiple platforms.
 
 This project also tries to be fully compatible with `OpenTelemetry` standard.
 
+<p align="center"><img src="banner.svg" alt="ktkit" width="100%"></p>
+
+---
+
 📖 [Documentation](https://smyrgeorge.github.io/log4k/)
 
 🏠 [Homepage](https://smyrgeorge.github.io/) (under construction)
 
-## Table of Contents
+## Features
 
 - [Usage](#usage)
     - [Extension Modules](#extension-modules)
